@@ -139,6 +139,42 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     }
   };
   
+  // Handle opening handicap editor
+  const handleEditPlayer = (player: Player, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent toggling selection
+    setEditingPlayer(player);
+    setShowHandicapEditor(true);
+  };
+  
+  // Handle saving player changes
+  const handleSavePlayerEdit = async (updatedPlayer: Player) => {
+    try {
+      const savedPlayer = await updatePlayer(updatedPlayer);
+      
+      // Update the players list
+      setPlayers(prev => 
+        prev.map(p => p.id === savedPlayer.id ? savedPlayer : p)
+      );
+      
+      // Update selected players if needed
+      setSelectedPlayers(prev => 
+        prev.map(p => p.id === savedPlayer.id ? savedPlayer : p)
+      );
+      
+      // Close the editor
+      setShowHandicapEditor(false);
+      setEditingPlayer(null);
+    } catch (error) {
+      console.error('Failed to update player:', error);
+    }
+  };
+  
+  // Handle canceling edit
+  const handleCancelEdit = () => {
+    setShowHandicapEditor(false);
+    setEditingPlayer(null);
+  };
+  
   // Handle final selection
   const handleConfirmSelection = () => {
     if (selectedPlayers.length !== 4) return;
@@ -193,6 +229,17 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   
   if (isLoading) {
     return <div>Loading players...</div>;
+  }
+  
+  // Render the handicap editor if active
+  if (showHandicapEditor && editingPlayer) {
+    return (
+      <QuickHandicapEditor
+        player={editingPlayer}
+        onSave={handleSavePlayerEdit}
+        onCancel={handleCancelEdit}
+      />
+    );
   }
   
   return (
@@ -274,6 +321,13 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
                       </span>
                     )}
                   </div>
+                  <button 
+                    className="edit-player-btn" 
+                    onClick={(e) => handleEditPlayer(player, e)}
+                    title="Edit player"
+                  >
+                    ✎
+                  </button>
                 </div>
               );
             })}
@@ -303,6 +357,13 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
                     <span className="player-name">{player.name}</span>
                     <span className="player-index">{player.index}</span>
                   </div>
+                  <button 
+                    className="edit-player-btn" 
+                    onClick={(e) => handleEditPlayer(player, e)}
+                    title="Edit player"
+                  >
+                    ✎
+                  </button>
                 </div>
               );
             })}
