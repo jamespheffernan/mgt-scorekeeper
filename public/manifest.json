@@ -1,0 +1,21 @@
+{
+  "name": "Millbrook Scorekeeper",
+  "short_name": "Millbrook",
+  "description": "Score tracker for Millbrook Game & Big Game",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ecf0f1",
+  "theme_color": "#3498db",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+} 

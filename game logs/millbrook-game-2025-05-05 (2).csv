@@ -1,0 +1,9 @@
+Hole,Base,Carry,Doubles,Payout,Jimmy Gross,Fred Gross,Neil Gross,Tom Kikis Gross,Jimmy Net,Fred Net,Neil Net,Tom Kikis Net,Jimmy Money,Fred Money,Neil Money,Tom Kikis Money,Red Junk,Blue Junk
+1,1,0,0,2,5,5,5,5,5,5,5,4,-2,2,-2,2,0,0
+2,2,0,0,4,3,3,3,2,3,3,3,1,-6,7,-6,7,0,2
+3,1,1,0,0,5,5,5,5,4,4,5,4,-6,7,-6,7,0,0
+4,1,2,0,0,4,4,4,4,4,4,4,4,-6,7,-6,7,0,0
+5,1,3,0,0,4,4,4,4,3,3,4,3,-6,7,-6,7,0,0
+6,1,0,0,5,5,5,5,5,5,5,5,4,-11,12,-11,12,0,0
+7,1,0,0,2,3,3,3,2,3,3,3,2,-13,14.5,-13,14.5,0,1
+Total,,,,,,,,,,,,,-13,14.5,-13,14.5,0,3

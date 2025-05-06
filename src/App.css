@@ -1,0 +1,2283 @@
+/* Base styling */
+:root {
+  --color-red: #e74c3c;
+  --color-blue: #3498db;
+  --color-green: #27ae60;
+  --color-gray: #95a5a6;
+  --color-dark: #2c3e50;
+  --color-light: #ecf0f1;
+  --color-primary: #3498db;
+  --color-secondary: #2ecc71;
+  --color-error: #e74c3c;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  line-height: 1.6;
+}
+
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-gray);
+}
+
+.app-content {
+  flex: 1;
+}
+
+.app-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+h1, h2, h3 {
+  margin-bottom: 16px;
+}
+
+button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+input, select {
+  padding: 8px;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  margin-bottom: 8px;
+  background-color: white;
+  color: var(--color-dark);
+}
+
+input:focus, select:focus {
+  outline: 2px solid var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Team colors */
+.team-red {
+  color: var(--color-red);
+}
+
+.team-blue {
+  color: var(--color-blue);
+}
+
+/* Setup component */
+.setup-container {
+  background-color: white;
+  padding: 24px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.player-list {
+  margin-bottom: 24px;
+}
+
+.player-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.team-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-options {
+  margin-bottom: 24px;
+}
+
+/* Enhanced Big Game Toggle */
+.big-game-toggle-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.big-game-toggle {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.toggle-label {
+  margin-left: 8px;
+}
+
+.big-game-explanation {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+  margin-left: 28px;
+  padding-top: 5px;
+}
+
+.start-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-secondary);
+  font-weight: bold;
+}
+
+.start-button:hover {
+  background-color: #27ae60;
+}
+
+/* Hole View */
+.hole-view {
+  background-color: white;
+  padding: 24px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.hole-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.scores-container {
+  margin-bottom: 24px;
+}
+
+.player-score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  border-left: 4px solid;
+}
+
+.player-score-row.Red {
+  border-left-color: var(--color-red);
+}
+
+.player-score-row.Blue {
+  border-left-color: var(--color-blue);
+}
+
+.player-team-indicator {
+  flex: 1;
+}
+
+.score-selector {
+  width: 80px;
+}
+
+.junk-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.junk-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-light);
+  padding: 12px;
+  border-radius: var(--border-radius);
+  margin-bottom: 24px;
+}
+
+.status-info {
+  display: flex;
+  gap: 16px;
+  font-weight: bold;
+}
+
+.double-button {
+  background-color: var(--color-gray);
+}
+
+.double-button.Red {
+  background-color: var(--color-red);
+}
+
+.double-button.Blue {
+  background-color: var(--color-blue);
+}
+
+.next-hole-button {
+  width: 100%;
+  padding: 12px;
+  font-weight: bold;
+}
+
+/* Enhanced Ledger View */
+.ledger-container {
+  margin: 16px 0;
+}
+
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ledger-header:hover {
+  background-color: #f5f5f5;
+}
+
+.team-totals {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.team-red {
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+.team-blue {
+  color: var(--color-blue);
+  font-weight: bold;
+}
+
+.big-game-total {
+  padding: 3px 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.drawer-toggle {
+  font-size: 1.2rem;
+  transition: transform 0.3s;
+}
+
+.ledger-details {
+  background-color: white;
+  padding: 16px;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-top: -4px;
+}
+
+.ledger-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.view-toggle-button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.export-button {
+  background-color: var(--color-gray);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.ledger-table th,
+.ledger-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.ledger-table th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ledger-table.compact-view td {
+  text-align: center;
+}
+
+.ledger-table.detailed-view th,
+.ledger-table.detailed-view td {
+  padding: 10px 8px;
+}
+
+.result-red {
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+.result-blue {
+  color: var(--color-blue);
+  font-weight: bold;
+}
+
+.result-push {
+  color: var(--color-gray);
+  font-style: italic;
+}
+
+.player-totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.player-total {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.player-ledger-cell {
+  padding: 8px;
+  border-radius: var(--border-radius);
+  background-color: #f9f9f9;
+}
+
+.player-hole-change {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.player-junk-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.junk-pill {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  color: #333;
+}
+
+.junk-birdie {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #0050b3;
+}
+
+.junk-birdie::before {
+  content: "🐦 ";
+  margin-right: 4px;
+}
+
+.junk-sandie {
+  background-color: #fffbe6;
+  border: 1px solid #ffd666;
+  color: #ad6800;
+}
+
+.junk-sandie::before {
+  content: "🏖️ ";
+  margin-right: 4px;
+}
+
+.junk-greenie {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #135200;
+}
+
+.junk-greenie::before {
+  content: "🥬 ";
+  margin-right: 4px;
+}
+
+.junk-penalty {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #a8071a;
+}
+
+.junk-penalty::before {
+  content: "❌ ";
+  margin-right: 4px;
+}
+
+.junk-ld10 {
+  background-color: #f9f0ff;
+  border: 1px solid #d3adf7;
+  color: #531dab;
+}
+
+.junk-ld10::before {
+  content: "🚀 ";
+  margin-right: 4px;
+}
+
+.player-running-total {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.player-final-cell {
+  padding: 12px 8px !important;
+  background-color: #f5f5f5;
+}
+
+.player-final-total {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.player-junk-total {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.big-game-cell {
+  font-size: 0.85rem;
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+.big-game-final-cell {
+  font-size: 1.1rem;
+  text-align: center;
+  background-color: #f0f0f0;
+}
+
+.big-game-final {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: bold;
+  padding: 6px;
+  background-color: #f0f0f0;
+  border-radius: var(--border-radius);
+}
+
+.ledger-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-gray);
+  font-style: italic;
+}
+
+/* Responsive adjustments for ledger */
+@media (max-width: 768px) {
+  .ledger-table.detailed-view {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .team-totals {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .ledger-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Settlement View */
+.settlement-container {
+  background-color: white;
+  padding: 24px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.team-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 24px;
+}
+
+.team-total {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  background-color: var(--color-light);
+}
+
+.player-settlement {
+  margin-bottom: 24px;
+}
+
+.settlement-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.settlement-table th,
+.settlement-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.final-amount {
+  font-weight: bold;
+}
+
+.big-game-summary {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.big-game-amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.finish-button {
+  background-color: var(--color-secondary);
+}
+
+.new-round-button {
+  background-color: var(--color-primary);
+}
+
+/* Enhanced Settlement View Styles (T-14) */
+.settlement-view {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.settlement-date {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  color: #666;
+}
+
+.team-summary {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0 25px;
+}
+
+.team-total {
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.team-total.team-red {
+  background-color: rgba(var(--color-red-rgb), 0.1);
+}
+
+.team-total.team-blue {
+  background-color: rgba(var(--color-blue-rgb), 0.1);
+}
+
+.player-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.player-result {
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.player-result.Red {
+  border-left: 4px solid var(--color-red);
+  background-color: rgba(var(--color-red-rgb), 0.05);
+}
+
+.player-result.Blue {
+  border-left: 4px solid var(--color-blue);
+  background-color: rgba(var(--color-blue-rgb), 0.05);
+}
+
+.player-result-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.player-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.player-team {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.Red .player-team {
+  background-color: var(--color-red);
+  color: white;
+}
+
+.Blue .player-team {
+  background-color: var(--color-blue);
+  color: white;
+}
+
+.player-total-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-total {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.player-total-breakdown {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.big-game-result {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.big-game-total {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 15px 0;
+}
+
+.big-game-breakdown {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.big-game-breakdown h4 {
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.big-game-holes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.big-game-hole {
+  background-color: white;
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.hole-number {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.best-nets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.best-net {
+  background-color: #f0f0f0;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.subtotal {
+  font-weight: bold;
+}
+
+.running-total {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.settlement-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.export-button {
+  padding: 12px 20px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.export-button:hover {
+  background-color: #2980b9;
+}
+
+.rematch-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  border-top: 1px solid #eee;
+  padding-top: 30px;
+}
+
+.rematch-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+  background-color: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.rematch-button:hover {
+  background-color: #27ae60;
+}
+
+.new-round-button {
+  padding: 12px 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.new-round-button:hover {
+  background-color: #e5e5e5;
+}
+
+/* Screenshot styling */
+.screenshot-mode {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+  .team-summary {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .big-game-holes {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .player-total-breakdown {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .settlement-actions {
+    flex-direction: column;
+  }
+}
+
+/* Error Boundary */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  text-align: center;
+  max-width: 80%;
+  margin: 2rem auto;
+}
+
+.error-container h2 {
+  color: var(--color-error);
+  margin-bottom: 1rem;
+}
+
+.error-details {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin: 1rem 0;
+  font-family: monospace;
+  word-break: break-word;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.error-reset-button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  margin-top: 1rem;
+}
+
+.error-reset-button:hover {
+  background-color: #217dbb;
+}
+
+/* Course Setup */
+.course-selection {
+  margin-bottom: 24px;
+}
+
+.course-select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.tee-selection {
+  margin-bottom: 24px;
+}
+
+.player-tee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: var(--color-light);
+  border-radius: var(--border-radius);
+}
+
+.player-name {
+  font-weight: bold;
+  flex: 1;
+}
+
+.tee-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tee-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gray);
+}
+
+.setup-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.back-button {
+  flex: 1;
+  background-color: var(--color-gray);
+}
+
+.continue-button {
+  flex: 2;
+  background-color: var(--color-secondary);
+  font-weight: bold;
+}
+
+/* Course Manager Styles */
+.course-manager {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.course-manager-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .course-manager-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.course-list-panel,
+.course-details-panel,
+.tee-details-panel {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.course-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.course-item {
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.course-item:hover {
+  background-color: #e9ecef;
+}
+
+.course-item.selected {
+  background-color: #007bff;
+  color: white;
+  font-weight: 500;
+}
+
+.tee-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tee-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: #e9ecef;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tee-item:hover {
+  background-color: #dee2e6;
+}
+
+.tee-item.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.tee-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.tee-name {
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.add-button,
+.edit-button,
+.save-button,
+.cancel-button,
+.delete-button,
+.edit-holes-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.edit-button {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.save-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+  margin-top: 1rem;
+}
+
+.edit-holes-button {
+  background-color: #17a2b8;
+  color: white;
+  margin-top: 0.5rem;
+}
+
+/* Hole Editor Styles */
+.hole-editor {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.hole-editor h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.hole-editor-table {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+
+.hole-editor table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hole-editor th,
+.hole-editor td {
+  border: 1px solid #dee2e6;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.hole-editor th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.hole-editor tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.hole-editor input,
+.hole-editor select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.stroke-index-explanation {
+  background-color: #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stroke-index-explanation h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stroke-index-explanation p {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.hole-editor-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Header actions for course manager toggle */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.course-manager-button {
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.course-manager-button:hover {
+  background-color: #5a6268;
+}
+
+/* Hole Info Styles */
+.hole-info {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hole-info h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.hole-info-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hole-tee-info {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 4px;
+  border-left: 3px solid #dee2e6;
+}
+
+.tee-color-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  min-width: 80px;
+  text-align: center;
+}
+
+.hole-stats {
+  display: flex;
+  gap: 1rem;
+  margin-left: 1rem;
+}
+
+.hole-yardage,
+.hole-par,
+.hole-si {
+  font-size: 0.9rem;
+}
+
+.hole-yardage {
+  font-weight: 500;
+}
+
+.hole-info-loading {
+  text-align: center;
+  padding: 1rem;
+  font-style: italic;
+  color: #6c757d;
+}
+
+/* PlayerRoster Component Styles */
+.player-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.player-roster h3 {
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.player-search {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: #f9f9f9;
+}
+
+.selected-players {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: var(--border-radius);
+}
+
+.selected-players h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--color-dark);
+}
+
+.selected-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.selected-player {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.selected-player.empty {
+  border: 2px dashed #ddd;
+  color: #999;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 10px;
+}
+
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 50%;
+}
+
+.remove-btn:hover {
+  background-color: #f0f0f0;
+  color: var(--color-error);
+}
+
+.team-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-selector select {
+  flex: 1;
+  padding: 6px;
+  border-radius: var(--border-radius);
+}
+
+.player-list-section {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 12px;
+  box-shadow: var(--box-shadow);
+}
+
+.player-list-section h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--color-dark);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.player-item:hover {
+  background-color: #f5f5f5;
+}
+
+.player-item.selected {
+  background-color: #e3f2fd;
+}
+
+.player-checkbox {
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.player-name {
+  font-weight: 500;
+  flex: 1;
+}
+
+.player-index {
+  font-weight: normal;
+  color: #666;
+}
+
+.team-indicator {
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.team-indicator.team-red {
+  background-color: #ffebee;
+  color: var(--color-red);
+}
+
+.team-indicator.team-blue {
+  background-color: #e3f2fd;
+  color: var(--color-blue);
+}
+
+.add-player-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-secondary);
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.add-player-button:hover {
+  background-color: #27ae60;
+}
+
+.add-player-form {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-top: 10px;
+}
+
+.add-player-form h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.form-row {
+  margin-bottom: 12px;
+}
+
+.form-row input {
+  width: 100%;
+  padding: 10px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.form-actions button {
+  flex: 1;
+}
+
+.confirm-button {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--color-primary);
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.confirm-button:disabled {
+  background-color: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.confirm-button:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .selected-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .player-list {
+    max-height: 250px;
+  }
+}
+
+/* HoleView error message */
+.error-message {
+  background-color: var(--color-error);
+  color: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: var(--border-radius);
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Enhanced Ledger View Styles (T-13) */
+.current-hole-row {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.win-amount, .junk-amount {
+  font-weight: bold;
+}
+
+.player-hole-change {
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.player-hole-change.positive {
+  background-color: rgba(0, 180, 0, 0.1);
+  color: #006600;
+}
+
+.player-hole-change.negative {
+  background-color: rgba(180, 0, 0, 0.1);
+  color: #660000;
+}
+
+.player-junk-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.junk-pill {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  color: #333;
+}
+
+.junk-birdie {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #0050b3;
+}
+
+.junk-birdie::before {
+  content: "🐦 ";
+  margin-right: 4px;
+}
+
+.junk-sandie {
+  background-color: #fffbe6;
+  border: 1px solid #ffd666;
+  color: #ad6800;
+}
+
+.junk-sandie::before {
+  content: "🏖️ ";
+  margin-right: 4px;
+}
+
+.junk-greenie {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #135200;
+}
+
+.junk-greenie::before {
+  content: "🥬 ";
+  margin-right: 4px;
+}
+
+.junk-penalty {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #a8071a;
+}
+
+.junk-penalty::before {
+  content: "❌ ";
+  margin-right: 4px;
+}
+
+.junk-ld10 {
+  background-color: #f9f0ff;
+  border: 1px solid #d3adf7;
+  color: #531dab;
+}
+
+.junk-ld10::before {
+  content: "🚀 ";
+  margin-right: 4px;
+}
+
+.player-junk-total {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-left: 5px;
+}
+
+.player-winnings-breakdown {
+  font-size: 0.85rem;
+  margin-top: 2px;
+  color: #666;
+}
+
+.big-game-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.big-game-scores {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.best-net {
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background-color: #f6f6f6;
+}
+
+.best-net-plus {
+  color: #999;
+}
+
+.big-game-subtotal {
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.big-game-running {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: #666;
+}
+
+.big-game-final {
+  margin-top: 8px;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px;
+  background-color: #f6f6f6;
+  border-radius: 4px;
+}
+
+.big-game-final-cell {
+  text-align: center;
+}
+
+.big-game-detail-link {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.bg-column {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.player-final-cell {
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.team-red.player-final-cell {
+  background-color: rgba(var(--color-red-rgb), 0.1);
+}
+
+.team-blue.player-final-cell {
+  background-color: rgba(var(--color-blue-rgb), 0.1);
+}
+
+.player-final-total {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Responsive adjustments for ledger */
+@media (max-width: 768px) {
+  .ledger-table.detailed-view {
+    font-size: 0.8rem;
+  }
+  
+  .player-junk-events {
+    flex-direction: column;
+  }
+  
+  .big-game-detail {
+    font-size: 0.9rem;
+  }
+}
+
+/* Enhance the drawer toggle animation */
+.ledger-header {
+  position: relative;
+}
+
+.drawer-toggle {
+  transition: transform 0.3s ease;
+}
+
+.ledger-header:hover .drawer-toggle {
+  transform: translateY(3px);
+}
+
+.ledger-details {
+  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+/* Enhanced Player Tee Info */
+.player-tee-info {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.85rem;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.player-score-row .player-team-indicator {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  .player-score-row .player-team-indicator {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* Course Manager Styles */
+.course-manager-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.import-button, .export-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.import-button {
+  background-color: #28a745;
+}
+
+.import-button:hover {
+  background-color: #218838;
+}
+
+.export-button {
+  background-color: #17a2b8;
+}
+
+.export-button:hover {
+  background-color: #138496;
+}
+
+.export-button:disabled {
+  background-color: #6c757d;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Add styles for the enhanced tee-aware HoleView */
+
+/* Player tee badge */
+.player-tee-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin-left: 8px;
+}
+
+/* Player info container */
+.player-info {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+/* Hole details for player */
+.hole-details-for-player {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
+.hole-details-for-player .hole-par,
+.hole-details-for-player .hole-si {
+  margin-right: 12px;
+  padding: 2px 6px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Stroke indicator */
+.stroke-indicator {
+  margin-left: 4px;
+  color: #f39c12;
+  font-weight: bold;
+  font-size: 1.1rem;
+  background-color: rgba(243, 156, 18, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Team-specific styling for double button */
+.double-button.red {
+  background-color: #e74c3c;
+}
+
+.double-button.blue {
+  background-color: #3498db;
+}
+
+/* Hole controls container */
+.hole-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.submit-button {
+  padding: 10px 20px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.submit-button:hover {
+  background-color: #2ecc71;
+}
+
+.submit-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Course Details Panel */
+.course-details-panel {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.course-details-loading,
+.course-details-empty {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+  font-style: italic;
+}
+
+.course-details-header {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.course-details-header h3 {
+  margin-bottom: 5px;
+  font-size: 1.5rem;
+}
+
+.course-location {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.tee-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tee-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.tee-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.tee-button.active {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tee-info {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.tee-info h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.tee-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.tee-spec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.spec-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.spec-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.course-stats {
+  margin-bottom: 20px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-box h5 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.par-distribution {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.par-distribution h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.par-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.par-bar {
+  height: 24px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  transition: width 0.5s;
+  min-width: 60px;
+}
+
+.par-bar.par3 {
+  background-color: #27ae60;
+}
+
+.par-bar.par4 {
+  background-color: #3498db;
+}
+
+.par-bar.par5 {
+  background-color: #e74c3c;
+}
+
+.hole-preview {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.hole-preview h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.hole-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.hole-card {
+  background-color: white;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.hole-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.hole-number {
+  background-color: #3498db;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px;
+}
+
+.hole-card:nth-child(even) .hole-number {
+  background-color: #e74c3c;
+}
+
+.hole-card-details {
+  padding: 8px;
+  font-size: 0.85rem;
+}
+
+.hole-yardage {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.hole-par, .hole-si {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hole-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .tee-specs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .tee-specs {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form action buttons */
+.form-actions button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+  min-width: 80px;
+}
+
+.form-actions button:first-child {
+  background-color: var(--color-gray);
+}
+
+.form-actions button:first-child:hover {
+  background-color: #7f8c8d;
+}
+
+.form-actions button:last-child:hover {
+  background-color: #2980b9;
+}
+
+.form-actions button:disabled {
+  background-color: var(--color-gray);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Double used indicator */
+.double-used-indicator {
+  background-color: var(--color-gray);
+  color: white;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  margin-right: 10px;
+  font-size: 0.9rem;
+  font-style: italic;
+}
