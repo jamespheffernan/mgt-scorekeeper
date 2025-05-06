@@ -7,26 +7,13 @@ import { evaluateJunkEvents, JunkEvent, JunkFlags as JF } from '../calcEngine/ju
 import { calculateBigGameRow, calculateBigGameTotal, BigGameRow } from '../calcEngine/bigGameCalculator';
 import { millbrookDb } from '../db/millbrookDb';
 import { TeeOption, HoleInfo as HoleInfoType } from '../db/courseModel';
+import { Player, Team, GameHistory } from '../db/API-GameState';
 
 // Re-export types
 export type JunkFlags = JF;
 export type { JunkEvent, BigGameRow };
 
 // Type definitions matching our API-GameState.ts
-export type Team = 'Red' | 'Blue';
-
-export interface Player {
-  id: string;          // uuid
-  name: string;
-  index: number;       // GHIN / WHS handicap index (e.g. 8.4)
-  ghin?: string;
-  defaultTeam?: Team;
-  // Added player preferences
-  preferredTee?: string;
-  lastUsed?: string;   // ISO date string
-  notes?: string;
-}
-
 export interface Match {
   id: string;                  // uuid
   date: string;                // ISO (YYYY-MM-DD)
@@ -43,6 +30,8 @@ export interface Match {
   courseId?: string;           // Reference to selected course
   playerTeeIds?: [string, string, string, string]; // Which tee each player is using
   doubleUsedThisHole?: boolean; // Flag to track double usage on current hole
+  startTime?: string;          // ISO date string
+  endTime?: string;            // ISO date string
 }
 
 export interface HoleScore {
@@ -165,6 +154,13 @@ export const getPlayerStrokeIndexes = async (
   }
 };
 
+// Calculate the number of minutes between two ISO timestamps
+function calculateDurationInMinutes(startTime: string, endTime: string): number {
+  const start = new Date(startTime).getTime();
+  const end = new Date(endTime).getTime();
+  return Math.round((end - start) / (1000 * 60));
+}
+
 // Create the store
 export const useGameStore = create(
   persist<GameState & {
@@ -172,7 +168,9 @@ export const useGameStore = create(
     createMatch: (players: Player[], teams: Team[], matchOptions: MatchOptions) => void;
     enterHoleScores: (hole: number, grossScores: [number, number, number, number], junkFlags: JunkFlags[]) => Promise<void>;
     callDouble: () => void;
-    finishRound: () => void;
+    finishRound: () => Promise<void>;
+    cancelMatch: () => Promise<void>;
+    resetGame: () => void;
     // Utility
     getPlayerById: (id: string) => Player | undefined;
   }>(
@@ -205,6 +203,7 @@ export const useGameStore = create(
       createMatch: (players, teams, matchOptions: MatchOptions) => {
         const today = new Date().toISOString().split('T')[0];
         const playerIds = players.map(p => p.id) as [string, string, string, string];
+        const startTime = new Date().toISOString();
         
         set({
           match: {
@@ -222,7 +221,8 @@ export const useGameStore = create(
             bigGameTotal: 0,
             courseId: matchOptions.courseId,
             playerTeeIds: matchOptions.playerTeeIds,
-            doubleUsedThisHole: false  // Initialize to false
+            doubleUsedThisHole: false,  // Initialize to false
+            startTime: startTime        // Record when the game started
           },
           players,
           playerTeams: teams,
@@ -232,6 +232,23 @@ export const useGameStore = create(
           bigGameRows: [],
           isDoubleAvailable: false,
           trailingTeam: undefined
+        });
+        
+        // Also save the initial game state to IndexedDB
+        const gameState = get();
+        millbrookDb.saveGameState(gameState).catch(err => {
+          console.error('Error saving initial game state:', err);
+        });
+        
+        // Update player lastUsed timestamps
+        players.forEach(player => {
+          const updatedPlayer = {
+            ...player,
+            lastUsed: startTime
+          };
+          millbrookDb.savePlayer(updatedPlayer).catch(err => {
+            console.error('Error updating player last used time:', err);
+          });
         });
       },
 
@@ -470,13 +487,164 @@ export const useGameStore = create(
       },
 
       // Finish the round
-      finishRound: () => {
-        set(state => ({
-          match: {
-            ...state.match,
-            state: 'finished'
+      finishRound: async () => {
+        const state = get();
+        const { match, players, playerTeams, ledger, bigGameRows } = state;
+        
+        // Record end time and update match state
+        const endTime = new Date().toISOString();
+        const updatedMatch = {
+          ...match,
+          state: 'finished' as const,  // Explicitly type as 'finished'
+          endTime
+        };
+        
+        // Update store with finished state
+        set({
+          match: updatedMatch
+        });
+        
+        try {
+          // Save updated match data to database
+          await millbrookDb.saveMatch(updatedMatch);
+          
+          // Save final game state
+          await millbrookDb.saveGameState({
+            ...state,
+            match: updatedMatch
+          });
+          
+          // Calculate final scores and team totals
+          const finalScores = ledger.length > 0 
+            ? ledger[ledger.length - 1].runningTotals
+            : [0, 0, 0, 0];
+          
+          // Calculate team totals
+          const redTotal = playerTeams.reduce((sum, team, idx) => {
+            return team === 'Red' ? sum + finalScores[idx] : sum;
+          }, 0);
+          
+          const blueTotal = playerTeams.reduce((sum, team, idx) => {
+            return team === 'Blue' ? sum + finalScores[idx] : sum;
+          }, 0);
+          
+          // Get course name
+          let courseName = "Unknown Course";
+          if (match.courseId) {
+            const course = await millbrookDb.getCourse(match.courseId);
+            if (course) {
+              courseName = course.name;
+            }
           }
-        }));
+          
+          // Create game history record
+          const gameHistory: GameHistory = {
+            id: match.id,
+            date: match.date,
+            courseName,
+            playerNames: players.map(p => p.name) as [string, string, string, string],
+            teamAssignments: playerTeams as [Team, Team, Team, Team],
+            finalScores: finalScores as [number, number, number, number],
+            teamTotals: [redTotal, blueTotal] as [number, number],
+            bigGameTotal: match.bigGameTotal,
+            startTime: match.startTime || endTime, // Fallback if no start time
+            endTime,
+            duration: match.startTime 
+              ? calculateDurationInMinutes(match.startTime, endTime)
+              : 0,
+            holesPlayed: match.currentHole,
+            isComplete: true,
+            bigGameEnabled: match.bigGame
+          };
+          
+          // Save game history to database
+          await millbrookDb.saveGameHistory(gameHistory);
+          
+          console.log('Game successfully finished and history saved');
+        } catch (err) {
+          console.error('Error finishing game:', err);
+        }
+      },
+      
+      // Cancel match (without saving history)
+      cancelMatch: async () => {
+        const state = get();
+        const { match, players, playerTeams } = state;
+        
+        // Record end time
+        const endTime = new Date().toISOString();
+        
+        // Mark match as finished but save minimal history
+        const updatedMatch = {
+          ...match,
+          state: 'finished' as const,  // Explicitly type as 'finished'
+          endTime
+        };
+        
+        // Update store
+        set({
+          match: updatedMatch
+        });
+        
+        try {
+          // Save updated match data to database
+          await millbrookDb.saveMatch(updatedMatch);
+          
+          // Create game history record for cancelled game
+          const gameHistory: GameHistory = {
+            id: match.id,
+            date: match.date,
+            courseName: "Unknown Course", // We could look this up like in finishRound
+            playerNames: players.map(p => p.name) as [string, string, string, string],
+            teamAssignments: playerTeams as [Team, Team, Team, Team],
+            finalScores: [0, 0, 0, 0],
+            teamTotals: [0, 0],
+            bigGameTotal: 0,
+            startTime: match.startTime || endTime, // Fallback if no start time
+            endTime,
+            duration: match.startTime 
+              ? calculateDurationInMinutes(match.startTime, endTime)
+              : 0,
+            holesPlayed: match.currentHole,
+            isComplete: false, // Mark as incomplete
+            bigGameEnabled: match.bigGame
+          };
+          
+          // Save cancelled game history
+          await millbrookDb.saveGameHistory(gameHistory);
+          
+          console.log('Game cancelled and minimal history saved');
+        } catch (err) {
+          console.error('Error cancelling game:', err);
+        }
+      },
+      
+      // Reset game state completely
+      resetGame: () => {
+        set({
+          match: {
+            id: '',
+            date: '',
+            bigGame: false,
+            playerIds: ['', '', '', ''],
+            holePar: Array(18).fill(4), 
+            holeSI: Array(18).fill(1),
+            state: 'active',
+            currentHole: 1,
+            carry: 0,
+            base: 1,
+            doubles: 0,
+            bigGameTotal: 0
+          },
+          players: [],
+          playerTeams: ['Red', 'Blue', 'Red', 'Blue'],
+          holeScores: [],
+          ledger: [],
+          junkEvents: [],
+          bigGameRows: [],
+          isDoubleAvailable: false,
+          trailingTeam: undefined
+        });
       },
 
       // Get player by ID

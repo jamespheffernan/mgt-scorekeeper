@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
 import { useGameStore } from './store/gameStore';
 import { MatchSetup } from './components/setup/MatchSetup';
@@ -9,6 +9,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 // import { GameStoreTest } from './components/GameStoreTest';  // Comment out since we're using the real HoleView now
 import { HoleView } from './components/hole/HoleView';  // Import the actual HoleView component
 import { CoursePreview } from './components/setup/CoursePreview';
+import GameHistoryView from './components/GameHistory';
 import { TestFixes } from './TestFixes'; // Import our test component
 
 // Uncomment these for testing/development
@@ -94,7 +95,24 @@ function App() {
               >
                 Test Fixes
               </button>
-              {isGameActive && !showCourseManager && <LedgerView />}
+              {isGameActive && !showCourseManager && (
+                <Link 
+                  to="/ledger" 
+                  className="nav-button"
+                  style={{ marginLeft: '10px' }}
+                >
+                  View Ledger
+                </Link>
+              )}
+              {!isGameActive && !showCourseManager && (
+                <Link 
+                  to="/history" 
+                  className="nav-button"
+                  style={{ marginLeft: '10px' }}
+                >
+                  Game History
+                </Link>
+              )}
             </div>
           </header>
           
@@ -103,7 +121,9 @@ function App() {
               <Route path="/" element={hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />} />
               <Route path="/setup" element={<MatchSetup />} />
               <Route path="/hole/:holeNumber" element={<HoleView />} />
-              <Route path="/summary" element={<SettlementView matchId={match.id} />} />
+              <Route path="/ledger" element={<LedgerView />} />
+              <Route path="/settlement" element={<SettlementView matchId={match.id} />} />
+              <Route path="/history" element={<GameHistoryView />} />
               <Route path="/course-preview" element={<CoursePreview />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

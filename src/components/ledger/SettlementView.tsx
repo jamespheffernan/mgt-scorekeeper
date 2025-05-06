@@ -11,6 +11,7 @@ interface SettlementViewProps {
 const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   const navigate = useNavigate();
   const createMatch = useGameStore(state => state.createMatch);
+  const resetGame = useGameStore(state => state.resetGame);
   const screenshotRef = useRef<HTMLDivElement>(null);
   
   // Get current game state
@@ -198,6 +199,12 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     navigate('/setup');
   };
   
+  // Return to main menu
+  const handleReturnToMainMenu = () => {
+    resetGame(); // Reset the game state
+    navigate('/'); // Navigate to main menu
+  };
+  
   return (
     <div className="settlement-view">
       <h2>Round Summary</h2>
@@ -307,7 +314,14 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
           className="new-round-button" 
           onClick={handleNewRound}
         >
-          New Round
+          New Round (Select Players)
+        </button>
+        
+        <button 
+          className="return-menu-button" 
+          onClick={handleReturnToMainMenu}
+        >
+          Return to Main Menu
         </button>
       </div>
     </div>

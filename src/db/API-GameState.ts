@@ -36,6 +36,10 @@ export interface Match {
   // Course and tee information
   courseId?: string;           // Reference to selected course
   playerTeeIds?: [string, string, string, string]; // Which tee each player is using
+  
+  // Timestamps for tracking game duration
+  startTime?: string;          // ISO timestamp when game started
+  endTime?: string;            // ISO timestamp when game ended
 }
 
 /* ––––– 2. Per-hole Snapshots ––––– */
@@ -88,6 +92,25 @@ export interface GameState {
   bigGameRows: BigGameRow[];
 }
 
+/* ––––– 5. Game History ––––– */
+
+export interface GameHistory {
+  id: string;                  // Same as match.id for reference
+  date: string;                // ISO date when match was played
+  courseName: string;          // Name of the course
+  playerNames: [string, string, string, string]; // Player names for easy reference
+  teamAssignments: [Team, Team, Team, Team];     // Team assignments
+  finalScores: [number, number, number, number]; // Final player scores
+  teamTotals: [number, number];                 // Final team totals [Red, Blue]
+  bigGameTotal: number;        // Final Big Game total if applicable
+  startTime: string;           // ISO timestamp when game started
+  endTime: string;             // ISO timestamp when game ended
+  duration: number;            // Game duration in minutes
+  holesPlayed: number;         // Total number of holes completed
+  isComplete: boolean;         // Whether the game was completed or cancelled
+  bigGameEnabled: boolean;     // Whether Big Game was enabled
+}
+
 /* ––––– 4. Dexie Schema ––––– */
 
 export interface DbSchema {
@@ -95,4 +118,5 @@ export interface DbSchema {
   gameStates: GameState;     // key = match.id
   players: Player;           // key = player.id
   courses: any;              // Course schema defined separately
+  gameHistory: GameHistory;  // key = match.id (same as the original match)
 } 

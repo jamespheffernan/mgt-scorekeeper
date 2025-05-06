@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGameStore, Player, Team } from '../../store/gameStore';
+import { useGameStore } from '../../store/gameStore';
+import { Player, Team } from '../../db/API-GameState';
 import { JunkFlags } from '../../calcEngine/junkCalculator';
 import { HoleInfo } from './HoleInfo';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo as HoleInfoType } from '../../db/courseModel';
 import { allocateStrokes, allocateStrokesMultiTee, getStrokes } from '../../calcEngine/strokeAllocator';
+import CancelGameDialog from '../CancelGameDialog';
+import EndGameDialog from '../EndGameDialog';
 import '../../App.css';
 
 export const HoleView = () => {
@@ -36,7 +39,7 @@ export const HoleView = () => {
     defaultPar, defaultPar, defaultPar, defaultPar
   ]);
   
-  // Local state for junk events
+  // Local state for junk flags
   const [junkFlags, setJunkFlags] = useState<JunkFlags[]>([
     { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
     { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
@@ -44,8 +47,13 @@ export const HoleView = () => {
     { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false }
   ]);
   
+  // State for errors and submission
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // State for dialogs
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showEndGameDialog, setShowEndGameDialog] = useState(false);
   
   // Load course data when match details change
   useEffect(() => {
@@ -347,6 +355,22 @@ export const HoleView = () => {
     <div className="hole-view">
       <div className="hole-header">
         <h2>Hole {currentHole}</h2>
+        
+        <div className="hole-actions">
+          <button 
+            className="view-ledger-button"
+            onClick={() => navigate('/ledger')}
+          >
+            View Ledger
+          </button>
+          
+          <button
+            className="cancel-game-button"
+            onClick={() => setShowCancelDialog(true)}
+          >
+            Cancel Game
+          </button>
+        </div>
       </div>
       
       {/* Add HoleInfo component to show detailed hole information */}
@@ -481,7 +505,26 @@ export const HoleView = () => {
         >
           {isSubmitting ? 'Submitting...' : 'Submit Scores'}
         </button>
+        
+        {currentHole >= 9 && (
+          <button
+            className="end-game-button"
+            onClick={() => setShowEndGameDialog(true)}
+            disabled={isSubmitting}
+          >
+            End Round
+          </button>
+        )}
       </div>
+      
+      {/* Dialogs */}
+      {showCancelDialog && (
+        <CancelGameDialog onClose={() => setShowCancelDialog(false)} />
+      )}
+      
+      {showEndGameDialog && (
+        <EndGameDialog onClose={() => setShowEndGameDialog(false)} />
+      )}
     </div>
   );
 }; 

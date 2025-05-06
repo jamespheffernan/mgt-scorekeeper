@@ -828,42 +828,35 @@ input:focus, select:focus {
 
 .rematch-actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 30px;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.rematch-button,
+.new-round-button,
+.return-menu-button {
+  padding: 12px 20px;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  color: white;
+  font-weight: 500;
+  flex: 1;
+  min-width: 200px;
 }
 
 .rematch-button {
-  width: 100%;
-  max-width: 400px;
-  padding: 15px;
   background-color: var(--color-secondary);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.rematch-button:hover {
-  background-color: #27ae60;
 }
 
 .new-round-button {
-  padding: 12px 20px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
+  background-color: var(--color-primary);
 }
 
-.new-round-button:hover {
-  background-color: #e5e5e5;
+.return-menu-button {
+  background-color: #f56c6c;
 }
 
 /* Screenshot styling */
@@ -2441,4 +2434,234 @@ input:focus, select:focus {
 .team-blue {
   background-color: #bbdefb;
   color: #1565c0;
+}
+
+/* Game Control Buttons */
+.hole-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.view-ledger-button,
+.cancel-game-button {
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+}
+
+.view-ledger-button {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.cancel-game-button {
+  background-color: #f56c6c;
+  color: white;
+}
+
+.end-game-button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #409eff;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Dialog Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: var(--color-primary);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.warning {
+  color: #f56c6c;
+  font-weight: bold;
+  margin: 15px 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.dialog-actions button {
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+}
+
+.cancel-button {
+  background-color: #909399;
+  color: white;
+}
+
+.confirm-button {
+  background-color: #409eff;
+  color: white;
+}
+
+/* Game History Styles */
+.game-history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.game-history-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.records-table th {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.records-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.records-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.complete-game {
+  background-color: rgba(103, 194, 58, 0.1);
+}
+
+.cancelled-game {
+  background-color: rgba(245, 108, 108, 0.1);
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-team-Red {
+  color: var(--color-red-team);
+  font-weight: 500;
+}
+
+.player-team-Blue {
+  color: var(--color-blue-team);
+  font-weight: 500;
+}
+
+.final-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-red {
+  color: var(--color-red-team);
+  font-weight: bold;
+}
+
+.team-blue {
+  color: var(--color-blue-team);
+  font-weight: bold;
+}
+
+.big-game-score {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.status-complete {
+  color: #67c23a;
+  font-weight: bold;
+}
+
+.status-cancelled {
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.no-scores {
+  color: #909399;
+  font-style: italic;
+}
+
+.records-count {
+  margin-bottom: 15px;
+  color: #606266;
+  font-size: 0.9rem;
+}
+
+/* Navigation buttons */
+.nav-button {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: var(--color-secondary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+  background-color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* Add specific styles for each nav button type if needed */
+.nav-button.ledger {
+  background-color: var(--color-secondary);
+}
+
+.nav-button.history {
+  background-color: #42b983;
 }

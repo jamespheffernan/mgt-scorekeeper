@@ -3,7 +3,8 @@ import {
   Player,
   Match,
   GameState,
-  DbSchema
+  DbSchema,
+  GameHistory
 } from './API-GameState';
 import { Course } from './courseModel';
 import { MILLBROOK_COURSE_DATA } from './millbrookCourseData';
@@ -17,6 +18,7 @@ class MillbrookDatabase extends Dexie {
   matches!: Table<Match, string>;
   gameStates!: Table<GameState, string>;
   courses!: Table<Course, string>;
+  gameHistory!: Table<GameHistory, string>;
 
   constructor() {
     super('millbrookDb');
@@ -38,6 +40,11 @@ class MillbrookDatabase extends Dexie {
     // Add player preferences in version 3
     this.version(3).stores({
       players: 'id, name, index, defaultTeam, preferredTee, lastUsed'
+    });
+    
+    // Add game history table in version 4
+    this.version(4).stores({
+      gameHistory: 'id, date, isComplete'
     });
   }
 
@@ -64,6 +71,16 @@ class MillbrookDatabase extends Dexie {
       .equals('active')
       .toArray();
   }
+  
+  /**
+   * Get all completed matches
+   */
+  async getCompletedMatches(): Promise<Match[]> {
+    return this.matches
+      .where('state')
+      .equals('finished')
+      .toArray();
+  }
 
   /**
    * Save a match to the database
@@ -84,6 +101,27 @@ class MillbrookDatabase extends Dexie {
    */
   async saveGameState(gameState: GameState): Promise<string> {
     return this.gameStates.put(gameState);
+  }
+  
+  /**
+   * Save game history record
+   */
+  async saveGameHistory(history: GameHistory): Promise<string> {
+    return this.gameHistory.put(history);
+  }
+  
+  /**
+   * Get all game history records
+   */
+  async getAllGameHistory(): Promise<GameHistory[]> {
+    return this.gameHistory.toArray();
+  }
+  
+  /**
+   * Get game history by ID
+   */
+  async getGameHistory(id: string): Promise<GameHistory | undefined> {
+    return this.gameHistory.get(id);
   }
 
   /**
