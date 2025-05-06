@@ -34,31 +34,31 @@ export function getInitialDoublingState(): DoublingState {
 
 /**
  * Calculate the base amount for a hole
- * 
- * @param holeNumber Current hole number (1-18)
- * @param doubles Number of doubles called so far
+ * @param holeNumber Current hole (1-18)
+ * @param doubles Number of doubles used so far
  * @returns Base amount in dollars
  */
 export function calculateBase(holeNumber: number, doubles: number): number {
   console.log(`[BASE-DEBUG] Calculating base for hole ${holeNumber} with ${doubles} doubles`);
   
-  // First hole is fixed at 1
+  // Special case for hole 1
   if (holeNumber === 1) {
     console.log(`[BASE-DEBUG] Hole 1: base = 1`);
-    return 1;
+    return 1; // First hole is always $1
   }
   
-  // Second hole is fixed at 2 (unless explicitly doubled)
+  // Special case for hole 2
   if (holeNumber === 2) {
-    const baseValue = doubles > 0 ? 2 * Math.pow(2, doubles - 1) : 2;
-    console.log(`[BASE-DEBUG] Hole 2: base = ${baseValue}`);
-    return baseValue;
+    // For hole 2, base is fixed at $2, but can be doubled
+    const base = doubles > 0 ? 2 * Math.pow(2, doubles) : 2;
+    console.log(`[BASE-DEBUG] Hole 2: base = ${base}`);
+    return base;
   }
   
-  // Hole 3+ uses the standard doubling formula
-  const baseValue = 2 * Math.pow(2, doubles);
-  console.log(`[BASE-DEBUG] Hole ${holeNumber}: base = ${baseValue} (2 * 2^${doubles})`);
-  return baseValue;
+  // For holes 3+, base = 2 * 2^doubles
+  const base = 2 * Math.pow(2, doubles);
+  console.log(`[BASE-DEBUG] Hole ${holeNumber}: base = ${base} (2 * 2^${doubles})`);
+  return base;
 }
 
 /**
