@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import { Player, Team } from '../../db/API-GameState';
 import { JunkFlags } from '../../calcEngine/junkCalculator';
@@ -13,6 +13,7 @@ import '../../App.css';
 
 export const HoleView = () => {
   const navigate = useNavigate();
+  const { holeNumber } = useParams<{ holeNumber: string }>();
   
   // Access store state and actions
   const match = useGameStore(state => state.match);
@@ -22,6 +23,8 @@ export const HoleView = () => {
   const trailingTeam = useGameStore(state => state.trailingTeam);
   const enterHoleScores = useGameStore(state => state.enterHoleScores);
   const callDouble = useGameStore(state => state.callDouble);
+  const ledger = useGameStore(state => state.ledger);
+  const junkEvents = useGameStore(state => state.junkEvents);
   
   // Current hole
   const currentHole = match.currentHole;
@@ -54,6 +57,41 @@ export const HoleView = () => {
   // State for dialogs
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showEndGameDialog, setShowEndGameDialog] = useState(false);
+  
+  // State for showing current ledger summary
+  const [showCurrentLedger, setShowCurrentLedger] = useState(false);
+  
+  // Get the current standings
+  const getCurrentStandings = () => {
+    if (ledger.length === 0) return { redTotal: 0, blueTotal: 0, isEqual: true };
+    
+    const lastLedgerEntry = ledger[ledger.length - 1];
+    // Find the first player index for each team
+    const firstRedIndex = playerTeams.findIndex(team => team === 'Red');
+    const firstBlueIndex = playerTeams.findIndex(team => team === 'Blue');
+    // Use only one player's running total per team
+    const redTotal = lastLedgerEntry.runningTotals[firstRedIndex] ?? 0;
+    const blueTotal = lastLedgerEntry.runningTotals[firstBlueIndex] ?? 0;
+    return {
+      redTotal,
+      blueTotal,
+      isEqual: redTotal === blueTotal
+    };
+  };
+  
+  // Get player junk total
+  const getPlayerJunkTotal = (playerId: string): number => {
+    return junkEvents
+      .filter(event => event.playerId === playerId)
+      .reduce((sum, event) => sum + event.value, 0);
+  };
+  
+  // Format currency
+  const formatCurrency = (amount: number): string => {
+    const formattedAmount = Math.abs(amount).toString();
+    const sign = amount >= 0 ? '+' : '-';
+    return `${sign}$${formattedAmount}`;
+  };
   
   // Load course data when match details change
   useEffect(() => {
@@ -132,22 +170,48 @@ export const HoleView = () => {
     updateJunkBasedOnScore(playerIndex, score);
   };
   
-  // Generate score options for dropdown
+  // Enhanced score options for dropdown with color coding and icons
   const scoreOptions = (playerIndex: number) => {
     const par = playerPars[playerIndex] || defaultPar;
     
     // Range from 1 to 2*par
-    return Array.from({ length: par * 2 }, (_, i) => i + 1).map(score => (
-      <option key={score} value={score}>
-        {score === 1 ? 'Hole in One' : 
-         score === par - 2 ? `${score} (Eagle)` :
-         score === par - 1 ? `${score} (Birdie)` :
-         score === par ? `${score} (Par)` :
-         score === par + 1 ? `${score} (Bogey)` :
-         score === par + 2 ? `${score} (Double Bogey)` :
-         score}
-      </option>
-    ));
+    return Array.from({ length: par * 2 }, (_, i) => i + 1).map(score => {
+      // Determine class and label based on score relative to par
+      let scoreClass = "";
+      let prefix = "";
+      
+      if (score === 1) {
+        scoreClass = "ace-score";
+        prefix = "🏆 ";
+      } else if (score === par - 2) {
+        scoreClass = "eagle-score";
+        prefix = "🦅 ";
+      } else if (score === par - 1) {
+        scoreClass = "birdie-score";
+        prefix = "🐦 ";
+      } else if (score === par) {
+        scoreClass = "par-score";
+        prefix = "⭐ ";
+      } else if (score === par + 1) {
+        scoreClass = "bogey-score";
+      } else if (score === par + 2) {
+        scoreClass = "double-bogey-score";
+      }
+      
+      const scoreText = score === 1 ? 'Hole in One' : 
+                      score === par - 2 ? `${score} (Eagle)` :
+                      score === par - 1 ? `${score} (Birdie)` :
+                      score === par ? `${score} (Par)` :
+                      score === par + 1 ? `${score} (Bogey)` :
+                      score === par + 2 ? `${score} (Double Bogey)` :
+                      score;
+      
+      return (
+        <option key={score} value={score} className={scoreClass}>
+          {prefix + scoreText}
+        </option>
+      );
+    });
   };
   
   // Update junk flags based on score
@@ -222,11 +286,12 @@ export const HoleView = () => {
       // Call the store action to record scores
       await enterHoleScores(currentHole, grossScores, junkFlags);
       
-      // Navigate to next hole or finish
-      if (currentHole < 18) {
-        navigate(`/hole/${currentHole + 1}`);
+      // If this is the final hole, show the end game dialog
+      if (currentHole === 18) {
+        setShowEndGameDialog(true);
       } else {
-        navigate('/finish');
+        // Otherwise, navigate to next hole
+        navigate(`/hole/${currentHole + 1}`);
       }
     } catch (error: any) {
       setErrorMessage(error.message || 'Error submitting scores');
@@ -351,6 +416,82 @@ export const HoleView = () => {
     ]);
   }, [currentHole]);
   
+  // Render current standings
+  const renderCurrentStandings = () => {
+    if (ledger.length === 0) return null;
+    
+    const { redTotal, blueTotal, isEqual } = getCurrentStandings();
+    const lastLedgerEntry = ledger[ledger.length - 1];
+    
+    return (
+      <div className="current-standings">
+        <div className="standings-header">
+          <h3>Current Standings</h3>
+          <button className="toggle-standings" onClick={() => setShowCurrentLedger(!showCurrentLedger)}>
+            {showCurrentLedger ? 'Hide Details' : 'Show Details'}
+          </button>
+        </div>
+        
+        <div className="team-standings-summary">
+          <div className="team-standing team-red">
+            <div className="team-name">Red Team</div>
+            <div className="team-amount">{formatCurrency(redTotal)}</div>
+          </div>
+          
+          <div className="versus-indicator">vs</div>
+          
+          <div className="team-standing team-blue">
+            <div className="team-name">Blue Team</div>
+            <div className="team-amount">{formatCurrency(blueTotal)}</div>
+          </div>
+        </div>
+        
+        {showCurrentLedger && (
+          <div className="player-standings">
+            {players.map((player, index) => (
+              <div key={player.id} className={`player-standing team-${playerTeams[index].toLowerCase()}`}>
+                <div className="player-name">{player.name}</div>
+                <div className="player-team-badge">{playerTeams[index]}</div>
+                <div className="player-amount">{formatCurrency(lastLedgerEntry.runningTotals[index])}</div>
+                {getPlayerJunkTotal(player.id) > 0 && (
+                  <div className="player-junk">
+                    Junk: ${getPlayerJunkTotal(player.id)}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="hole-info-summary">
+          <div className="hole-info-item">
+            <div className="info-label">Holes Played</div>
+            <div className="info-value">{currentHole - 1}</div>
+          </div>
+          
+          <div className="hole-info-item">
+            <div className="info-label">Current Base</div>
+            <div className="info-value">${match.base}</div>
+          </div>
+          
+          <div className="hole-info-item">
+            <div className="info-label">Carry</div>
+            <div className="info-value">
+              ${lastLedgerEntry ? lastLedgerEntry.carryAfter : 0}
+            </div>
+          </div>
+          
+          {isDoubleAvailable && trailingTeam && !match.doubleUsedThisHole && (
+            <div className="hole-info-item">
+              <div className="info-label">Double Available</div>
+              <div className="info-value available">Yes</div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="hole-view">
       <div className="hole-header">
@@ -360,15 +501,27 @@ export const HoleView = () => {
           <button 
             className="view-ledger-button"
             onClick={() => navigate('/ledger')}
+            aria-label="View full ledger"
           >
-            View Ledger
+            <span className="button-icon">📊</span> View Ledger
           </button>
+          
+          {currentHole === 18 && (
+            <button
+              className="finish-round-button"
+              onClick={() => setShowEndGameDialog(true)}
+              aria-label="Finish the round"
+            >
+              <span className="button-icon">🏁</span> Finish Round
+            </button>
+          )}
           
           <button
             className="cancel-game-button"
             onClick={() => setShowCancelDialog(true)}
+            aria-label="Cancel the game"
           >
-            Cancel Game
+            <span className="button-icon">⛔</span> Cancel Game
           </button>
         </div>
       </div>
@@ -378,13 +531,18 @@ export const HoleView = () => {
         <HoleInfo holeNumber={currentHole} />
       )}
       
+      {/* Add current standings section if we have ledger entries */}
+      {ledger.length > 0 && renderCurrentStandings()}
+      
       {errorMessage && (
-        <div className="error-message">
+        <div className="error-message" role="alert">
           {errorMessage}
         </div>
       )}
       
       <div className="scores-container">
+        <h3>Enter Scores</h3>
+        
         {players.map((player, index) => {
           const teeInfo = getPlayerTeeInfo(index);
           const hasStroke = playerGetsStroke(index);
@@ -397,7 +555,10 @@ export const HoleView = () => {
             >
               <div className="player-info">
                 <div className="player-team-indicator">
-                  {playerTeams[index]} • {player.name}
+                  <span className={`player-team-badge ${playerTeams[index].toLowerCase()}`}>
+                    {playerTeams[index]}
+                  </span>
+                  <span className="player-name-display">{player.name}</span>
                 </div>
                 
                 {teeInfo.name && (
@@ -410,7 +571,7 @@ export const HoleView = () => {
                   <span className="hole-par">Par {playerPars[index]}</span>
                   <span className="hole-si">SI: {playerSIs[index]}</span>
                   {playerGetsStroke(index) && (
-                    <span className="stroke-indicator" title="Player gets a stroke on this hole">
+                    <span className="stroke-indicator" title={`Player gets ${getPlayerStrokes(index)} stroke(s) on this hole`}>
                       {getPlayerStrokes(index) > 1 ? `${getPlayerStrokes(index)}★` : '★'}
                     </span>
                   )}
@@ -422,57 +583,62 @@ export const HoleView = () => {
                   value={grossScores[index]}
                   onChange={(e) => updateScore(index, parseInt(e.target.value))}
                   disabled={isSubmitting}
+                  aria-label={`Score for ${player.name}`}
                 >
                   {scoreOptions(index)}
                 </select>
               </div>
               
               <div className="junk-flags">
-                <label>
+                <label className="junk-flag-label">
                   <input
                     type="checkbox"
                     checked={junkFlags[index].hadBunkerShot}
                     onChange={() => toggleJunkFlag(index, 'hadBunkerShot')}
                     disabled={isSubmitting}
+                    aria-label="Sandy (Up and down from bunker)"
                   />
-                  Sandy
+                  <span className="junk-name">Sandy</span>
                 </label>
                 
                 {isPar3 && (
                   <>
-                    <label>
+                    <label className="junk-flag-label">
                       <input
                         type="checkbox"
                         checked={junkFlags[index].isOnGreenFromTee}
                         onChange={() => toggleGreenieFlag(index)}
                         disabled={isSubmitting}
+                        aria-label="Greenie (Closest to pin on par 3)"
                       />
-                      Greenie
+                      <span className="junk-name">Greenie</span>
                     </label>
                     
                     {junkFlags[index].isOnGreenFromTee && (
-                      <label>
+                      <label className="junk-flag-label">
                         <input
                           type="checkbox"
                           checked={junkFlags[index].hadThreePutts}
                           onChange={() => toggleJunkFlag(index, 'hadThreePutts')}
                           disabled={isSubmitting}
+                          aria-label="3-Putt (Three putts on green)"
                         />
-                        3-Putt
+                        <span className="junk-name">3-Putt</span>
                       </label>
                     )}
                   </>
                 )}
                 
                 {currentHole === 17 && (
-                  <label>
+                  <label className="junk-flag-label">
                     <input
                       type="checkbox"
                       checked={junkFlags[index].isLongDrive}
                       onChange={() => toggleJunkFlag(index, 'isLongDrive')}
                       disabled={isSubmitting}
+                      aria-label="LD10 (Longest Drive on hole 17)"
                     />
-                    LD10
+                    <span className="junk-name">LD10</span>
                   </label>
                 )}
               </div>
@@ -487,13 +653,14 @@ export const HoleView = () => {
             className={`double-button ${trailingTeam.toLowerCase()}`}
             onClick={callDouble}
             disabled={isSubmitting}
+            aria-label={`${trailingTeam} Team Doubles`}
           >
             {trailingTeam} Team Doubles
           </button>
         )}
         
         {match.doubleUsedThisHole && (
-          <div className="double-used-indicator">
+          <div className="double-used-indicator" aria-live="polite">
             Double already played this hole
           </div>
         )}
@@ -502,19 +669,10 @@ export const HoleView = () => {
           className="submit-button"
           onClick={submitScores}
           disabled={isSubmitting}
+          aria-label="Submit scores and advance to next hole"
         >
           {isSubmitting ? 'Submitting...' : 'Submit Scores'}
         </button>
-        
-        {currentHole >= 9 && (
-          <button
-            className="end-game-button"
-            onClick={() => setShowEndGameDialog(true)}
-            disabled={isSubmitting}
-          >
-            End Round
-          </button>
-        )}
       </div>
       
       {/* Dialogs */}
@@ -523,7 +681,9 @@ export const HoleView = () => {
       )}
       
       {showEndGameDialog && (
-        <EndGameDialog onClose={() => setShowEndGameDialog(false)} />
+        <EndGameDialog 
+          onClose={() => setShowEndGameDialog(false)} 
+        />
       )}
     </div>
   );
