@@ -7,7 +7,6 @@ import SettlementView from './components/ledger/SettlementView';
 import { LedgerView } from './components/ledger/LedgerView';
 import { ErrorBoundary } from './components/ErrorBoundary';
 // import { GameStoreTest } from './components/GameStoreTest';  // Comment out since we're using the real HoleView now
-import { HoleView } from './components/hole/HoleView';  // Import the actual HoleView component
 import { ResponsiveHoleView } from './components/hole/ResponsiveHoleView';  // Import the responsive component
 import { CoursePreview } from './components/setup/CoursePreview';
 import GameHistoryView from './components/GameHistory';

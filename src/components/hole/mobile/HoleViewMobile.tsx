@@ -9,7 +9,6 @@ export const HoleViewMobile: React.FC = () => {
   
   // Access store state and actions
   const match = useGameStore(state => state.match);
-  const players = useGameStore(state => state.players);
   const playerTeams = useGameStore(state => state.playerTeams);
   const isDoubleAvailable = useGameStore(state => state.isDoubleAvailable);
   const trailingTeam = useGameStore(state => state.trailingTeam);
