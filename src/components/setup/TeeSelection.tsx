@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useGame } from '../../store/gameStore';
-import { db } from '../../db/millbrookDb';
-import { Course, Tee } from '../../db/courseModel';
+import { millbrookDb } from '../../db/millbrookDb';
+import { Course, TeeOption } from '../../db/courseModel';
 
 interface TeeSelectionProps {
   players: string[];
@@ -16,7 +15,6 @@ export const TeeSelection: React.FC<TeeSelectionProps> = ({
   onTeeSelect,
   initialTeeIds = []
 }) => {
-  const { playerNames } = useGame();
   const [course, setCourse] = useState<Course | null>(null);
   const [selectedTees, setSelectedTees] = useState<string[]>(initialTeeIds.length ? initialTeeIds : Array(players.length).fill(''));
   const [isLoading, setIsLoading] = useState(true);
@@ -25,12 +23,12 @@ export const TeeSelection: React.FC<TeeSelectionProps> = ({
     const loadCourse = async () => {
       if (courseId) {
         try {
-          const fetchedCourse = await db.courses.get(courseId);
+          const fetchedCourse = await millbrookDb.courses.get(courseId);
           setCourse(fetchedCourse || null);
           
           // If no initial tees and course has default tee, set it for all players
-          if (!initialTeeIds.length && fetchedCourse?.tees?.length) {
-            const defaultTeeId = fetchedCourse.tees[0].id;
+          if (!initialTeeIds.length && fetchedCourse?.teeOptions?.length) {
+            const defaultTeeId = fetchedCourse.teeOptions[0].id;
             setSelectedTees(Array(players.length).fill(defaultTeeId));
           }
         } catch (error) {
@@ -51,15 +49,15 @@ export const TeeSelection: React.FC<TeeSelectionProps> = ({
     onTeeSelect(newSelectedTees);
   };
 
-  const getTeeById = (teeId: string): Tee | undefined => {
-    return course?.tees.find(tee => tee.id === teeId);
+  const getTeeById = (teeId: string): TeeOption | undefined => {
+    return course?.teeOptions.find(tee => tee.id === teeId);
   };
 
   if (isLoading) {
     return <div>Loading tees...</div>;
   }
 
-  if (!course || !course.tees.length) {
+  if (!course || !course.teeOptions.length) {
     return <div>No tees available for this course</div>;
   }
 
@@ -68,7 +66,7 @@ export const TeeSelection: React.FC<TeeSelectionProps> = ({
       <h3>Select Tees</h3>
       {players.map((playerId, index) => (
         <div key={playerId} className="player-tee-row">
-          <div className="player-name">{playerNames[playerId] || `Player ${index + 1}`}</div>
+          <div className="player-name">{`Player ${index + 1}`}</div>
           <div className="tee-selector">
             {selectedTees[index] && (
               <div 
@@ -81,7 +79,7 @@ export const TeeSelection: React.FC<TeeSelectionProps> = ({
               onChange={(e) => handleTeeChange(index, e.target.value)}
               className="tee-select"
             >
-              {course.tees.map((tee) => (
+              {course.teeOptions.map((tee) => (
                 <option key={tee.id} value={tee.id}>
                   {tee.name} ({tee.rating}/{tee.slope})
                 </option>
