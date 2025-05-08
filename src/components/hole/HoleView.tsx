@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
-import { Player, Team } from '../../db/API-GameState';
-import { JunkFlags } from '../../calcEngine/junkCalculator';
-import { HoleInfo } from './HoleInfo';
-import { millbrookDb } from '../../db/millbrookDb';
-import { Course, TeeOption, HoleInfo as HoleInfoType } from '../../db/courseModel';
-import { allocateStrokes, allocateStrokesMultiTee, getStrokes } from '../../calcEngine/strokeAllocator';
 import CancelGameDialog from '../CancelGameDialog';
 import EndGameDialog from '../EndGameDialog';
 import '../../App.css';
+import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
+import { JunkFlags } from '../../calcEngine/junkCalculator';
+import { millbrookDb } from '../../db/millbrookDb';
+import { allocateStrokes, allocateStrokesMultiTee } from '../../calcEngine/strokeAllocator';
 
 export const HoleView = () => {
   const navigate = useNavigate();
