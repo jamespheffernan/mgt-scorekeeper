@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import html2canvas from 'html2canvas';
@@ -14,6 +14,10 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   const resetGame = useGameStore(state => state.resetGame);
   const screenshotRef = useRef<HTMLDivElement>(null);
   
+  // Local state for UI control
+  const [activeTab, setActiveTab] = useState<'summary' | 'details' | 'bigGame'>('summary');
+  const [showTeamStats, setShowTeamStats] = useState(true);
+  
   // Get current game state
   const match = useGameStore(state => state.match);
   const players = useGameStore(state => state.players);
@@ -21,6 +25,7 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   const ledger = useGameStore(state => state.ledger);
   const junkEvents = useGameStore(state => state.junkEvents);
   const bigGameRows = useGameStore(state => state.bigGameRows);
+  const holeScores = useGameStore(state => state.holeScores);
   
   // Verify that the matchId matches the current match
   useEffect(() => {
@@ -32,6 +37,35 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   // Calculate final ledger values
   const finalLedger = ledger.length > 0 ? ledger[ledger.length - 1] : null;
   
+  // Game statistics
+  const gameStats = {
+    holesPlayed: ledger.length,
+    duration: match.startTime && match.endTime 
+      ? getTimeDuration(match.startTime, match.endTime)
+      : '00:00',
+    totalDoublesPlayed: ledger.length > 0 ? 
+      // Count instances where the doubles value increases between consecutive rows
+      ledger.reduce((count, row, index) => {
+        // For the first row, check if doubles is already > 0
+        if (index === 0) {
+          return row.doubles > 0 ? 1 : 0;
+        }
+        // For subsequent rows, check if doubles increased from previous row
+        return count + (row.doubles > ledger[index - 1].doubles ? 1 : 0);
+      }, 0) : 0,
+    totalJunkEvents: junkEvents.length,
+    totalJunkValue: junkEvents.reduce((sum, event) => sum + event.value, 0),
+    bigGamePoints: match.bigGameTotal
+  };
+  
+  // Calculate hole wins
+  const holeWins = holeScores.reduce((wins, score) => {
+    if (score.teamNet[0] < score.teamNet[1]) wins.red++;
+    else if (score.teamNet[1] < score.teamNet[0]) wins.blue++;
+    else wins.push++;
+    return wins;
+  }, { red: 0, blue: 0, push: 0 });
+  
   // Get player junk total
   const getPlayerJunkTotal = (playerId: string): number => {
     return junkEvents
@@ -39,11 +73,26 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
       .reduce((sum, event) => sum + event.value, 0);
   };
   
+  // Get player junk events
+  const getPlayerJunkEvents = (playerId: string): any[] => {
+    return junkEvents.filter(event => event.playerId === playerId);
+  };
+  
   // Get team junk total
   const getTeamJunkTotal = (team: 'Red' | 'Blue'): number => {
     return junkEvents
       .filter(event => event.teamId === team)
       .reduce((sum, event) => sum + event.value, 0);
+  };
+  
+  // Get junk events by type
+  const getJunkEventsByType = (): Record<string, number> => {
+    const result: Record<string, number> = {};
+    junkEvents.forEach(event => {
+      if (!result[event.type]) result[event.type] = 0;
+      result[event.type]++;
+    });
+    return result;
   };
   
   // Format currency
@@ -61,20 +110,36 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     const redCount = playerTeams.filter(team => team === 'Red').length;
     const blueCount = playerTeams.filter(team => team === 'Blue').length;
     
-    // Calculate team totals by dividing the sum by the number of team members
-    // This ensures we display the correct team total, not the sum of all player amounts
+    // Log the runningTotals and team counts for debugging
+    console.log('[DEBUG] finalLedger.runningTotals:', finalLedger.runningTotals);
+    console.log('[DEBUG] playerTeams:', playerTeams);
+    console.log('[DEBUG] redCount:', redCount, 'blueCount:', blueCount);
+    
+    // Calculate team totals and divide by the number of players on each team
     const redTotal = players.reduce((sum, player, index) => 
       playerTeams[index] === 'Red' ? sum + finalLedger.runningTotals[index] : sum, 0) / redCount;
     
     const blueTotal = players.reduce((sum, player, index) => 
       playerTeams[index] === 'Blue' ? sum + finalLedger.runningTotals[index] : sum, 0) / blueCount;
     
-    console.log(`[DEBUG] Settlement team totals (adjusted): Red=${redTotal}, Blue=${blueTotal}`);
-    
+    console.log('[DEBUG] redTotal:', redTotal, 'blueTotal:', blueTotal);
     return { red: redTotal, blue: blueTotal };
   };
   
   const teamTotals = getTeamTotals();
+  const winningTeam = teamTotals.red > teamTotals.blue ? 'Red' : teamTotals.blue > teamTotals.red ? 'Blue' : 'Tie';
+  
+  // Get time duration in hours:minutes format
+  function getTimeDuration(startTime: string, endTime: string): string {
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    const diffMs = end - start;
+    
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  }
   
   // Start a new match with the same players
   const handleRematch = () => {
@@ -95,21 +160,34 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     let csv = 'Millbrook Game Summary\n';
     csv += `Date,${new Date(match.date).toLocaleDateString()}\n\n`;
     
+    // Add team totals
+    csv += 'Team Totals\n';
+    csv += `Red Team,$${teamTotals.red}\n`;
+    csv += `Blue Team,$${teamTotals.blue}\n\n`;
+    
     // Add team junk totals
     csv += 'Team Junk Totals\n';
     csv += `Red Team Junk,$${getTeamJunkTotal('Red')}\n`;
     csv += `Blue Team Junk,$${getTeamJunkTotal('Blue')}\n\n`;
     
     // Add player results
-    csv += 'Player,Team,Final Total\n';
+    csv += 'Player,Team,Final Total,Junk Total\n';
     players.forEach((player, index) => {
       const finalTotal = finalLedger ? finalLedger.runningTotals[index] : 0;
+      const junkTotal = getPlayerJunkTotal(player.id);
       
-      csv += `${player.name},${playerTeams[index]},${finalTotal}\n`;
+      csv += `${player.name},${playerTeams[index]},${finalTotal},${junkTotal}\n`;
     });
     
-    // Add team totals
-    csv += `\nTeam Totals,Red,${teamTotals.red},Blue,${teamTotals.blue}\n`;
+    // Add hole statistics
+    csv += `\nHole Wins,Red:${holeWins.red},Blue:${holeWins.blue},Push:${holeWins.push}\n`;
+    
+    // Add game stats
+    csv += `\nGame Stats\n`;
+    csv += `Holes Played,${gameStats.holesPlayed}\n`;
+    csv += `Duration,${gameStats.duration}\n`;
+    csv += `Doubles Played,${gameStats.totalDoublesPlayed}\n`;
+    csv += `Junk Events,${gameStats.totalJunkEvents}\n`;
     
     // Add Big Game total if enabled
     if (match.bigGame) {
@@ -128,15 +206,11 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     csv += '\nHole-by-Hole Details\n';
     csv += 'Hole,Base,Carry,Doubles,Result,Payout\n';
     ledger.forEach((row, index) => {
-      // Determine winner based on running totals comparison
+      // Determine winner
       let holeResult = 'Push';
-      if (index > 0) {
-        const prevRunningTotals = ledger[index - 1].runningTotals;
-        const redChange = row.runningTotals[0] - prevRunningTotals[0]; // Assuming player 0 is Red
-        const blueChange = row.runningTotals[2] - prevRunningTotals[2]; // Assuming player 2 is Blue
-        
-        if (redChange > blueChange) holeResult = 'Red';
-        else if (blueChange > redChange) holeResult = 'Blue';
+      if (holeScores[index]) {
+        if (holeScores[index].teamNet[0] < holeScores[index].teamNet[1]) holeResult = 'Red';
+        else if (holeScores[index].teamNet[1] < holeScores[index].teamNet[0]) holeResult = 'Blue';
       }
       
       // Calculate junk for this hole
@@ -194,7 +268,7 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     }
   };
   
-  // Go to home/setup
+  // Setup a new game
   const handleNewRound = () => {
     navigate('/setup');
   };
@@ -205,11 +279,393 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     navigate('/'); // Navigate to main menu
   };
   
+  // Render player trend chart (mini sparkline)
+  const renderPlayerTrend = (playerIndex: number) => {
+    const width = 100;
+    const height = 30;
+    const padding = 2;
+    const totalHoles = ledger.length;
+    
+    if (totalHoles < 2) return null;
+    
+    // Get player running totals across all holes
+    const runningTotals = ledger.map(row => row.runningTotals[playerIndex]);
+    
+    // Find min and max values
+    const minValue = Math.min(...runningTotals);
+    const maxValue = Math.max(...runningTotals);
+    const valueRange = maxValue - minValue || 1; // Avoid division by zero
+    
+    // Calculate scaling factors
+    const xScale = (width - padding * 2) / (totalHoles - 1);
+    const yScale = (height - padding * 2) / valueRange;
+    
+    // Generate SVG path
+    const points = runningTotals.map((value, index) => {
+      const x = padding + index * xScale;
+      const y = height - padding - (value - minValue) * yScale;
+      return `${x},${y}`;
+    });
+    
+    // Determine trend line color
+    let trendColor = '#909399'; // Neutral
+    if (runningTotals[0] < runningTotals[runningTotals.length - 1]) {
+      trendColor = '#67c23a'; // Positive trend (green)
+    } else if (runningTotals[0] > runningTotals[runningTotals.length - 1]) {
+      trendColor = '#f56c6c'; // Negative trend (red)
+    }
+    
+    return (
+      <svg width={width} height={height} className="player-trend-chart">
+        <polyline
+          fill="none"
+          stroke={trendColor}
+          strokeWidth="2"
+          points={points.join(' ')}
+        />
+        {/* Start point */}
+        <circle cx={points[0].split(',')[0]} cy={points[0].split(',')[1]} r="3" fill={trendColor} />
+        {/* End point */}
+        <circle 
+          cx={points[points.length - 1].split(',')[0]} 
+          cy={points[points.length - 1].split(',')[1]} 
+          r="3" 
+          fill={trendColor} 
+        />
+      </svg>
+    );
+  };
+  
+  // Render the summary tab
+  const renderSummaryTab = () => (
+    <div className="settlement-summary-tab">
+      <div className="game-result-banner" 
+           style={{ backgroundColor: winningTeam === 'Red' ? 'rgba(245, 108, 108, 0.2)' : 
+                                    winningTeam === 'Blue' ? 'rgba(64, 158, 255, 0.2)' : 
+                                    'rgba(144, 147, 153, 0.2)' }}>
+        {winningTeam !== 'Tie' ? (
+          <h3>{winningTeam} Team Wins!</h3>
+        ) : (
+          <h3>It's a Tie!</h3>
+        )}
+      </div>
+      
+      <div className="team-summary">
+        <div className={`team-total team-red ${winningTeam === 'Red' ? 'winning-team' : ''}`}>
+          <div className="team-name">Red Team</div>
+          <div className="team-amount">{formatCurrency(teamTotals.red)}</div>
+          <div className="team-holes-won">{holeWins.red} holes won</div>
+        </div>
+        
+        <div className="team-summary-separator">vs</div>
+        
+        <div className={`team-total team-blue ${winningTeam === 'Blue' ? 'winning-team' : ''}`}>
+          <div className="team-name">Blue Team</div>
+          <div className="team-amount">{formatCurrency(teamTotals.blue)}</div>
+          <div className="team-holes-won">{holeWins.blue} holes won</div>
+        </div>
+      </div>
+      
+      <div className="player-results">
+        {players.map((player, index) => {
+          const finalTotal = finalLedger?.runningTotals[index] || 0;
+          const playerJunkTotal = getPlayerJunkTotal(player.id);
+          const teamClass = playerTeams[index].toLowerCase();
+          
+          return (
+            <div key={player.id} className={`player-result team-${teamClass}`}>
+              <div className="player-result-header">
+                <span className="player-name">{player.name}</span>
+                <span className="player-team">{playerTeams[index]}</span>
+              </div>
+              
+              <div className="player-details">
+                <div className="player-trend">
+                  {renderPlayerTrend(index)}
+                </div>
+                
+                <div className="player-total-container">
+                  <div className="player-total">{formatCurrency(finalTotal)}</div>
+                  {playerJunkTotal > 0 && (
+                    <div className="player-junk-total">
+                      Junk: ${playerJunkTotal}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="game-stats">
+        <div className="stats-row">
+          <div className="stat-item">
+            <div className="stat-label">Holes Played</div>
+            <div className="stat-value">{gameStats.holesPlayed}</div>
+          </div>
+          
+          <div className="stat-item">
+            <div className="stat-label">Duration</div>
+            <div className="stat-value">{gameStats.duration}</div>
+          </div>
+          
+          <div className="stat-item">
+            <div className="stat-label">Doubles</div>
+            <div className="stat-value">{gameStats.totalDoublesPlayed}</div>
+          </div>
+          
+          {match.bigGame && (
+            <div className="stat-item">
+              <div className="stat-label">Big Game</div>
+              <div className="stat-value">${gameStats.bigGamePoints}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  
+  // Render hole-by-hole details tab
+  const renderDetailsTab = () => (
+    <div className="settlement-details-tab">
+      <div className="hole-details">
+        <table className="hole-details-table">
+          <thead>
+            <tr className="hole-details-header">
+              <th>Hole</th>
+              <th>Base</th>
+              <th>Carry</th>
+              <th>Dbl</th>
+              <th>Winner</th>
+              {players.map((player, idx) => (
+                <th key={idx} className={`team-${playerTeams[idx].toLowerCase()}`}>
+                  {player.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {ledger.map((row, index) => {
+              // Determine winner based on hole scores
+              let holeWinner = 'Push';
+              let winnerClass = 'winner-push';
+              
+              if (holeScores[index]) {
+                if (holeScores[index].teamNet[0] < holeScores[index].teamNet[1]) {
+                  holeWinner = 'Red';
+                  winnerClass = 'winner-red';
+                } else if (holeScores[index].teamNet[1] < holeScores[index].teamNet[0]) {
+                  holeWinner = 'Blue';
+                  winnerClass = 'winner-blue';
+                }
+              }
+              
+              // Calculate total junk for this hole
+              const holeRedJunk = junkEvents
+                .filter(event => event.hole === row.hole && event.teamId === 'Red')
+                .reduce((sum, event) => sum + event.value, 0);
+                
+              const holeBlueJunk = junkEvents
+                .filter(event => event.hole === row.hole && event.teamId === 'Blue')
+                .reduce((sum, event) => sum + event.value, 0);
+                
+              const totalPayout = row.payout + holeRedJunk + holeBlueJunk;
+              
+              return (
+                <tr key={index} className={`hole-row ${holeWinner !== 'Push' ? `winner-${holeWinner.toLowerCase()}-bg` : ''}`}>
+                  <td className="hole-number">{row.hole}</td>
+                  <td className="hole-base">${row.base}</td>
+                  <td className="hole-carry">${row.carryAfter}</td>
+                  <td className="hole-doubles">{row.doubles > 0 ? '✓' : ''}</td>
+                  <td className={`hole-winner ${winnerClass}`}>
+                    {holeWinner !== 'Push' ? (
+                      <div className={`winner-badge ${holeWinner.toLowerCase()}`}>
+                        {holeWinner}
+                      </div>
+                    ) : (
+                      'Push'
+                    )}
+                  </td>
+                  
+                  {players.map((player, playerIdx) => {
+                    // Calculate player change for this hole
+                    let change = 0;
+                    if (index > 0) {
+                      change = row.runningTotals[playerIdx] - ledger[index - 1].runningTotals[playerIdx];
+                    } else {
+                      change = row.runningTotals[playerIdx];
+                    }
+                    
+                    // Check if player had junk on this hole
+                    const playerJunk = junkEvents.filter(
+                      event => event.hole === row.hole && event.playerId === player.id
+                    );
+                    
+                    // Get scores if available
+                    const grossScore = holeScores[index]?.gross[playerIdx];
+                    const netScore = holeScores[index]?.net[playerIdx];
+                    
+                    return (
+                      <td key={playerIdx} className={`player-hole-details ${change > 0 ? 'positive-change' : change < 0 ? 'negative-change' : ''}`}>
+                        <div className="player-scores">
+                          {grossScore && (
+                            <div className="player-score-wrapper">
+                              <span className="gross-score">{grossScore}</span>
+                              {netScore !== grossScore && (
+                                <span className="net-score">({netScore})</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="player-money-change">
+                          {formatCurrency(change)}
+                        </div>
+                        
+                        {playerJunk.length > 0 && (
+                          <div className="player-hole-junk">
+                            {playerJunk.map((junk, jIdx) => (
+                              <span key={jIdx} className={`junk-item junk-${junk.type.toLowerCase().replace(/\s+/g, '-')}`} title={`${junk.type}: $${junk.value}`}>
+                                {junk.type.includes('Birdie') ? '🐦' : 
+                                 junk.type.includes('Sand') ? '🏖️' : 
+                                 junk.type.includes('Green') ? '🟢' : 
+                                 junk.type.includes('Pole') ? '🕳️' :
+                                 junk.type.includes('Long') || junk.type.includes('LD') ? '🚀' :
+                                 junk.type.substring(0, 1)}
+                                <span className="junk-value">${junk.value}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+          
+          <tfoot>
+            <tr className="totals-row">
+              <td colSpan={5}>
+                <strong>Final Totals</strong>
+              </td>
+              
+              {players.map((player, index) => {
+                const finalTotal = finalLedger?.runningTotals[index] || 0;
+                const playerJunkTotal = getPlayerJunkTotal(player.id);
+                
+                return (
+                  <td key={index} className={`player-final-cell team-${playerTeams[index].toLowerCase()}`}>
+                    <div className="player-final-total">
+                      {formatCurrency(finalTotal)}
+                    </div>
+                    {playerJunkTotal > 0 && (
+                      <div className="player-junk-total">
+                        Junk: ${playerJunkTotal}
+                      </div>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      <div className="settlement-summary-sections">
+        <div className="junk-summary">
+          <h4>Junk Events</h4>
+          <div className="junk-events-container">
+            {Object.entries(getJunkEventsByType()).map(([type, count]) => (
+              <div key={type} className="junk-type-item">
+                <span className="junk-type">{type}</span>
+                <span className="junk-count">{count}x</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="hole-stats-summary">
+          <h4>Hole Stats</h4>
+          <div className="hole-stats-grid">
+            <div className="hole-stat-item">
+              <div className="stat-label">Red Team Wins</div>
+              <div className="stat-value team-red">{holeWins.red}</div>
+            </div>
+            <div className="hole-stat-item">
+              <div className="stat-label">Blue Team Wins</div>
+              <div className="stat-value team-blue">{holeWins.blue}</div>
+            </div>
+            <div className="hole-stat-item">
+              <div className="stat-label">Pushes</div>
+              <div className="stat-value">{holeWins.push}</div>
+            </div>
+            <div className="hole-stat-item">
+              <div className="stat-label">Doubles Played</div>
+              <div className="stat-value">{gameStats.totalDoublesPlayed}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+  // Render Big Game tab (if enabled)
+  const renderBigGameTab = () => {
+    if (!match.bigGame) {
+      return <div className="big-game-disabled">Big Game was not enabled for this round.</div>;
+    }
+    
+    return (
+      <div className="big-game-tab">
+        <div className="big-game-total-container">
+          <h3>Big Game Total</h3>
+          <div className="big-game-total-value">${match.bigGameTotal}</div>
+        </div>
+        
+        <div className="big-game-breakdown">
+          <h4>Hole-by-Hole Breakdown</h4>
+          <table className="big-game-table">
+            <thead>
+              <tr>
+                <th>Hole</th>
+                <th>Best Net Scores</th>
+                <th>Subtotal</th>
+                <th>Running Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bigGameRows.map((row, index) => {
+                // Calculate running total
+                const runningTotal = bigGameRows
+                  .slice(0, index + 1)
+                  .reduce((sum, r) => sum + r.subtotal, 0);
+                
+                return (
+                  <tr key={row.hole}>
+                    <td>{row.hole}</td>
+                    <td>
+                      <span className="best-net">{row.bestNet[0]}</span> +{' '}
+                      <span className="best-net">{row.bestNet[1]}</span>
+                    </td>
+                    <td>{row.subtotal}</td>
+                    <td>{runningTotal}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="settlement-view">
-      <h2>Round Summary</h2>
-      
-      <div className="settlement-summary" ref={screenshotRef}>
+      <div className="settlement-header">
+        <h2>Game Summary</h2>
         <div className="settlement-date">
           {new Date(match.date).toLocaleDateString(undefined, { 
             weekday: 'long',
@@ -218,111 +674,76 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
             day: 'numeric'
           })}
         </div>
-        
-        <h3>Final Totals</h3>
-        <div className="team-summary">
-          <div className="team-total team-red">
-            Red Team: {formatCurrency(teamTotals.red)}
-          </div>
-          <div className="team-total team-blue">
-            Blue Team: {formatCurrency(teamTotals.blue)}
-          </div>
-        </div>
-        
-        <div className="player-results">
-          {players.map((player, index) => {
-            const finalTotal = finalLedger?.runningTotals[index] || 0;
-            
-            return (
-              <div 
-                key={player.id} 
-                className={`player-result ${playerTeams[index]}`}
-              >
-                <div className="player-result-header">
-                  <span className="player-name">{player.name}</span>
-                  <span className="player-team">{playerTeams[index]}</span>
-                </div>
-                <div className="player-total-container">
-                  <div className="player-total">
-                    {formatCurrency(finalTotal)}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        
+      </div>
+      
+      <div className="settlement-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'summary' ? 'active' : ''}`}
+          onClick={() => setActiveTab('summary')}
+        >
+          Summary
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
+          onClick={() => setActiveTab('details')}
+        >
+          Hole-by-Hole
+        </button>
         {match.bigGame && (
-          <div className="big-game-result">
-            <h3>Big Game Total</h3>
-            <div className="big-game-total">{match.bigGameTotal}</div>
-            
-            <div className="big-game-breakdown">
-              <h4>Hole-by-Hole Breakdown</h4>
-              <div className="big-game-holes">
-                {bigGameRows.map((row, index) => {
-                  // Calculate running total up to this point
-                  const runningTotal = bigGameRows
-                    .slice(0, index + 1)
-                    .reduce((sum, r) => sum + r.subtotal, 0);
-                  
-                  return (
-                    <div key={row.hole} className="big-game-hole">
-                      <div className="hole-number">Hole {row.hole}</div>
-                      <div className="best-nets">
-                        <span className="best-net">{row.bestNet[0]}</span>
-                        <span>+</span>
-                        <span className="best-net">{row.bestNet[1]}</span>
-                        <span>=</span>
-                        <span className="subtotal">{row.subtotal}</span>
-                      </div>
-                      <div className="running-total">Total: {runningTotal}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <button 
+            className={`tab-button ${activeTab === 'bigGame' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bigGame')}
+          >
+            Big Game
+          </button>
         )}
       </div>
       
-      <div className="settlement-actions">
-        <button 
-          className="export-button" 
-          onClick={handleExportCSV}
-        >
-          Export CSV
-        </button>
-        
-        <button 
-          className="export-button" 
-          onClick={handleExportPNG}
-        >
-          Save PNG
-        </button>
+      <div className="settlement-content" ref={screenshotRef}>
+        {activeTab === 'summary' && renderSummaryTab()}
+        {activeTab === 'details' && renderDetailsTab()}
+        {activeTab === 'bigGame' && renderBigGameTab()}
       </div>
       
-      <div className="rematch-actions">
-        <button 
-          className="rematch-button" 
-          onClick={handleRematch}
-        >
-          Quick Rematch (Same Players & Teams)
-        </button>
+      <div className="settlement-actions">
+        <div className="export-actions">
+          <button 
+            className="export-button" 
+            onClick={handleExportCSV}
+          >
+            Export CSV
+          </button>
+          
+          <button 
+            className="export-button" 
+            onClick={handleExportPNG}
+          >
+            Save PNG
+          </button>
+        </div>
         
-        <button 
-          className="new-round-button" 
-          onClick={handleNewRound}
-        >
-          New Round (Select Players)
-        </button>
-        
-        <button 
-          className="return-menu-button" 
-          onClick={handleReturnToMainMenu}
-        >
-          Return to Main Menu
-        </button>
+        <div className="game-actions">
+          <button 
+            className="action-button rematch-button" 
+            onClick={handleRematch}
+          >
+            Rematch
+          </button>
+          
+          <button 
+            className="action-button new-game-button" 
+            onClick={handleNewRound}
+          >
+            New Game
+          </button>
+          
+          <button 
+            className="action-button menu-button" 
+            onClick={handleReturnToMainMenu}
+          >
+            Main Menu
+          </button>
+        </div>
       </div>
     </div>
   );

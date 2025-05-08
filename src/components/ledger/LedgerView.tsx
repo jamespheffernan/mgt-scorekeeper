@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useGameStore, LedgerRow, JunkEvent, Player, Team, BigGameRow } from '../../store/gameStore';
+import { useNavigate } from 'react-router-dom';
+import { useGameStore } from '../../store/gameStore';
+import { Player, Team } from '../../db/API-GameState';
+import type { LedgerRow, JunkEvent, BigGameRow } from '../../store/gameStore';
 import '../../App.css';
 
 export const LedgerView = () => {
+  const navigate = useNavigate();
+  
   // Access store state
   const match = useGameStore(state => state.match);
   const players = useGameStore(state => state.players);
@@ -263,9 +268,23 @@ export const LedgerView = () => {
       .slice(0, upToIndex + 1)
       .reduce((total, row) => total + row.subtotal, 0);
   };
-  
+
+  // Function to navigate back to current hole
+  const handleBackToHole = () => {
+    navigate(`/hole/${match.currentHole}`);
+  };
+
   return (
     <div className="ledger-container">
+      <div className="back-button-container">
+        <button 
+          className="back-to-hole-button"
+          onClick={handleBackToHole}
+        >
+          Back to Hole {match.currentHole}
+        </button>
+      </div>
+      
       <div className="ledger-header" onClick={toggleDrawer}>
         <h3>Running Totals</h3>
         <div className="team-totals">
@@ -283,18 +302,20 @@ export const LedgerView = () => {
           {hasData ? (
             <>
               <div className="ledger-controls">
-                <button 
-                  className="view-toggle-button"
-                  onClick={toggleViewMode}
-                >
-                  {compactView ? 'Show Detailed View' : 'Show Compact View'}
-                </button>
-                <button 
-                  className="export-button"
-                  onClick={exportToCsv}
-                >
-                  Export CSV
-                </button>
+                <div className="view-controls">
+                  <button 
+                    className="view-toggle-button"
+                    onClick={toggleViewMode}
+                  >
+                    {compactView ? 'Show Detailed View' : 'Show Compact View'}
+                  </button>
+                  <button 
+                    className="export-button"
+                    onClick={exportToCsv}
+                  >
+                    Export CSV
+                  </button>
+                </div>
               </div>
               
               {compactView ? (

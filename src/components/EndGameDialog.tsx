@@ -9,7 +9,6 @@ interface EndGameDialogProps {
 const EndGameDialog: React.FC<EndGameDialogProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const finishRound = useGameStore(state => state.finishRound);
-  const resetGame = useGameStore(state => state.resetGame);
   
   // Handle game ending
   const handleEndGame = async () => {
@@ -17,13 +16,10 @@ const EndGameDialog: React.FC<EndGameDialogProps> = ({ onClose }) => {
       // Call the store action to finish the round
       await finishRound();
       
-      // Reset game state
-      resetGame();
-      
       // Close the dialog
       onClose();
       
-      // Navigate to the ledger/settlement view before returning to main menu
+      // Navigate to the settlement view
       navigate('/settlement');
     } catch (error) {
       console.error('Error ending game:', error);

@@ -175,19 +175,104 @@ input:focus, select:focus {
 
 /* Hole View */
 .hole-view {
-  background-color: white;
+  background-color: #f9f9f9;
   padding: 24px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .hole-header {
-  text-align: center;
-  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 18px;
+}
+
+.hole-header h2 {
+  font-size: 32px;
+  color: #334155;
+  margin: 0;
+  font-weight: 700;
+  position: relative;
+}
+
+.hole-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: #3b82f6;
+  border-radius: 2px;
+}
+
+.hole-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.view-ledger-button, .finish-round-button, .cancel-game-button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.view-ledger-button {
+  background-color: #3b82f6;
+}
+
+.view-ledger-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.finish-round-button {
+  background-color: #10b981;
+}
+
+.finish-round-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-game-button {
+  background-color: #ef4444;
+}
+
+.cancel-game-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .scores-container {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  border: 1px solid #edf2f7;
+}
+
+.scores-container h3 {
+  font-size: 20px;
+  margin: 0 0 20px 0;
+  color: #2d3748;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f4f8;
 }
 
 .player-score-row {
@@ -195,9 +280,17 @@ input:focus, select:focus {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  padding: 8px;
-  border-radius: var(--border-radius);
+  padding: 16px;
+  border-radius: 10px;
   border-left: 4px solid;
+  background-color: #f8fafc;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.player-score-row:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
 }
 
 .player-score-row.Red {
@@ -213,20 +306,75 @@ input:focus, select:focus {
 }
 
 .score-selector {
-  width: 80px;
+  width: 100px;
+}
+
+.score-selector select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  background-color: white;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.score-selector select:hover {
+  border-color: #a0aec0;
+}
+
+.score-selector select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  outline: none;
 }
 
 .junk-flags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
+  margin-left: 20px;
 }
 
-.junk-option {
-  display: flex;
+.junk-flag-label {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.9rem;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.junk-flag-label:hover {
+  background-color: #e2e8f0;
+}
+
+.junk-flag-label input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+}
+
+.junk-flag-label input:checked + .junk-name {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.junk-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  transition: all 0.2s;
 }
 
 .status-bar {
@@ -266,6 +414,12 @@ input:focus, select:focus {
 /* Enhanced Ledger View */
 .ledger-container {
   margin: 16px 0;
+}
+
+.back-button-container {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .ledger-header {
@@ -324,7 +478,39 @@ input:focus, select:focus {
 .ledger-controls {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
+}
+
+.view-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.back-to-hole-button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.back-to-hole-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+}
+
+.back-to-hole-button::before {
+  content: "↩";
+  margin-right: 6px;
+  font-size: 16px;
 }
 
 .view-toggle-button {
@@ -553,7 +739,18 @@ input:focus, select:focus {
   
   .ledger-controls {
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .view-controls {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .back-to-hole-button {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -1270,69 +1467,122 @@ input:focus, select:focus {
 
 /* Hole Info Styles */
 .hole-info {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #edf2f7;
 }
 
 .hole-info h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  text-align: center;
-  border-bottom: 1px solid #dee2e6;
-  padding-bottom: 0.5rem;
+  font-size: 18px;
+  margin: 0 0 16px 0;
+  color: #2d3748;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f4f8;
+  display: flex;
+  align-items: center;
+}
+
+.hole-info h3::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  margin-right: 8px;
 }
 
 .hole-info-details {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .hole-tee-info {
   display: flex;
   align-items: center;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
-  border-left: 3px solid #dee2e6;
+  padding: 12px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.hole-tee-info:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tee-color-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   color: white;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
-  min-width: 80px;
-  text-align: center;
+  font-weight: 600;
+  font-size: 10px;
+  margin-right: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
 }
 
 .hole-stats {
   display: flex;
-  gap: 1rem;
-  margin-left: 1rem;
+  gap: 14px;
 }
 
-.hole-yardage,
-.hole-par,
-.hole-si {
-  font-size: 0.9rem;
-}
-
-.hole-yardage {
+.hole-yardage, .hole-par, .hole-si {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
   font-weight: 500;
+  color: #4b5563;
+}
+
+.hole-yardage::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234b5563'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 16l-4-4m0 0l4-4m-4 4h18'%3E%3C/path%3E%3C/svg%3E");
+  background-size: contain;
+  margin-right: 4px;
+}
+
+.hole-par::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234b5563'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 21v-4m0 0V5a2 2 0 012-2h6.5L21 11.5V19a2 2 0 01-2 2h-8a2 2 0 01-2-2z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: contain;
+  margin-right: 4px;
+}
+
+.hole-si::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234b5563'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 10V3L4 14h7v7l9-11h-7z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: contain;
+  margin-right: 4px;
 }
 
 .hole-info-loading {
+  background-color: #f1f5f9;
+  border-radius: 10px;
+  padding: 24px;
   text-align: center;
-  padding: 1rem;
+  color: #64748b;
   font-style: italic;
-  color: #6c757d;
+  margin-bottom: 24px;
 }
 
 /* PlayerRoster Component Styles */
@@ -2664,4 +2914,1331 @@ input:focus, select:focus {
 
 .nav-button.history {
   background-color: #42b983;
+}
+
+/* Settlement View Styles */
+.settlement-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.settlement-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.settlement-header h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: var(--color-primary);
+}
+
+.settlement-date {
+  font-size: 16px;
+  color: #606266;
+  margin-bottom: 16px;
+}
+
+.settlement-tabs {
+  display: flex;
+  border-bottom: 1px solid #dcdfe6;
+  margin-bottom: 24px;
+}
+
+.tab-button {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #606266;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: var(--color-primary);
+}
+
+.tab-button.active {
+  color: var(--color-primary);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary);
+}
+
+.settlement-content {
+  padding: 20px 0;
+  min-height: 400px;
+}
+
+/* Summary tab */
+.game-result-banner {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.game-result-banner h3 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.team-summary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.team-total {
+  flex: 1;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 280px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.team-red {
+  background-color: rgba(245, 108, 108, 0.1);
+  color: var(--color-red-team);
+}
+
+.team-blue {
+  background-color: rgba(64, 158, 255, 0.1);
+  color: var(--color-blue-team);
+}
+
+.winning-team {
+  border: 2px solid gold;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+.team-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.team-amount {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.team-holes-won {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.team-summary-separator {
+  margin: 0 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #909399;
+}
+
+.player-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.player-result {
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.player-result.team-red {
+  background-color: rgba(245, 108, 108, 0.1);
+}
+
+.player-result.team-blue {
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+.player-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.player-name {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.player-team {
+  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+}
+
+.player-trend {
+  flex: 1;
+}
+
+.player-total-container {
+  text-align: right;
+}
+
+.player-total {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.player-junk-total {
+  font-size: 14px;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
+.game-stats {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0 16px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #303133;
+}
+
+/* Details tab */
+.hole-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+.hole-details-table th {
+  background-color: #f2f2f2;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #606266;
+  border-bottom: 2px solid #dcdfe6;
+}
+
+.hole-details-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.winner-red {
+  color: var(--color-red-team);
+  font-weight: 600;
+}
+
+.winner-blue {
+  color: var(--color-blue-team);
+  font-weight: 600;
+}
+
+.winner-push {
+  color: #909399;
+}
+
+.positive-change {
+  color: #67c23a;
+}
+
+.negative-change {
+  color: #f56c6c;
+}
+
+.player-hole-junk {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.junk-item {
+  font-size: 12px;
+  padding: 2px 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  cursor: help;
+}
+
+.junk-summary {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.junk-summary h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #303133;
+}
+
+.junk-events-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.junk-type-item {
+  display: flex;
+  align-items: center;
+  background-color: #f2f2f2;
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+
+.junk-type {
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.junk-count {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+/* Big Game tab */
+.big-game-tab {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.big-game-disabled {
+  text-align: center;
+  padding: 40px;
+  color: #909399;
+  font-style: italic;
+}
+
+.big-game-total-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.big-game-total-container h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #303133;
+}
+
+.big-game-total-value {
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.big-game-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+.big-game-table th {
+  background-color: #f2f2f2;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #606266;
+  border-bottom: 2px solid #dcdfe6;
+}
+
+.big-game-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.best-net {
+  font-weight: 600;
+  color: #67c23a;
+}
+
+/* Settlement actions */
+.settlement-actions {
+  margin-top: 30px;
+  border-top: 1px solid #ebeef5;
+  padding-top: 20px;
+}
+
+.export-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.export-button {
+  padding: 10px 16px;
+  background-color: white;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.export-button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.rematch-button {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.rematch-button:hover {
+  background-color: #66b1ff;
+}
+
+.new-game-button {
+  background-color: #67c23a;
+  color: white;
+}
+
+.new-game-button:hover {
+  background-color: #85ce61;
+}
+
+.menu-button {
+  background-color: #909399;
+  color: white;
+}
+
+.menu-button:hover {
+  background-color: #a6a9ad;
+}
+
+/* For screenshot mode */
+.settlement-content.screenshot-mode {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+/* Enhanced Settlement Hole-by-Hole View Styles */
+.settlement-details-tab {
+  margin-bottom: 30px;
+}
+
+.hole-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hole-details-header {
+  background-color: #f1f5f9;
+}
+
+.hole-details-table th {
+  background-color: #f1f5f9;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hole-details-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.hole-row {
+  transition: background-color 0.2s;
+}
+
+.hole-row:hover {
+  background-color: #f8fafc;
+}
+
+.winner-red-bg {
+  background-color: rgba(245, 108, 108, 0.05);
+}
+
+.winner-blue-bg {
+  background-color: rgba(64, 158, 255, 0.05);
+}
+
+.hole-number {
+  font-weight: 600;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.hole-base, .hole-carry {
+  text-align: center;
+  font-weight: 500;
+  color: #475569;
+}
+
+.hole-doubles {
+  text-align: center;
+  color: #0f766e;
+  font-weight: bold;
+}
+
+.hole-winner {
+  text-align: center;
+}
+
+.winner-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: white;
+  text-align: center;
+}
+
+.winner-badge.red {
+  background-color: #ef4444;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.winner-badge.blue {
+  background-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.player-hole-details {
+  padding: 10px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.player-scores {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.player-score-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f8fafc;
+  border-radius: 4px;
+  padding: 3px 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.gross-score {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.net-score {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.player-money-change {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.positive-change .player-money-change {
+  color: #16a34a;
+}
+
+.negative-change .player-money-change {
+  color: #dc2626;
+}
+
+.player-hole-junk {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.junk-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.junk-item.junk-birdie {
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+.junk-item.junk-sandy, .junk-item.junk-sandie {
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #b45309;
+}
+
+.junk-item.junk-greenie {
+  background-color: #dcfce7;
+  border: 1px solid #86efac;
+  color: #15803d;
+}
+
+.junk-item.junk-poley {
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+}
+
+.junk-item.junk-long-drive, .junk-item.junk-ld10 {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.junk-value {
+  font-weight: 600;
+}
+
+.totals-row {
+  background-color: #f8fafc;
+  border-top: 2px solid #e2e8f0;
+}
+
+.totals-row td {
+  padding: 14px 10px;
+}
+
+.player-final-cell {
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.team-red.player-final-cell {
+  background-color: rgba(245, 108, 108, 0.08);
+}
+
+.team-blue.player-final-cell {
+  background-color: rgba(64, 158, 255, 0.08);
+}
+
+.player-final-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.settlement-summary-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.junk-summary, .hole-stats-summary {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.junk-summary h4, .hole-stats-summary h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #334155;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+.hole-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.hole-stat-item {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.team-red.stat-value {
+  color: #ef4444;
+}
+
+.team-blue.stat-value {
+  color: #3b82f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .settlement-summary-sections {
+    grid-template-columns: 1fr;
+  }
+  
+  .hole-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .hole-details-table {
+    font-size: 0.9rem;
+  }
+  
+  .player-score-wrapper {
+    padding: 2px 4px;
+  }
+  
+  .gross-score {
+    font-size: 0.9rem;
+  }
+  
+  .net-score {
+    font-size: 0.75rem;
+  }
+}
+
+/* Current Standings */
+.current-standings {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #edf2f7;
+}
+
+.standings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.standings-header h3 {
+  font-size: 20px;
+  margin: 0;
+  color: #2d3748;
+}
+
+.toggle-standings {
+  background-color: #f8fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-standings:hover {
+  background-color: #f1f5f9;
+  color: #2d3748;
+}
+
+.team-standings-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.versus-indicator {
+  font-size: 18px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.team-standing {
+  flex: 1;
+  max-width: 200px;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.team-standing.team-red {
+  background-color: rgba(245, 108, 108, 0.1);
+  color: #ef4444;
+}
+
+.team-standing.team-blue {
+  background-color: rgba(64, 158, 255, 0.1);
+  color: #3b82f6;
+}
+
+.team-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.team-amount {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.versus-indicator {
+  margin: 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.player-standings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.player-standing {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.player-standing.team-red {
+  border-left: 3px solid #ef4444;
+}
+
+.player-standing.team-blue {
+  border-left: 3px solid #3b82f6;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.player-team-badge {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.player-standing.team-red .player-team-badge {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.player-standing.team-blue .player-team-badge {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.player-amount {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.player-junk {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.hole-info-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.hole-info-item {
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.info-value.available {
+  color: #16a34a;
+}
+
+/* Player Score Entry Styling */
+.scores-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.scores-container h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #334155;
+  font-size: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+.player-score-row {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.player-score-row:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.player-score-row.Red {
+  border-left: 4px solid #ef4444;
+}
+
+.player-score-row.Blue {
+  border-left: 4px solid #3b82f6;
+}
+
+.player-team-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.player-team-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.player-team-badge.red {
+  background-color: #ef4444;
+}
+
+.player-team-badge.blue {
+  background-color: #3b82f6;
+}
+
+.player-name-display {
+  font-weight: 600;
+  font-size: 16px;
+  color: #334155;
+}
+
+.player-tee-badge {
+  align-self: flex-start;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.hole-details-for-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.hole-par, .hole-si {
+  background-color: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.stroke-indicator {
+  color: #f59e0b;
+  background-color: #fff7ed;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #fed7aa;
+}
+
+.score-selector {
+  margin: 8px 0;
+}
+
+.score-selector select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: white;
+  color: #334155;
+  cursor: pointer;
+}
+
+.junk-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.junk-flag-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e2e8f0;
+}
+
+.junk-flag-label:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.junk-flag-label input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.junk-name {
+  font-weight: 500;
+  color: #475569;
+}
+
+.hole-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.double-button {
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.double-button.red {
+  background-color: #ef4444;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+.double-button.red:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+}
+
+.double-button.blue {
+  background-color: #3b82f6;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.double-button.blue:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.double-used-indicator {
+  padding: 10px 16px;
+  font-style: italic;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+}
+
+.submit-button {
+  padding: 12px 24px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+}
+
+.submit-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error message */
+.error-message {
+  padding: 12px 16px;
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  color: #b91c1c;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hole-view {
+    padding: 16px;
+  }
+  
+  .hole-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .team-standings-summary {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .team-standing {
+    max-width: none;
+  }
+  
+  .versus-indicator {
+    margin: 0;
+  }
+  
+  .hole-info-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .player-standing {
+    padding: 10px;
+  }
+}
+
+/* Score option styling */
+.ace-score {
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.eagle-score {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.birdie-score {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.par-score {
+  color: #000000;
+  font-weight: 600;
+}
+
+.bogey-score {
+  color: #f59e0b;
+}
+
+.double-bogey-score {
+  color: #ef4444;
+}
+
+/* Button icon styling */
+.button-icon {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+/* Selection styling improvement */
+select option {
+  padding: 8px;
+  font-size: 14px;
+}
+
+/* Animate the submit button */
+.submit-button {
+  flex: 2;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background-color: #10b981;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.4s;
+}
+
+.submit-button:hover::after {
+  left: 100%;
+}
+
+.submit-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);
+}
+
+.submit-button:disabled {
+  background-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submit-button:disabled::after {
+  display: none;
 }
