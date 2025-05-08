@@ -12,6 +12,7 @@ import { Player, Team, GameHistory } from '../db/API-GameState';
 // Re-export types
 export type JunkFlags = JF;
 export type { JunkEvent, BigGameRow };
+export type { Player, Team } from '../db/API-GameState';
 
 // Type definitions matching our API-GameState.ts
 export interface Match {
