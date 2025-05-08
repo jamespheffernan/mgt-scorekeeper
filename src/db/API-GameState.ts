@@ -70,6 +70,7 @@ export type JunkType =
 export interface JunkEvent {
   hole: number;
   playerId: string;
+  teamId: Team;
   type: JunkType;
   value: number;            // dollars
 }

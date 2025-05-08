@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGameStore, Player, Team } from '../../store/gameStore';
+import { Player } from '../../store/gameStore';
 import { Course, TeeOption } from '../../db/courseModel';
 import { millbrookDb } from '../../db/millbrookDb';
 import '../../App.css';
@@ -30,7 +30,7 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
           setSelectedCourse(allCourses[0]);
           
           // Initialize tee selections with reasonable defaults based on gender
-          const defaultTeeIds = selectedPlayers.map((player, index) => {
+          const defaultTeeIds = selectedPlayers.map((player) => {
             // Simple logic: select tees based on gender if available
             // In a real app, you might consider stored preferences
             const playerGender = determinePlayerGender(player);
@@ -58,7 +58,7 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
     
     // Reset tee selections with new defaults
     if (course) {
-      const newTeeIds = selectedPlayers.map((player, index) => {
+      const newTeeIds = selectedPlayers.map((player) => {
         const playerGender = determinePlayerGender(player);
         const appropriateTee = findAppropriateTeesForGender(course, playerGender);
         return appropriateTee?.id || course.teeOptions[0].id;

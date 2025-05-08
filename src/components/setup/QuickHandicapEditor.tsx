@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Player } from '../../store/gameStore';
-import { useDatabase } from '../../hooks/useDatabase';
 import '../../App.css';
 
 interface QuickHandicapEditorProps {

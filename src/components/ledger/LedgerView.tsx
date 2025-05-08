@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
-import { Player, Team } from '../../db/API-GameState';
-import type { LedgerRow, JunkEvent, BigGameRow } from '../../store/gameStore';
+import { Team } from '../../db/API-GameState';
+import type { JunkEvent } from '../../store/gameStore';
 import '../../App.css';
 
 export const LedgerView = () => {
@@ -62,23 +62,10 @@ export const LedgerView = () => {
     return player ? player.name : 'Unknown';
   };
   
-  // Get player team by ID
-  const getPlayerTeam = (playerId: string): Team | undefined => {
-    const index = players.findIndex(p => p.id === playerId);
-    return index >= 0 ? playerTeams[index] : undefined;
-  };
-  
   // Get team junk total
   const getTeamJunkTotal = (team: Team): number => {
     return junkEvents
       .filter(event => event.teamId === team)
-      .reduce((sum, event) => sum + event.value, 0);
-  };
-  
-  // Get player junk total
-  const getPlayerJunkTotal = (playerId: string): number => {
-    return junkEvents
-      .filter(event => event.playerId === playerId)
       .reduce((sum, event) => sum + event.value, 0);
   };
   
@@ -94,10 +81,10 @@ export const LedgerView = () => {
     
     // Calculate team totals by dividing the sum by the number of team members
     // This ensures we display the correct team total, not the sum of all player amounts
-    const redTotal = players.reduce((sum, player, index) => 
+    const redTotal = players.reduce((sum, _player, index) => 
       playerTeams[index] === 'Red' ? sum + lastLedgerRow.runningTotals[index] : sum, 0) / redCount;
     
-    const blueTotal = players.reduce((sum, player, index) => 
+    const blueTotal = players.reduce((sum, _player, index) => 
       playerTeams[index] === 'Blue' ? sum + lastLedgerRow.runningTotals[index] : sum, 0) / blueCount;
     
     console.log(`[DEBUG] Team totals (adjusted): Red=${redTotal}, Blue=${blueTotal}`);
@@ -215,53 +202,12 @@ export const LedgerView = () => {
     return winner === 'Red' ? 'result-red' : 'result-blue';
   };
   
-  // Format BigGame row data
-  const formatBigGameData = (row: BigGameRow | undefined): string => {
-    if (!row) return '-';
-    return `${row.bestNet[0]} + ${row.bestNet[1]} = ${row.subtotal}`;
-  };
-  
   // Team totals for display
   const teamTotals = getTeamTotals();
   
   // Determine if we have any data to display
   const hasData = ledger.length > 0;
   
-  // Get player running total for a specific hole
-  const getPlayerRunningTotal = (playerIndex: number, holeIndex: number): number => {
-    if (holeIndex < 0 || holeIndex >= ledger.length) return 0;
-    return ledger[holeIndex].runningTotals[playerIndex];
-  };
-
-  // Calculate player change for a specific hole (enhanced for T-13)
-  const getPlayerHoleChange = (playerIndex: number, holeIndex: number): number => {
-    if (holeIndex <= 0 || holeIndex >= ledger.length) return 0;
-    const currentTotal = ledger[holeIndex].runningTotals[playerIndex];
-    const previousTotal = ledger[holeIndex - 1].runningTotals[playerIndex];
-    return currentTotal - previousTotal;
-  };
-
-  // Get hole's junk events for a player (enhanced for T-13)
-  const getPlayerJunkEventsForHole = (playerId: string, hole: number): JunkEvent[] => {
-    return getJunkEventsForHole(hole).filter(event => event.playerId === playerId);
-  };
-
-  // Enhanced BigGame display data (for T-13)
-  const formatEnhancedBigGameData = (row: BigGameRow | undefined): React.ReactNode => {
-    if (!row) return '-';
-    
-    return (
-      <div className="big-game-detail">
-        <div className="big-game-scores">
-          <span className="best-net">{row.bestNet[0]}</span>
-          <span className="best-net-plus">+</span>
-          <span className="best-net">{row.bestNet[1]}</span>
-        </div>
-        <div className="big-game-subtotal">= {row.subtotal}</div>
-      </div>
-    );
-  };
-
   // Calculate running Big Game total (enhanced for T-13)
   const getRunningBigGameTotal = (upToIndex: number): number => {
     return bigGameRows
@@ -402,9 +348,9 @@ export const LedgerView = () => {
                       <th>Carry</th>
                       <th>Dbl</th>
                       <th>Result</th>
-                      {players.map((player, index) => (
-                        <th key={index} className={teamColor(playerTeams[index])}>
-                          {player.name}
+                      {players.map((_, playerIndex) => (
+                        <th key={playerIndex} className={teamColor(playerTeams[playerIndex])}>
+                          {players[playerIndex].name}
                         </th>
                       ))}
                       {match.bigGame && <th className="bg-column">Big Game</th>}
@@ -423,12 +369,9 @@ export const LedgerView = () => {
                           <td>{row.doubles > 0 ? '✓' : ''}</td>
                           <td className={getWinnerClass(holeWinner)}>{holeWinner}</td>
                           
-                          {players.map((player, playerIndex) => {
-                            const playerJunkEvents = getJunkEventsForHole(row.hole)
-                              .filter(event => event.playerId === player.id);
-                            const playerTeam = playerTeams[playerIndex];
+                          {players.map((_, playerIndex) => {
                             const teamJunkEvents = getJunkEventsForHole(row.hole)
-                              .filter(event => event.teamId === playerTeam);
+                              .filter(event => event.teamId === playerTeams[playerIndex]);
                             const teamJunkValue = teamJunkEvents.reduce((sum, event) => sum + event.value, 0);
                             const runningTotal = row.runningTotals[playerIndex];
                             const previousTotal = index > 0 ? ledger[index - 1].runningTotals[playerIndex] : 0;
@@ -457,7 +400,14 @@ export const LedgerView = () => {
                           
                           {match.bigGame && (
                             <td className="big-game-cell">
-                              {formatEnhancedBigGameData(bgRow)}
+                              <div className="big-game-detail">
+                                <div className="big-game-scores">
+                                  <span className="best-net">{bgRow?.bestNet[0]}</span>
+                                  <span className="best-net-plus">+</span>
+                                  <span className="best-net">{bgRow?.bestNet[1]}</span>
+                                </div>
+                                <div className="big-game-subtotal">= {bgRow?.subtotal}</div>
+                              </div>
                               <div className="big-game-running">
                                 Running: {getRunningBigGameTotal(index)}
                               </div>
@@ -473,8 +423,7 @@ export const LedgerView = () => {
                         <strong>Final Totals</strong>
                       </td>
                       
-                      {players.map((player, index) => {
-                        const junkTotal = getTeamJunkTotal(playerTeams[index]);
+                      {players.map((_, index) => {
                         const finalTotal = ledger.length > 0 ? ledger[ledger.length - 1].runningTotals[index] : 0;
                         
                         return (

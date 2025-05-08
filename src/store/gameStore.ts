@@ -6,8 +6,8 @@ import { calculateHolePayout, calculatePlayerPayouts, updateRunningTotals } from
 import { evaluateJunkEvents, JunkEvent, JunkFlags as JF } from '../calcEngine/junkCalculator';
 import { calculateBigGameRow, calculateBigGameTotal, BigGameRow } from '../calcEngine/bigGameCalculator';
 import { millbrookDb } from '../db/millbrookDb';
-import { TeeOption, HoleInfo as HoleInfoType } from '../db/courseModel';
 import { Player, Team, GameHistory } from '../db/API-GameState';
+import { TeeOption, HoleInfo } from '../db/courseModel';
 
 // Re-export types
 export type JunkFlags = JF;
@@ -106,8 +106,7 @@ interface MatchOptions {
 // Utility function to get player-specific stroke indexes
 export const getPlayerStrokeIndexes = async (
   courseId: string | undefined,
-  playerTeeIds: string[] | undefined,
-  hole: number
+  playerTeeIds: string[] | undefined
 ): Promise<number[][] | null> => {
   if (!courseId || !playerTeeIds) {
     return null;
@@ -135,7 +134,7 @@ export const getPlayerStrokeIndexes = async (
       if (tee && tee.holes) {
         // Extract hole SI values in order (1-18)
         const holeSIs = new Array(18).fill(0);
-        tee.holes.forEach((holeInfo: HoleInfoType) => {
+        tee.holes.forEach((holeInfo: HoleInfo) => {
           if (holeInfo.number >= 1 && holeInfo.number <= 18) {
             holeSIs[holeInfo.number - 1] = holeInfo.strokeIndex;
           }
@@ -264,7 +263,7 @@ export const useGameStore = create(
         const indexes = players.map(p => p.index);
         
         // Try to get player-specific stroke indexes if course data is available
-        const playerSIs = await getPlayerStrokeIndexes(match.courseId, match.playerTeeIds, hole);
+        const playerSIs = await getPlayerStrokeIndexes(match.courseId, match.playerTeeIds);
         
         // Update match.holePar if we have course data
         let updatedMatch = { ...match };
@@ -355,21 +354,21 @@ export const useGameStore = create(
         // 8. Evaluate junk events
         const newJunkEvents: JunkEvent[] = [];
         
-        players.forEach((player, idx) => {
+        players.forEach((_, idx) => {
           // Get the correct par value for this player
           const par = updatedMatch.holePar[hole - 1];
-          console.log(`[DEBUG] Using par=${par} for player ${player.name} on hole ${hole}`);
+          console.log(`[DEBUG] Using par=${par} for player ${players[idx].name} on hole ${hole}`);
           
           const events = evaluateJunkEvents(
             hole,
-            player.id,
+            players[idx].id,
             playerTeams[idx],
             grossScores[idx],
             par,
             junkFlags[idx],
             updatedMatch.base
           );
-          console.log(`[DEBUG] Junk events for player ${player.name}: ${JSON.stringify(events)}`);
+          console.log(`[DEBUG] Junk events for player ${players[idx].name}: ${JSON.stringify(events)}`);
           newJunkEvents.push(...events);
         });
         
@@ -392,7 +391,7 @@ export const useGameStore = create(
         
         // Add team junk totals to all team members
         // When one team earns junk, the other team should lose that amount to keep the game balanced
-        players.forEach((player, idx) => {
+        players.forEach((_, idx) => {
           const team = playerTeams[idx];
           if (team === 'Red') {
             // Red team gets their junk earnings and loses Blue's junk earnings
@@ -490,7 +489,7 @@ export const useGameStore = create(
       // Finish the round
       finishRound: async () => {
         const state = get();
-        const { match, players, playerTeams, ledger, bigGameRows } = state;
+        const { match, players, playerTeams, ledger } = state;
         
         // Record end time and update match state
         const endTime = new Date().toISOString();

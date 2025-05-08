@@ -40,7 +40,7 @@ export function JunkCalculatorTest() {
         isLongDrive: false
       },
       base: 2,
-      expected: [{ hole: 3, playerId: 'player-1', type: 'Greenie' as JunkType, value: 2 }]
+      expected: [{ hole: 3, playerId: 'player-1', teamId: 'Red' as const, type: 'Greenie' as JunkType, value: 2 }]
     },
     { 
       name: 'Birdie Detection', 
@@ -56,7 +56,7 @@ export function JunkCalculatorTest() {
         isLongDrive: false
       },
       base: 2,
-      expected: [{ hole: 4, playerId: 'player-1', type: 'Birdie' as JunkType, value: 2 }]
+      expected: [{ hole: 4, playerId: 'player-1', teamId: 'Red' as const, type: 'Birdie' as JunkType, value: 2 }]
     },
     { 
       name: 'Sandie Detection', 
@@ -72,7 +72,7 @@ export function JunkCalculatorTest() {
         isLongDrive: false
       },
       base: 2,
-      expected: [{ hole: 5, playerId: 'player-1', type: 'Sandie' as JunkType, value: 2 }]
+      expected: [{ hole: 5, playerId: 'player-1', teamId: 'Red' as const, type: 'Sandie' as JunkType, value: 2 }]
     },
     { 
       name: 'Penalty Detection', 
@@ -88,7 +88,7 @@ export function JunkCalculatorTest() {
         isLongDrive: false
       },
       base: 2,
-      expected: [{ hole: 6, playerId: 'player-1', type: 'Penalty' as JunkType, value: 2 }]
+      expected: [{ hole: 6, playerId: 'player-1', teamId: 'Red' as const, type: 'Penalty' as JunkType, value: 2 }]
     },
     { 
       name: 'LD10 Detection', 
@@ -104,7 +104,7 @@ export function JunkCalculatorTest() {
         isLongDrive: true
       },
       base: 2,
-      expected: [{ hole: 17, playerId: 'player-1', type: 'LD10' as JunkType, value: 10 }]
+      expected: [{ hole: 17, playerId: 'player-1', teamId: 'Red' as const, type: 'LD10' as JunkType, value: 10 }]
     },
     { 
       name: 'Multiple Events (Birdie + Sandie)', 
@@ -121,8 +121,8 @@ export function JunkCalculatorTest() {
       },
       base: 2,
       expected: [
-        { hole: 4, playerId: 'player-1', type: 'Birdie' as JunkType, value: 2 },
-        { hole: 4, playerId: 'player-1', type: 'Sandie' as JunkType, value: 2 }
+        { hole: 4, playerId: 'player-1', teamId: 'Red' as const, type: 'Birdie' as JunkType, value: 2 },
+        { hole: 4, playerId: 'player-1', teamId: 'Red' as const, type: 'Sandie' as JunkType, value: 2 }
       ]
     }
   ];
@@ -137,7 +137,7 @@ export function JunkCalculatorTest() {
       isLongDrive
     };
     
-    const events = evaluateJunkEvents(hole, playerId, grossScore, par, flags, base);
+    const events = evaluateJunkEvents(hole, playerId, 'Red', grossScore, par, flags, base);
     setJunkEvents(events);
   };
   

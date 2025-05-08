@@ -20,15 +20,22 @@ export const HoleEditor: React.FC<HoleEditorProps> = ({ tee, onSave, onCancel })
     
     // Convert string values to numbers for numeric fields
     if (field === 'par' || field === 'yardage' || field === 'strokeIndex') {
-      newHoles[index] = {
-        ...newHoles[index],
-        [field]: typeof value === 'string' ? parseInt(value, 10) : value
-      };
-    } else {
-      newHoles[index] = {
-        ...newHoles[index],
-        [field]: value
-      };
+      const numValue = Number(value);
+      if (!isNaN(numValue)) {
+        switch (field) {
+          case 'par':
+            newHoles[index].par = numValue;
+            break;
+          case 'yardage':
+            newHoles[index].yardage = numValue;
+            break;
+          case 'strokeIndex':
+            newHoles[index].strokeIndex = numValue;
+            break;
+        }
+      }
+    } else if (typeof value === 'string') {
+      (newHoles[index] as any)[field] = value;
     }
     
     setHoles(newHoles);

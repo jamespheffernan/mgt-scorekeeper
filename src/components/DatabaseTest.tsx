@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDatabase } from '../hooks/useDatabase';
-import { Player, Match } from '../db/API-GameState';
+import { Player } from '../db/API-GameState';
 
 /**
  * A test component to verify our database functionality

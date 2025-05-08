@@ -5,14 +5,6 @@ import { CourseSetup } from './CourseSetup';
 import PlayerRoster from './PlayerRoster';
 import '../../App.css';
 
-// Default player for empty slots
-const EMPTY_PLAYER: Player = {
-  id: '',
-  name: '',
-  index: 0,
-  defaultTeam: undefined
-};
-
 enum SetupStep {
   PLAYERS,
   COURSE
@@ -31,10 +23,6 @@ export const MatchSetup = () => {
   const [teams, setTeams] = useState<Team[]>(['Red', 'Blue', 'Red', 'Blue']);
   const [bigGame, setBigGame] = useState(false);
   
-  // Course and tee selection
-  const [courseId, setCourseId] = useState<string>('');
-  const [playerTeeIds, setPlayerTeeIds] = useState<[string, string, string, string]>(['', '', '', '']);
-  
   // Handle players selected from roster
   const handlePlayersSelected = (selectedPlayers: Player[], selectedTeams: Team[]) => {
     setPlayers(selectedPlayers);
@@ -51,9 +39,6 @@ export const MatchSetup = () => {
   
   // Handle course setup completion
   const handleCourseSetupComplete = (courseId: string, playerTeeIds: [string, string, string, string]) => {
-    setCourseId(courseId);
-    setPlayerTeeIds(playerTeeIds);
-    
     // Create the match with all information
     createMatch(players, teams, { 
       bigGame,

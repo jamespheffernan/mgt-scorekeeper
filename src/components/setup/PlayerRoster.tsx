@@ -10,7 +10,6 @@ interface PlayerRosterProps {
 }
 
 // Create a local storage key for recently used players
-const RECENT_PLAYERS_KEY = 'millbrook_recent_players';
 const PLAYER_PREFERENCES_KEY = 'millbrook_player_preferences';
 
 // Type for player preferences
@@ -60,11 +59,6 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
       }
     }
   }, [dbPlayers]);
-  
-  // Filter players based on search query
-  const filteredPlayers = players.filter(player => 
-    player.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
   
   // Get recent players sorted by lastUsed date
   const recentPlayers = players.filter(player => {

@@ -88,7 +88,7 @@ describe('LedgerView', () => {
   // Setup for each test
   beforeEach(() => {
     // Mock the store with our test data
-    (useGameStore as jest.Mock).mockImplementation(selector => {
+    (useGameStore as unknown as jest.Mock).mockImplementation(selector => {
       const state = {
         match: mockMatch,
         players: mockPlayers,
@@ -181,7 +181,6 @@ describe('LedgerView', () => {
     fireEvent.click(screen.getByText('Running Totals'));
     
     // Final running totals should be displayed
-    const finalTotals = mockLedger[mockLedger.length - 1].runningTotals;
     expect(screen.getByText(`Alice: -$2`)).toBeInTheDocument();
     expect(screen.getByText(`Bob: -$2`)).toBeInTheDocument();
     expect(screen.getByText(`Charlie: +$2`)).toBeInTheDocument();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { millbrookDb } from '../../db/millbrookDb';
-import { Course, TeeOption, Gender, HoleInfo } from '../../db/courseModel';
+import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
 import '../../App.css';
 
@@ -192,7 +192,6 @@ export const CourseManager: React.FC = () => {
   const [selectedTee, setSelectedTee] = useState<TeeOption | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
-  const [isAddingTee, setIsAddingTee] = useState(false);
   const [isEditingHoles, setIsEditingHoles] = useState(false);
   
   // Form state
@@ -201,14 +200,6 @@ export const CourseManager: React.FC = () => {
     location: string;
   }>({ name: '', location: '' });
   
-  const [teeForm, setTeeForm] = useState<{
-    name: string;
-    color: string;
-    gender: Gender;
-    rating: number;
-    slope: number;
-  }>({ name: '', color: '', gender: 'M', rating: 72, slope: 113 });
-
   // Ref for file input
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -247,48 +238,6 @@ export const CourseManager: React.FC = () => {
         location: course.location || '',
       });
     }
-  };
-
-  // Handle tee selection
-  const handleTeeSelect = (teeId: string) => {
-    if (!selectedCourse) return;
-    
-    const tee = selectedCourse.teeOptions.find(t => t.id === teeId) || null;
-    setSelectedTee(tee);
-    
-    // Reset tee form with selected tee data
-    if (tee) {
-      setTeeForm({
-        name: tee.name,
-        color: tee.color,
-        gender: tee.gender,
-        rating: tee.rating,
-        slope: tee.slope,
-      });
-    }
-  };
-
-  // Handle course form changes
-  const handleCourseFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCourseForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Handle tee form changes
-  const handleTeeFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setTeeForm(prev => ({ 
-      ...prev, 
-      [name]: name === 'rating' || name === 'slope' ? parseFloat(value) : value 
-    }));
-  };
-
-  // Add new course
-  const handleAddCourse = () => {
-    setIsAddingCourse(true);
-    setSelectedCourse(null);
-    setSelectedTee(null);
-    setCourseForm({ name: '', location: '' });
   };
 
   // Save course (new or edit)
@@ -344,88 +293,6 @@ export const CourseManager: React.FC = () => {
     }
   };
 
-  // Add new tee option
-  const handleAddTee = () => {
-    if (!selectedCourse) return;
-    
-    setIsAddingTee(true);
-    setSelectedTee(null);
-    setTeeForm({
-      name: '',
-      color: '',
-      gender: 'Any',
-      rating: 72.0,
-      slope: 113,
-    });
-  };
-
-  // Save tee option (new or edit)
-  const handleSaveTee = async () => {
-    try {
-      if (!selectedCourse) return;
-      if (!teeForm.name.trim() || !teeForm.color.trim()) {
-        alert('Tee name and color are required');
-        return;
-      }
-      
-      let updatedCourse: Course;
-      
-      if (isAddingTee) {
-        // Create new tee option with default hole data
-        const newTee: TeeOption = {
-          id: crypto.randomUUID(),
-          name: teeForm.name,
-          color: teeForm.color,
-          gender: teeForm.gender,
-          rating: teeForm.rating,
-          slope: teeForm.slope,
-          holes: Array.from({ length: 18 }, (_, i) => ({
-            number: i + 1,
-            par: selectedCourse.teeOptions[0]?.holes[i]?.par || 4,
-            yardage: selectedCourse.teeOptions[0]?.holes[i]?.yardage || 400,
-            strokeIndex: selectedCourse.teeOptions[0]?.holes[i]?.strokeIndex || i + 1,
-          } as HoleInfo))
-        };
-        
-        updatedCourse = {
-          ...selectedCourse,
-          teeOptions: [...selectedCourse.teeOptions, newTee]
-        };
-        
-        setIsAddingTee(false);
-        setSelectedTee(newTee);
-      } else if (selectedTee) {
-        // Update existing tee option
-        const updatedTee: TeeOption = {
-          ...selectedTee,
-          name: teeForm.name,
-          color: teeForm.color,
-          gender: teeForm.gender as Gender,
-          rating: teeForm.rating,
-          slope: teeForm.slope,
-        };
-        
-        updatedCourse = {
-          ...selectedCourse,
-          teeOptions: selectedCourse.teeOptions.map(tee => 
-            tee.id === selectedTee.id ? updatedTee : tee
-          )
-        };
-        
-        setSelectedTee(updatedTee);
-      } else {
-        return;
-      }
-      
-      await millbrookDb.saveCourse(updatedCourse);
-      setSelectedCourse(updatedCourse);
-      await loadCourses();
-    } catch (error) {
-      console.error('Error saving tee option:', error);
-      alert('Failed to save tee option. Please try again.');
-    }
-  };
-
   // Delete course
   const handleDeleteCourse = async () => {
     try {
@@ -443,42 +310,6 @@ export const CourseManager: React.FC = () => {
       console.error('Error deleting course:', error);
       alert('Failed to delete course. Please try again.');
     }
-  };
-
-  // Delete tee option
-  const handleDeleteTee = async () => {
-    try {
-      if (!selectedCourse || !selectedTee) return;
-      
-      // Prevent deleting the last tee option
-      if (selectedCourse.teeOptions.length <= 1) {
-        alert('Cannot delete the last tee option. A course must have at least one tee option.');
-        return;
-      }
-      
-      if (!confirm(`Are you sure you want to delete ${selectedTee.name} tees?`)) {
-        return;
-      }
-      
-      const updatedCourse: Course = {
-        ...selectedCourse,
-        teeOptions: selectedCourse.teeOptions.filter(tee => tee.id !== selectedTee.id)
-      };
-      
-      await millbrookDb.saveCourse(updatedCourse);
-      setSelectedCourse(updatedCourse);
-      setSelectedTee(null);
-      await loadCourses();
-    } catch (error) {
-      console.error('Error deleting tee option:', error);
-      alert('Failed to delete tee option. Please try again.');
-    }
-  };
-
-  // Navigate to hole editor
-  const handleEditHoles = () => {
-    if (!selectedCourse || !selectedTee) return;
-    setIsEditingHoles(true);
   };
 
   // Save updated tee from hole editor

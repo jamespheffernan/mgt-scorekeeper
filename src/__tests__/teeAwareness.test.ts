@@ -110,7 +110,7 @@ describe('Tee Awareness Feature', () => {
     test('TC-07: Returns correct SI arrays for each player', async () => {
       const playerTeeIds = ['tee-blue', 'tee-white', 'tee-blue', 'tee-red'];
       
-      const result = await getPlayerStrokeIndexes('course-1', playerTeeIds, 1);
+      const result = await getPlayerStrokeIndexes('course-1', playerTeeIds);
       
       // Verify we have 4 players' worth of SI arrays
       expect(result).toHaveLength(4);
@@ -130,18 +130,18 @@ describe('Tee Awareness Feature', () => {
     test('TC-08: Handles missing course data gracefully', async () => {
       (millbrookDb.getCourse as jest.Mock).mockResolvedValue(null);
       
-      const result = await getPlayerStrokeIndexes('invalid-course', ['tee-1', 'tee-2', 'tee-3', 'tee-4'], 1);
+      const result = await getPlayerStrokeIndexes('invalid-course', ['tee-1', 'tee-2', 'tee-3', 'tee-4']);
       
       expect(result).toBeNull();
     });
     
     test('TC-09: Returns null for missing course or tee IDs', async () => {
       // Test with undefined courseId
-      let result = await getPlayerStrokeIndexes(undefined, ['tee-1', 'tee-2', 'tee-3', 'tee-4'], 1);
+      let result = await getPlayerStrokeIndexes(undefined, ['tee-1', 'tee-2', 'tee-3', 'tee-4']);
       expect(result).toBeNull();
       
       // Test with undefined playerTeeIds
-      result = await getPlayerStrokeIndexes('course-1', undefined, 1);
+      result = await getPlayerStrokeIndexes('course-1', undefined);
       expect(result).toBeNull();
     });
   });

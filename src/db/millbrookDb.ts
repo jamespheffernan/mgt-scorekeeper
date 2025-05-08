@@ -3,7 +3,6 @@ import {
   Player,
   Match,
   GameState,
-  DbSchema,
   GameHistory
 } from './API-GameState';
 import { Course } from './courseModel';

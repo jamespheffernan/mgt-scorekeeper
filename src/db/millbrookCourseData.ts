@@ -1,4 +1,4 @@
-import { Course, TeeOption, HoleInfo, Gender } from './courseModel';
+import { Course, HoleInfo, Gender } from './courseModel';
 
 /**
  * Creates a valid HoleInfo object

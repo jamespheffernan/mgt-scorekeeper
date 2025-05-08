@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useGameStore, Player, Team } from './store/gameStore';
-import { JunkFlags } from './calcEngine/junkCalculator';
 
 /**
  * Component to test the bug fixes

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { allocateStrokes, hasStroke } from '../calcEngine/strokeAllocator';
+import { allocateStrokes } from '../calcEngine/strokeAllocator';
 
 /**
  * Visual test component for the stroke allocator

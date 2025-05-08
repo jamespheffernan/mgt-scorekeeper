@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import CancelGameDialog from '../CancelGameDialog';
 import EndGameDialog from '../EndGameDialog';
 import '../../App.css';
-import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
+import { Course, TeeOption } from '../../db/courseModel';
 import { JunkFlags } from '../../calcEngine/junkCalculator';
 import { millbrookDb } from '../../db/millbrookDb';
 import { allocateStrokes, allocateStrokesMultiTee } from '../../calcEngine/strokeAllocator';
 
 export const HoleView = () => {
   const navigate = useNavigate();
-  const { holeNumber } = useParams<{ holeNumber: string }>();
   
   // Access store state and actions
   const match = useGameStore(state => state.match);
@@ -33,7 +32,6 @@ export const HoleView = () => {
   const [teeOptions, setTeeOptions] = useState<Record<string, TeeOption>>({});
   const [playerPars, setPlayerPars] = useState<number[]>([defaultPar, defaultPar, defaultPar, defaultPar]);
   const [playerSIs, setPlayerSIs] = useState<number[]>([currentHole, currentHole, currentHole, currentHole]);
-  const [isLoadingCourse, setIsLoadingCourse] = useState(true);
   
   // Local state for scores
   const [grossScores, setGrossScores] = useState<[number, number, number, number]>([
@@ -61,7 +59,7 @@ export const HoleView = () => {
   
   // Get the current standings
   const getCurrentStandings = () => {
-    if (ledger.length === 0) return { redTotal: 0, blueTotal: 0, isEqual: true };
+    if (ledger.length === 0) return { redTotal: 0, blueTotal: 0 };
     
     const lastLedgerEntry = ledger[ledger.length - 1];
     // Find the first player index for each team
@@ -73,7 +71,6 @@ export const HoleView = () => {
     return {
       redTotal,
       blueTotal,
-      isEqual: redTotal === blueTotal
     };
   };
   
@@ -95,12 +92,10 @@ export const HoleView = () => {
   useEffect(() => {
     const loadCourseData = async () => {
       if (!match.courseId || !match.playerTeeIds) {
-        setIsLoadingCourse(false);
         return;
       }
       
       try {
-        setIsLoadingCourse(true);
         const courseData = await millbrookDb.getCourse(match.courseId);
         
         if (courseData) {
@@ -150,8 +145,6 @@ export const HoleView = () => {
         }
       } catch (error) {
         console.error('Error loading course data:', error);
-      } finally {
-        setIsLoadingCourse(false);
       }
     };
     
@@ -165,7 +158,8 @@ export const HoleView = () => {
     setGrossScores(newScores);
     
     // Auto-detect junk events based on score
-    updateJunkBasedOnScore(playerIndex, score);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateJunkBasedOnScore(playerIndex);
   };
   
   // Enhanced score options for dropdown with color coding and icons
@@ -213,15 +207,9 @@ export const HoleView = () => {
   };
   
   // Update junk flags based on score
-  const updateJunkBasedOnScore = (playerIndex: number, score: number) => {
-    const par = playerPars[playerIndex];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const updateJunkBasedOnScore = (_playerIndex: number) => {
     const newFlags = [...junkFlags];
-    
-    // Check if the hole is a par 3
-    const isPar3 = par === 3;
-    
-    // Don't auto-set greenie flags based on score
-    // A good score on a par 3 doesn't necessarily mean a greenie
     
     // Set other automatic flags here if needed
     
@@ -237,40 +225,6 @@ export const HoleView = () => {
       ...newFlags[playerIndex],
       [flag]: !newFlags[playerIndex][flag]
     };
-    
-    setJunkFlags(newFlags);
-  };
-  
-  // Toggle Greenie flag - make it exclusive to one player
-  // Selecting greenie automatically implies closest to pin
-  const toggleGreenieFlag = (playerIndex: number) => {
-    const newFlags = [...junkFlags];
-    
-    // Toggle the flag for the current player
-    const newValue = !newFlags[playerIndex].isOnGreenFromTee;
-    
-    // If turning on, disable for all other players
-    if (newValue) {
-      // Set all to false first
-      for (let i = 0; i < newFlags.length; i++) {
-        newFlags[i].isOnGreenFromTee = false;
-        newFlags[i].isClosestOnGreen = false; // Keep the flag in sync (for backward compatibility)
-        
-        // Also clear 3-putt for all
-        newFlags[i].hadThreePutts = false;
-      }
-      
-      // Then set true just for this player
-      newFlags[playerIndex].isOnGreenFromTee = true;
-      newFlags[playerIndex].isClosestOnGreen = true; // Keep the flag in sync (for backward compatibility)
-    } else {
-      // Just turn off for this player
-      newFlags[playerIndex].isOnGreenFromTee = false;
-      newFlags[playerIndex].isClosestOnGreen = false; // Keep the flag in sync (for backward compatibility)
-      
-      // Also clear 3-putt
-      newFlags[playerIndex].hadThreePutts = false;
-    }
     
     setJunkFlags(newFlags);
   };
@@ -291,8 +245,12 @@ export const HoleView = () => {
         // Otherwise, navigate to next hole
         navigate(`/hole/${currentHole + 1}`);
       }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Error submitting scores');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('Error submitting scores');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -418,7 +376,7 @@ export const HoleView = () => {
   const renderCurrentStandings = () => {
     if (ledger.length === 0) return null;
     
-    const { redTotal, blueTotal, isEqual } = getCurrentStandings();
+    const { redTotal, blueTotal } = getCurrentStandings();
     const lastLedgerEntry = ledger[ledger.length - 1];
     
     return (
@@ -524,11 +482,6 @@ export const HoleView = () => {
         </div>
       </div>
       
-      {/* Add HoleInfo component to show detailed hole information */}
-      {match.courseId && (
-        <HoleInfo holeNumber={currentHole} />
-      )}
-      
       {/* Add current standings section if we have ledger entries */}
       {ledger.length > 0 && renderCurrentStandings()}
       
@@ -543,8 +496,6 @@ export const HoleView = () => {
         
         {players.map((player, index) => {
           const teeInfo = getPlayerTeeInfo(index);
-          const hasStroke = playerGetsStroke(index);
-          const isPar3 = playerPars[index] === 3;
           
           return (
             <div 
@@ -598,34 +549,6 @@ export const HoleView = () => {
                   />
                   <span className="junk-name">Sandy</span>
                 </label>
-                
-                {isPar3 && (
-                  <>
-                    <label className="junk-flag-label">
-                      <input
-                        type="checkbox"
-                        checked={junkFlags[index].isOnGreenFromTee}
-                        onChange={() => toggleGreenieFlag(index)}
-                        disabled={isSubmitting}
-                        aria-label="Greenie (Closest to pin on par 3)"
-                      />
-                      <span className="junk-name">Greenie</span>
-                    </label>
-                    
-                    {junkFlags[index].isOnGreenFromTee && (
-                      <label className="junk-flag-label">
-                        <input
-                          type="checkbox"
-                          checked={junkFlags[index].hadThreePutts}
-                          onChange={() => toggleJunkFlag(index, 'hadThreePutts')}
-                          disabled={isSubmitting}
-                          aria-label="3-Putt (Three putts on green)"
-                        />
-                        <span className="junk-name">3-Putt</span>
-                      </label>
-                    )}
-                  </>
-                )}
                 
                 {currentHole === 17 && (
                   <label className="junk-flag-label">
