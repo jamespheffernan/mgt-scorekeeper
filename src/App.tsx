@@ -14,7 +14,7 @@ import { TestFixes } from './TestFixes'; // Import our test component
 import SignUp from './components/auth/SignUp';
 import LogIn from './components/auth/LogIn';
 import UserProfile from './components/auth/UserProfile';
-import { useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Uncomment these for testing/development
 /*
@@ -25,21 +25,6 @@ import { PayoutCalculatorTest } from './components/PayoutCalculatorTest';
 import { JunkCalculatorTest } from './components/JunkCalculatorTest';
 import { BigGameCalculatorTest } from './components/BigGameCalculatorTest';
 */
-
-// Protected Route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { currentUser, loading } = useAuth();
-  
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-  
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
-  
-  return <>{children}</>;
-};
 
 function App() {
   // Access store state
