@@ -106,6 +106,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   
   // Local UI state
   const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null);
+  // Track updated scores locally for immediate UI update
+  const [localScores, setLocalScores] = useState<Record<number, number>>({});
 
   const handleCardClick = (index: number) => {
     setActivePlayerIndex(index);
@@ -113,6 +115,11 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
 
   const handleScoreChange = (score: number) => {
     if (activePlayerIndex !== null) {
+      // Update the local score state for immediate feedback
+      setLocalScores({
+        ...localScores,
+        [activePlayerIndex]: score
+      });
       onScoreChange(activePlayerIndex, score);
     }
   };
@@ -140,9 +147,22 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
     }
   });
   
-  // Combine indices in order: All Red players, then all Blue players
-  const orderedIndices = [...redPlayerIndices, ...bluePlayerIndices];
-
+  // Get the current score for a player, prioritizing local updates
+  const getPlayerScore = (playerIndex: number): number => {
+    // First check if there's a local update
+    if (localScores[playerIndex] !== undefined) {
+      return localScores[playerIndex];
+    }
+    
+    // Then check if there's a submitted score from the store
+    if (currentHoleScore && currentHoleScore.gross[playerIndex] !== undefined) {
+      return currentHoleScore.gross[playerIndex];
+    }
+    
+    // Fall back to par
+    return playerPars[playerIndex] || holePar[currentHole - 1] || 4;
+  };
+  
   return (
     <div>
       <div style={{ 
@@ -196,31 +216,49 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
           margin: '0 -4px', // Compensate for small screens
         }}
       >
-        {orderedIndices.map((playerIndex) => {
-          // Get the gross score for this player if available
-          const grossScore = currentHoleScore 
-            ? currentHoleScore.gross[playerIndex] 
-            : playerPars[playerIndex] || holePar[currentHole - 1] || 4; // Default to par
-          
-          // Get player-specific par from props, fall back to hole par
-          const par = playerPars[playerIndex] || holePar[currentHole - 1] || 4;
+        {/* Create pairs of players (one red, one blue) for each row */}
+        {redPlayerIndices.map((redIndex, i) => {
+          const redPlayerIndex = redIndex;
+          const bluePlayerIndex = bluePlayerIndices[i] !== undefined ? bluePlayerIndices[i] : -1;
           
           return (
-            <PlayerCard
-              key={players[playerIndex].id || playerIndex}
-              name={players[playerIndex].name}
-              team={playerTeams[playerIndex] as 'Red' | 'Blue'}
-              playerIndex={playerIndex}
-              holeNumber={currentHole}
-              par={par}
-              grossScore={grossScore}
-              strokes={playerStrokes[playerIndex] || 0}
-              yardage={playerYardages[playerIndex] || 0}
-              onEdit={() => handleCardClick(playerIndex)}
-            />
+            <React.Fragment key={`row-${i}`}>
+              {/* Red player card */}
+              {redPlayerIndex !== -1 && (
+                <PlayerCard
+                  key={players[redPlayerIndex].id || redPlayerIndex}
+                  name={players[redPlayerIndex].name}
+                  team={playerTeams[redPlayerIndex] as 'Red' | 'Blue'}
+                  playerIndex={redPlayerIndex}
+                  holeNumber={currentHole}
+                  par={playerPars[redPlayerIndex] || holePar[currentHole - 1] || 4}
+                  grossScore={getPlayerScore(redPlayerIndex)}
+                  strokes={playerStrokes[redPlayerIndex] || 0}
+                  yardage={playerYardages[redPlayerIndex] || 0}
+                  onEdit={() => handleCardClick(redPlayerIndex)}
+                />
+              )}
+              
+              {/* Blue player card */}
+              {bluePlayerIndex !== -1 && (
+                <PlayerCard
+                  key={players[bluePlayerIndex].id || bluePlayerIndex}
+                  name={players[bluePlayerIndex].name}
+                  team={playerTeams[bluePlayerIndex] as 'Red' | 'Blue'}
+                  playerIndex={bluePlayerIndex}
+                  holeNumber={currentHole}
+                  par={playerPars[bluePlayerIndex] || holePar[currentHole - 1] || 4}
+                  grossScore={getPlayerScore(bluePlayerIndex)}
+                  strokes={playerStrokes[bluePlayerIndex] || 0}
+                  yardage={playerYardages[bluePlayerIndex] || 0}
+                  onEdit={() => handleCardClick(bluePlayerIndex)}
+                />
+              )}
+            </React.Fragment>
           );
         })}
       </div>
+      
       {activePlayerIndex !== null && (
         <BottomSheet
           playerName={players[activePlayerIndex].name}
@@ -228,7 +266,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
           team={playerTeams[activePlayerIndex] as 'Red' | 'Blue'}
           currentHole={currentHole}
           par={playerPars[activePlayerIndex] || holePar[currentHole - 1] || 4}
-          initialScore={currentHoleScore?.gross[activePlayerIndex] || playerPars[activePlayerIndex] || holePar[currentHole - 1] || 4}
+          initialScore={getPlayerScore(activePlayerIndex)}
           strokes={playerStrokes[activePlayerIndex] || 0}
           onScoreChange={handleScoreChange}
           onJunkChange={handleJunkChange}

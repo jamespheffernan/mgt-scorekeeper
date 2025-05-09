@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../../store/gameStore';
 import { PlayersFourBox } from './PlayersFourBox';
 import { JunkFlags } from '../../../store/gameStore';
+import { allocateStrokes, allocateStrokesMultiTee } from '../../../calcEngine/strokeAllocator';
+import { Course, TeeOption } from '../../../db/courseModel';
+import { millbrookDb } from '../../../db/millbrookDb';
 
 export const HoleViewMobile: React.FC = () => {
   const navigate = useNavigate();
   
   // Access store state and actions
   const match = useGameStore(state => state.match);
+  const players = useGameStore(state => state.players);
   const playerTeams = useGameStore(state => state.playerTeams);
   const isDoubleAvailable = useGameStore(state => state.isDoubleAvailable);
   const trailingTeam = useGameStore(state => state.trailingTeam);
@@ -19,6 +23,14 @@ export const HoleViewMobile: React.FC = () => {
   // Current hole
   const currentHole = match.currentHole;
   const defaultPar = match.holePar[currentHole - 1];
+  
+  // State for course data
+  const [course, setCourse] = useState<Course | null>(null);
+  const [teeOptions, setTeeOptions] = useState<Record<string, TeeOption>>({});
+  const [playerPars, setPlayerPars] = useState<number[]>([defaultPar, defaultPar, defaultPar, defaultPar]);
+  const [playerSIs, setPlayerSIs] = useState<number[]>([currentHole, currentHole, currentHole, currentHole]);
+  const [playerYardages, setPlayerYardages] = useState<number[]>([0, 0, 0, 0]);
+  const [playerStrokes, setPlayerStrokes] = useState<number[]>([0, 0, 0, 0]);
   
   // Local state for scores and junk
   const [grossScores, setGrossScores] = useState<[number, number, number, number]>([
@@ -58,6 +70,107 @@ export const HoleViewMobile: React.FC = () => {
     const formattedAmount = Math.abs(amount).toString();
     const sign = amount >= 0 ? '+' : '-';
     return `${sign}$${formattedAmount}`;
+  };
+  
+  // Load course data when match details change
+  useEffect(() => {
+    const loadCourseData = async () => {
+      if (!match.courseId || !match.playerTeeIds) {
+        return;
+      }
+      
+      try {
+        const courseData = await millbrookDb.getCourse(match.courseId);
+        
+        if (courseData) {
+          setCourse(courseData);
+          console.log(`[COURSE-DEBUG] Loaded course: ${courseData.name}`);
+          
+          // Create a map of tee options by ID for easy access
+          const teeMap: Record<string, TeeOption> = {};
+          courseData.teeOptions.forEach(tee => {
+            teeMap[tee.id] = tee;
+            console.log(`[COURSE-DEBUG] Tee option: ${tee.name} (${tee.color}), id: ${tee.id}`);
+          });
+          setTeeOptions(teeMap);
+          
+          // Get player-specific pars, stroke indexes, and yardages
+          if (match.playerTeeIds) {
+            const newPlayerPars: number[] = [];
+            const newPlayerSIs: number[] = [];
+            const newPlayerYardages: number[] = [];
+            
+            match.playerTeeIds.forEach((teeId, index) => {
+              const tee = teeMap[teeId];
+              if (tee && tee.holes) {
+                const holeInfo = tee.holes.find(h => h.number === currentHole);
+                if (holeInfo) {
+                  newPlayerPars[index] = holeInfo.par;
+                  newPlayerSIs[index] = holeInfo.strokeIndex;
+                  newPlayerYardages[index] = holeInfo.yardage;
+                } else {
+                  newPlayerPars[index] = defaultPar;
+                  newPlayerSIs[index] = currentHole;
+                  newPlayerYardages[index] = 0;
+                }
+              } else {
+                newPlayerPars[index] = defaultPar;
+                newPlayerSIs[index] = currentHole;
+                newPlayerYardages[index] = 0;
+              }
+            });
+            
+            setPlayerPars(newPlayerPars);
+            setPlayerSIs(newPlayerSIs);
+            setPlayerYardages(newPlayerYardages);
+            
+            // Update the default gross scores based on pars
+            setGrossScores(newPlayerPars as [number, number, number, number]);
+            
+            // Calculate player strokes
+            calculatePlayerStrokes(courseData, teeMap);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading course data:', error);
+      }
+    };
+    
+    loadCourseData();
+  }, [match.courseId, match.playerTeeIds, currentHole, defaultPar]);
+  
+  // Calculate strokes for each player
+  const calculatePlayerStrokes = (courseData: Course, teeMap: Record<string, TeeOption>) => {
+    const playerIndexes = players.map(p => p.index);
+    let strokes: number[] = [0, 0, 0, 0];
+    
+    try {
+      if (match.courseId && match.playerTeeIds) {
+        // Try to use multi-tee stroke allocation if possible
+        const playerSIs: number[][] = players.map((_, pIdx) => {
+          const pteeId = match.playerTeeIds?.[pIdx];
+          const ptee = courseData.teeOptions.find(t => t.id === pteeId);
+          if (ptee && ptee.holes) {
+            return Array.from({ length: 18 }, (_, i) => {
+              const holeInfo = ptee.holes.find(h => h.number === i + 1);
+              return holeInfo ? holeInfo.strokeIndex : i + 1;
+            });
+          }
+          return Array.from({ length: 18 }, (_, i) => i + 1);
+        });
+        
+        const strokeMatrix = allocateStrokesMultiTee(playerIndexes, playerSIs);
+        strokes = strokeMatrix.map(playerStrokes => playerStrokes[currentHole - 1]);
+      } else {
+        // Fall back to standard allocation
+        const strokeMatrix = allocateStrokes(playerIndexes, match.holeSI);
+        strokes = strokeMatrix.map(playerStrokes => playerStrokes[currentHole - 1]);
+      }
+    } catch (error) {
+      console.error('Error calculating strokes:', error);
+    }
+    
+    setPlayerStrokes(strokes);
   };
   
   // Handle score update from PlayersFourBox
@@ -127,6 +240,62 @@ export const HoleViewMobile: React.FC = () => {
         </h2>
       </div>
       
+      {/* Hole Info Strip */}
+      <div style={{ 
+        margin: '0 8px 12px',
+        padding: '10px 12px',
+        backgroundColor: '#f1f5f9',
+        borderRadius: '8px',
+        fontSize: '13px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          {match.playerTeeIds && match.playerTeeIds.some(id => Boolean(id)) ? (
+            <>
+              {/* Show first tee's info if available */}
+              {Object.keys(teeOptions).length > 0 && match.playerTeeIds && (
+                <>
+                  {match.playerTeeIds.map((teeId, index) => {
+                    if (index === 0 && teeId && teeOptions[teeId]) {
+                      const tee = teeOptions[teeId];
+                      const holeInfo = tee.holes?.find(h => h.number === currentHole);
+                      if (holeInfo) {
+                        return (
+                          <div key={teeId} style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            width: '100%',
+                          }}>
+                            <span>
+                              <span style={{ 
+                                display: 'inline-block',
+                                width: 12,
+                                height: 12,
+                                borderRadius: '50%',
+                                backgroundColor: tee.color.toLowerCase(),
+                                marginRight: 6,
+                                verticalAlign: 'middle'
+                              }}></span>
+                              {tee.name}
+                            </span>
+                            <span style={{ fontWeight: 'bold' }}>Par {holeInfo.par}</span>
+                            <span>{holeInfo.yardage} yds</span>
+                            <span>SI: {holeInfo.strokeIndex}</span>
+                          </div>
+                        );
+                      }
+                    }
+                    return null;
+                  })}
+                </>
+              )}
+            </>
+          ) : (
+            <span>Par {defaultPar}</span>
+          )}
+        </div>
+      </div>
+      
       {/* Standings Strip */}
       <div style={{ 
         margin: '0 8px 16px',
@@ -162,6 +331,10 @@ export const HoleViewMobile: React.FC = () => {
         <PlayersFourBox 
           onScoreChange={updateScore}
           onJunkChange={updateJunk}
+          playerPars={playerPars}
+          playerYardages={playerYardages}
+          playerStrokeIndexes={playerSIs}
+          playerStrokes={playerStrokes}
         />
       </div>
       

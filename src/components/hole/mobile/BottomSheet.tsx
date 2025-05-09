@@ -70,7 +70,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   // Determine which junk options should be visible
   const isPar3 = par === 3;
   const canHaveGreenie = isPar3;
-  const canHaveLongDrive = par >= 4; // Typically only on longer holes
+  const canHaveLongDrive = currentHole === 17; // Only available on hole 17
   const canHaveThreePutts = junkFlags.isOnGreenFromTee; // Only if on green from tee
   
   return (
@@ -232,7 +232,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               Note: Some junk options are only available in specific contexts:
               <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px' }}>
                 {!canHaveGreenie && <li>Greenies only available on par 3 holes</li>}
-                {!canHaveLongDrive && <li>Long drive only available on par 4+ holes</li>}
+                {!canHaveLongDrive && <li>Long drive only available on hole 17</li>}
                 {!canHaveThreePutts && junkFlags.isOnGreenFromTee === false && <li>Three putts requires green from tee</li>}
               </ul>
             </div>

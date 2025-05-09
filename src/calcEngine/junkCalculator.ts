@@ -248,8 +248,8 @@ export function evaluateJunkEvents(
     }
   }
   
-  // Detect Long Drive on hole 17
-  if (hole === 17 && flags.isLongDrive) {
+  // Detect LD10 (Long Drive on hole 17)
+  if (flags.isLongDrive) {
     const ldEvent = detectLD10(hole, playerId, teamId, flags);
     if (ldEvent) {
       console.log(`[JUNK-DEBUG] Detected long drive: value=${ldEvent.value}`);
