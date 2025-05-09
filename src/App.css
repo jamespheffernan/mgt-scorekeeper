@@ -4242,3 +4242,170 @@ select option {
 .submit-button:disabled::after {
   display: none;
 }
+
+/* SettlementView.tsx - Hole-by-Hole Details Tab (Card-based) */
+
+.settlement-details-tab {
+  /* If this tab itself needs to scroll, or if its parent .settlement-content scrolls */
+}
+
+.hole-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Space between hole cards */
+  padding: 8px; /* Padding around the container of cards */
+  max-height: calc(100vh - 250px); /* Example: Adjust 250px based on header/footer/tabs height */
+  overflow-y: auto; /* Enable vertical scrolling for cards if they overflow */
+}
+
+.hole-card {
+  border: 1px solid #e2e8f0; /* Light border for cards */
+  border-radius: 8px;      /* Rounded corners */
+  background-color: #ffffff; /* White background for cards */
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow */
+}
+
+/* Optional: Add a colored left border if a team won the hole */
+.hole-card.winner-red-border {
+  border-left: 4px solid var(--color-red);
+}
+.hole-card.winner-blue-border {
+  border-left: 4px solid var(--color-blue);
+}
+
+.hole-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9; /* Separator line */
+}
+
+.hole-number-card {
+  font-size: 1.1em;
+}
+
+.hole-winner-card {
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+}
+
+.winner-badge-card {
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85em;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.winner-badge-card.red {
+  background-color: var(--color-red);
+}
+.winner-badge-card.blue {
+  background-color: var(--color-blue);
+}
+.winner-badge-card.push {
+  background-color: var(--color-gray);
+}
+
+
+.hole-card-main-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 8px;
+  padding: 10px 0;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.hole-card-main-info span {
+  padding: 6px;
+  background-color: #f8fafc; 
+  border-radius: 4px;
+  border: 1px solid #eef2f7;
+}
+
+.player-details-grid {
+  display: grid;
+  /* On small screens, stack them. On larger, maybe 2 columns */
+  /* grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); */ 
+  grid-template-columns: 1fr; /* Default to 1 column for mobile focus */
+  gap: 12px;
+}
+
+/* For wider screens, if desired to have two columns */
+@media (min-width: 500px) {
+  .player-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.player-details-card {
+  background-color: #f9fafb; 
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 0.9em; /* Increased slightly for readability */
+}
+
+.team-text-red {
+  /* color: #c53030; */ /* Base color set by .player-name-card if needed */
+}
+.team-text-red .player-name-card {
+  color: var(--color-red);
+}
+.team-text-blue {
+  /* color: #2c5282; */
+}
+.team-text-blue .player-name-card {
+  color: var(--color-blue);
+}
+
+.player-name-card {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 1.05em;
+}
+
+.player-score-card,
+.player-change-card,
+.player-junk-card {
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.gross-score-card {
+  font-weight: 500;
+}
+.net-score-card {
+  color: #4a5568; 
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.player-junk-card {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.player-junk-card span.junk-item-card:not(:last-child) {
+  margin-right: 6px;
+}
+
+.junk-item-card {
+  display: inline-block; /* Allows margin and padding */
+  font-size: 0.9em;
+  background-color: #e9ecef;
+  padding: 3px 6px;
+  border-radius: 12px; /* More pill-like */
+  margin-bottom: 4px; /* Space if they wrap */
+  color: #343a40;
+}

@@ -404,106 +404,87 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   // Render hole-by-hole details tab
   const renderDetailsTab = () => (
     <div className="settlement-details-tab">
-      <div className="hole-details">
-        <table className="hole-details-table">
-          <thead>
-            <tr className="hole-details-header">
-              <th>Hole</th>
-              <th>Base</th>
-              <th>Carry</th>
-              <th>Dbl</th>
-              <th>Winner</th>
-              {players.map((player, idx) => (
-                <th key={idx} className={`team-${playerTeams[idx].toLowerCase()}`}>
-                  {player.name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {ledger.map((row, index) => {
-              // Determine winner based on hole scores
-              let holeWinner = 'Push';
-              let winnerClass = 'winner-push';
-              
-              if (holeScores[index]) {
-                if (holeScores[index].teamNet[0] < holeScores[index].teamNet[1]) {
-                  holeWinner = 'Red';
-                  winnerClass = 'winner-red';
-                } else if (holeScores[index].teamNet[1] < holeScores[index].teamNet[0]) {
-                  holeWinner = 'Blue';
-                  winnerClass = 'winner-blue';
-                }
-              }
-              
-              return (
-                <tr key={index} className={`hole-row ${holeWinner !== 'Push' ? `winner-${holeWinner.toLowerCase()}-bg` : ''}`}>
-                  <td className="hole-number">{row.hole}</td>
-                  <td className="hole-base">${row.base}</td>
-                  <td className="hole-carry">${row.carryAfter}</td>
-                  <td className="hole-doubles">{row.doubles > 0 ? '✓' : ''}</td>
-                  <td className={`hole-winner ${winnerClass}`}>
-                    {holeWinner !== 'Push' ? (
-                      <div className={`winner-badge ${holeWinner.toLowerCase()}`}>
-                        {holeWinner}
-                      </div>
-                    ) : (
-                      'Push'
-                    )}
-                  </td>
-                  {players.map((player, playerIdx) => {
-                    // Calculate player change for this hole
-                    let change = 0;
-                    if (index > 0) {
-                      change = row.runningTotals[playerIdx] - ledger[index - 1].runningTotals[playerIdx];
-                    } else {
-                      change = row.runningTotals[playerIdx];
-                    }
-                    // Check if player had junk on this hole
-                    const playerJunk = junkEvents.filter(
-                      event => event.hole === row.hole && event.playerId === player.id
-                    );
-                    // Get scores if available
-                    const grossScore = holeScores[index]?.gross[playerIdx];
-                    const netScore = holeScores[index]?.net[playerIdx];
-                    return (
-                      <td key={playerIdx} className={`player-hole-details ${change > 0 ? 'positive-change' : change < 0 ? 'negative-change' : ''}`}>
-                        <div className="player-scores">
-                          {grossScore && (
-                            <div className="player-score-wrapper">
-                              <span className="gross-score">{grossScore}</span>
-                              {netScore !== grossScore && (
-                                <span className="net-score">({netScore})</span>
-                              )}
-                            </div>
-                          )}
+      <div className="hole-cards-container">
+        {ledger.map((row, index) => {
+          // Determine winner based on hole scores
+          let holeWinner = 'Push';
+          let winnerClass = 'winner-push';
+          if (holeScores[index]) {
+            if (holeScores[index].teamNet[0] < holeScores[index].teamNet[1]) {
+              holeWinner = 'Red';
+              winnerClass = 'winner-red';
+            } else if (holeScores[index].teamNet[1] < holeScores[index].teamNet[0]) {
+              holeWinner = 'Blue';
+              winnerClass = 'winner-blue';
+            }
+          }
+
+          return (
+            <div key={index} className={`hole-card ${holeWinner !== 'Push' ? `winner-${holeWinner.toLowerCase()}-border` : ''}`}>
+              <div className="hole-card-header">
+                <span className="hole-number-card">Hole {row.hole}</span>
+                <span className={`hole-winner-card ${winnerClass}`}>
+                  Winner: {holeWinner !== 'Push' ? (
+                    <span className={`winner-badge-card ${holeWinner.toLowerCase()}`}>{holeWinner}</span>
+                  ) : (
+                    'Push'
+                  )}
+                </span>
+              </div>
+              <div className="hole-card-main-info">
+                <span>Base: ${row.base}</span>
+                <span>Carry: ${row.carryAfter}</span>
+                <span>Doubles: {row.doubles > 0 ? 'Yes' : 'No'}</span>
+              </div>
+
+              <div className="player-details-grid">
+                {players.map((player, playerIdx) => {
+                  let change = 0;
+                  if (index > 0) {
+                    change = row.runningTotals[playerIdx] - ledger[index - 1].runningTotals[playerIdx];
+                  } else {
+                    change = row.runningTotals[playerIdx];
+                  }
+                  const playerJunk = junkEvents.filter(
+                    event => event.hole === row.hole && event.playerId === player.id
+                  );
+                  const grossScore = holeScores[index]?.gross[playerIdx];
+                  const netScore = holeScores[index]?.net[playerIdx];
+                  const playerTeamClass = playerTeams[playerIdx]?.toLowerCase();
+
+                  return (
+                    <div key={player.id} className={`player-details-card team-text-${playerTeamClass}`}>
+                      <strong className="player-name-card">{player.name} ({playerTeams[playerIdx]})</strong>
+                      {grossScore !== undefined && (
+                        <div className="player-score-card">
+                          Score: <span className="gross-score-card">{grossScore}</span>
+                          {netScore !== undefined && netScore !== grossScore && <span className="net-score-card"> (Net: {netScore})</span>}
                         </div>
-                        <div className="player-money-change">
-                          {formatCurrency(change)}
+                      )}
+                      <div className="player-change-card">Change: {formatCurrency(change)}</div>
+                      {playerJunk.length > 0 && (
+                        <div className="player-junk-card">
+                          Junk:
+                          {playerJunk.map((junk, jIdx) => (
+                            <span key={jIdx} className={`junk-item-card junk-${junk.type.toLowerCase().replace(/\s+/g, '-')}`} title={`${junk.type}: $${junk.value}`}>
+                              {junk.type.includes('Birdie') ? '🐦' : 
+                               junk.type.includes('Sand') ? '🏖️' : 
+                               junk.type.includes('Green') ? '🟢' : 
+                               junk.type.includes('Pole') ? '🕳️' :
+                               junk.type.includes('Long') || junk.type.includes('LD') ? '🚀' :
+                               junk.type.substring(0, 1)}
+                              (${junk.value})
+                            </span>
+                          ))}
                         </div>
-                        {playerJunk.length > 0 && (
-                          <div className="player-hole-junk">
-                            {playerJunk.map((junk, jIdx) => (
-                              <span key={jIdx} className={`junk-item junk-${junk.type.toLowerCase().replace(/\s+/g, '-')}`} title={`${junk.type}: $${junk.value}`}>
-                                {junk.type.includes('Birdie') ? '🐦' : 
-                                 junk.type.includes('Sand') ? '🏖️' : 
-                                 junk.type.includes('Green') ? '🟢' : 
-                                 junk.type.includes('Pole') ? '🕳️' :
-                                 junk.type.includes('Long') || junk.type.includes('LD') ? '🚀' :
-                                 junk.type.substring(0, 1)}
-                                <span className="junk-value">${junk.value}</span>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
