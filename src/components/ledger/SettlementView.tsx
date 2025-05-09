@@ -490,11 +490,109 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   );
   
   // Render the big game tab
-  const renderBigGameTab = () => (
-    <div className="settlement-big-game-tab">
-      {/* Implementation of renderBigGameTab */}
-    </div>
-  );
+  const renderBigGameTab = () => {
+    if (!match.bigGame || bigGameRows.length === 0) {
+      return (
+        <div className="settlement-big-game-tab big-game-disabled">
+          <p>Big Game was not enabled for this match, or no Big Game scores were recorded.</p>
+        </div>
+      );
+    }
+
+    let runningTotal = 0;
+
+    return (
+      <div className="settlement-big-game-tab">
+        <div className="big-game-overall-total">
+          <h3>Total Big Game Score</h3>
+          <div className="big-game-total-value">{match.bigGameTotal}</div>
+        </div>
+        <div className="big-game-cards-container">
+          {bigGameRows.map((row) => {
+            runningTotal += row.subtotal;
+
+            const holeScoreEntry = holeScores.find(hs => hs.hole === row.hole);
+            let playerNamesForBestScores: string[] = ['N/A', 'N/A'];
+
+            if (holeScoreEntry) {
+              const netScoresForHole = holeScoreEntry.net;
+              
+              // Create an array of { score, originalPlayerIndex } to handle multiple players having the same score
+              const scoresWithOriginalIndices = netScoresForHole.map((score, playerIdx) => ({
+                score,
+                originalPlayerIndex: playerIdx
+              }));
+
+              // Find first player matching bestNet[0]
+              const p1Entry = scoresWithOriginalIndices.find(entry => entry.score === row.bestNet[0]);
+              if (p1Entry) {
+                playerNamesForBestScores[0] = players[p1Entry.originalPlayerIndex]?.name || 'P?';
+              }
+
+              // Find second player matching bestNet[1], ensuring it's a different player if scores are identical
+              const p2Entry = scoresWithOriginalIndices.find(entry => 
+                entry.score === row.bestNet[1] && 
+                (p1Entry ? entry.originalPlayerIndex !== p1Entry.originalPlayerIndex : true)
+              );
+              
+              if (p2Entry) {
+                playerNamesForBestScores[1] = players[p2Entry.originalPlayerIndex]?.name || 'P?';
+              } else if (row.bestNet[0] === row.bestNet[1] && p1Entry) {
+                // If bestNet scores are identical and we found the first player,
+                // look for another player with the same score but different index.
+                const secondP1Entry = scoresWithOriginalIndices.find(entry => 
+                  entry.score === row.bestNet[0] && entry.originalPlayerIndex !== p1Entry.originalPlayerIndex
+                );
+                if (secondP1Entry) {
+                  playerNamesForBestScores[1] = players[secondP1Entry.originalPlayerIndex]?.name || 'P?';
+                }
+              }
+              // Fallback if the second player wasn't found distinctly (e.g. if bestNet[0] !== bestNet[1] but p2Entry logic failed)
+              if (playerNamesForBestScores[1] === 'N/A' || (row.bestNet[0] !== row.bestNet[1] && playerNamesForBestScores[1] === playerNamesForBestScores[0])){
+                  const sortedByScore = [...scoresWithOriginalIndices].sort((a,b) => a.score - b.score);
+                  if(sortedByScore.length > 1){
+                      const secondBestPlayerIndex = sortedByScore[1].originalPlayerIndex;
+                      // Ensure the second distinct player is chosen if the top two scores are the same from one player
+                      if(sortedByScore[0].originalPlayerIndex === secondBestPlayerIndex && sortedByScore[0].score === sortedByScore[1].score && sortedByScore.length > 2){
+                          playerNamesForBestScores[1] = players[sortedByScore[2].originalPlayerIndex]?.name || 'P?';
+                      } else {
+                          playerNamesForBestScores[1] = players[secondBestPlayerIndex]?.name || 'P?';
+                      }
+                      // Re-verify the first player if the general sort picked a different primary for bestNet[0]
+                      if (players[sortedByScore[0].originalPlayerIndex]?.name !== playerNamesForBestScores[0] && row.bestNet[0] === sortedByScore[0].score) {
+                          playerNamesForBestScores[0] = players[sortedByScore[0].originalPlayerIndex]?.name || 'P?';
+                      }
+                  }
+              }
+            }
+
+            return (
+              <div key={row.hole} className="big-game-card">
+                <div className="big-game-card-header">
+                  <span className="hole-number-card">Hole {row.hole}</span>
+                </div>
+                <div className="big-game-card-scores">
+                  Best Scores: 
+                  <span className="best-net-score-player">
+                    {row.bestNet[0]} ({playerNamesForBestScores[0]})
+                  </span> + 
+                  <span className="best-net-score-player">
+                    {row.bestNet[1]} ({playerNamesForBestScores[1]})
+                  </span>
+                </div>
+                <div className="big-game-card-subtotal">
+                  Hole Subtotal: <span className="subtotal-value">{row.subtotal}</span>
+                </div>
+                <div className="big-game-card-running-total">
+                  Running Total: <span className="running-total-value">{runningTotal}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
   
   // Render the active tab
   const renderActiveTab = () => {

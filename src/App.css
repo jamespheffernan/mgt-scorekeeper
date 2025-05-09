@@ -11,6 +11,7 @@
   --color-error: #e74c3c;
   --border-radius: 8px;
   --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: #343a40;
 }
 
 * {
@@ -4408,4 +4409,96 @@ select option {
   border-radius: 12px; /* More pill-like */
   margin-bottom: 4px; /* Space if they wrap */
   color: #343a40;
+}
+
+/* SettlementView.tsx - Big Game Tab (Card-based) */
+
+.settlement-big-game-tab {
+  /* Styles for the main tab container if needed */
+}
+
+.big-game-disabled {
+  padding: 20px;
+  text-align: center;
+  color: var(--color-gray);
+  font-style: italic;
+}
+
+.big-game-overall-total {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.big-game-overall-total h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.2em;
+  color: var(--color-dark);
+}
+
+.big-game-total-value {
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.big-game-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px;
+   /* Consistent with hole-cards-container if sharing same scroll context */
+  max-height: calc(100vh - 350px); /* Adjust based on overall total + headers/footers/tabs */
+  overflow-y: auto;
+}
+
+.big-game-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.big-game-card-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* .hole-number-card can be reused if styles are identical */
+
+.big-game-card-scores,
+.big-game-card-subtotal,
+.big-game-card-running-total {
+  margin-bottom: 8px;
+  font-size: 0.95em;
+  padding: 6px 0;
+}
+
+.best-net-score {
+  font-weight: 600;
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+.subtotal-value,
+.running-total-value {
+  font-weight: bold;
+  color: var(--color-dark);
+}
+
+.best-net-score-player {
+  font-weight: 600;
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 0 2px;
+  display: inline-block; /* To allow a little spacing if names are long */
 }
