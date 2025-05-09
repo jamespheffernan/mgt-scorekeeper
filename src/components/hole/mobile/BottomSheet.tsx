@@ -70,7 +70,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   // Determine which junk options should be visible
   const isPar3 = par === 3;
   const canHaveGreenie = isPar3;
-  const canHaveClosestToPin = isPar3;
   const canHaveLongDrive = par >= 4; // Typically only on longer holes
   const canHaveThreePutts = junkFlags.isOnGreenFromTee; // Only if on green from tee
   
@@ -195,18 +194,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             </label>
           )}
           
-          {canHaveClosestToPin && (
-            <label style={{ display: 'flex', alignItems: 'center' }}>
-              <input 
-                type="checkbox" 
-                checked={junkFlags.isClosestOnGreen} 
-                onChange={() => handleJunkChange('isClosestOnGreen')}
-                style={{ marginRight: 8 }}
-              />
-              Closest to Pin
-            </label>
-          )}
-          
           {canHaveLongDrive && (
             <label style={{ display: 'flex', alignItems: 'center' }}>
               <input 
@@ -232,7 +219,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           )}
           
           {/* Show note about context-specific junk options only if some are hidden */}
-          {(!canHaveGreenie || !canHaveClosestToPin || !canHaveLongDrive || 
+          {(!canHaveGreenie || !canHaveLongDrive || 
             (!canHaveThreePutts && junkFlags.isOnGreenFromTee === false)) && (
             <div style={{ 
               fontSize: '13px', 
@@ -245,7 +232,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               Note: Some junk options are only available in specific contexts:
               <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px' }}>
                 {!canHaveGreenie && <li>Greenies only available on par 3 holes</li>}
-                {!canHaveClosestToPin && <li>Closest to pin only available on par 3 holes</li>}
                 {!canHaveLongDrive && <li>Long drive only available on par 4+ holes</li>}
                 {!canHaveThreePutts && junkFlags.isOnGreenFromTee === false && <li>Three putts requires green from tee</li>}
               </ul>
