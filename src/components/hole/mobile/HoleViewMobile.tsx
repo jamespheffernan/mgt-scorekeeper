@@ -6,6 +6,7 @@ import { JunkFlags } from '../../../store/gameStore';
 import { allocateStrokes, allocateStrokesMultiTee } from '../../../calcEngine/strokeAllocator';
 import { Course, TeeOption } from '../../../db/courseModel';
 import { millbrookDb } from '../../../db/millbrookDb';
+import CancelGameDialog from '../../CancelGameDialog';
 
 export const HoleViewMobile: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ export const HoleViewMobile: React.FC = () => {
   // Error handling and submission state
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   
   // Get the current standings
   const getCurrentStandings = () => {
@@ -228,7 +230,7 @@ export const HoleViewMobile: React.FC = () => {
   
   // Cancel game
   const cancelGame = () => {
-    navigate('/cancel');
+    setShowCancelDialog(true);
   };
   
   // Get standings data
@@ -451,6 +453,11 @@ export const HoleViewMobile: React.FC = () => {
           Cancel Game
         </button>
       </div>
+      
+      {/* Dialogs */}
+      {showCancelDialog && (
+        <CancelGameDialog onClose={() => setShowCancelDialog(false)} />
+      )}
     </div>
   );
 }; 
