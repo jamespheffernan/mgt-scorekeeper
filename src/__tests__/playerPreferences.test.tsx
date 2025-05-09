@@ -22,10 +22,12 @@ describe('Player Preferences', () => {
     
     const mockSave = vi.fn();
     const mockCancel = vi.fn();
+    const mockDelete = vi.fn();
     
     beforeEach(() => {
       mockSave.mockClear();
       mockCancel.mockClear();
+      mockDelete.mockClear();
     });
     
     it('renders correctly with player data', () => {
@@ -34,6 +36,7 @@ describe('Player Preferences', () => {
           player={mockPlayer} 
           onSave={mockSave} 
           onCancel={mockCancel} 
+          onDelete={mockDelete}
         />
       );
       
@@ -49,6 +52,7 @@ describe('Player Preferences', () => {
           player={mockPlayer} 
           onSave={mockSave} 
           onCancel={mockCancel} 
+          onDelete={mockDelete}
         />
       );
       
@@ -76,6 +80,7 @@ describe('Player Preferences', () => {
           player={mockPlayer} 
           onSave={mockSave} 
           onCancel={mockCancel} 
+          onDelete={mockDelete}
         />
       );
       
@@ -104,6 +109,7 @@ describe('Player Preferences', () => {
           player={mockPlayer} 
           onSave={mockSave} 
           onCancel={mockCancel} 
+          onDelete={mockDelete}
         />
       );
       
