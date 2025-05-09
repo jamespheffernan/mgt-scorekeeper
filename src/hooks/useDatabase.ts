@@ -93,6 +93,17 @@ export function useDatabase() {
     }
   };
 
+  // Delete a player by ID
+  const deletePlayerById = async (playerId: string): Promise<void> => {
+    try {
+      await millbrookDb.deletePlayer(playerId);
+      setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
+    } catch (err) {
+      console.error('Error deleting player:', err);
+      throw new Error('Failed to delete player');
+    }
+  };
+
   // Create a new match
   const createMatch = async (
     matchData: Omit<Match, 'id' | 'state' | 'currentHole' | 'carry' | 'base' | 'doubles' | 'bigGameTotal'>
@@ -173,6 +184,7 @@ export function useDatabase() {
     error,
     createPlayer,
     updatePlayer,
+    deletePlayerById,
     createMatch,
     getGameState,
     updateGameState

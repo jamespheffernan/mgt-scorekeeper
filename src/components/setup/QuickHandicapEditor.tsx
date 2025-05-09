@@ -6,12 +6,14 @@ interface QuickHandicapEditorProps {
   player: Player;
   onSave: (updatedPlayer: Player) => void;
   onCancel: () => void;
+  onDelete: (playerId: string) => void;
 }
 
 export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({ 
   player, 
   onSave, 
-  onCancel 
+  onCancel, 
+  onDelete 
 }) => {
   const [indexValue, setIndexValue] = useState(player.index.toString());
   const [ghinValue, setGhinValue] = useState(player.ghin || '');
@@ -52,6 +54,13 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
     };
     
     onSave(updatedPlayer);
+  };
+  
+  // Handle delete button click
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete ${player.name}? This action cannot be undone.`)) {
+      onDelete(player.id);
+    }
   };
   
   return (
@@ -101,6 +110,13 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
           onClick={onCancel}
         >
           Cancel
+        </button>
+        <button
+          className="delete-button"
+          onClick={handleDelete}
+          style={{ backgroundColor: '#e74c3c', color: 'white' }}
+        >
+          Delete Player
         </button>
         <button
           className="save-button"

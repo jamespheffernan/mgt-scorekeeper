@@ -62,6 +62,13 @@ class MillbrookDatabase extends Dexie {
   }
 
   /**
+   * Delete a player from the database
+   */
+  async deletePlayer(playerId: string): Promise<void> {
+    return this.players.delete(playerId);
+  }
+
+  /**
    * Get all active matches
    */
   async getActiveMatches(): Promise<Match[]> {

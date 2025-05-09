@@ -21,7 +21,13 @@ interface PlayerPreference {
 
 const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // Access database
-  const { players: dbPlayers, isLoading, createPlayer, updatePlayer } = useDatabase();
+  const { 
+    players: dbPlayers, 
+    isLoading, 
+    createPlayer, 
+    updatePlayer,
+    deletePlayerById
+  } = useDatabase();
   
   // Component state
   const [players, setPlayers] = useState<Player[]>([]);
@@ -163,6 +169,21 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     }
   };
   
+  // Handle deleting a player
+  const handleDeletePlayer = async (playerId: string) => {
+    try {
+      await deletePlayerById(playerId);
+      // No need to call setPlayers here as useDatabase hook handles its own state update, which will propagate.
+      // However, we need to update selectedPlayers if the deleted player was selected.
+      setSelectedPlayers(prev => prev.filter(p => p.id !== playerId));
+      setShowHandicapEditor(false);
+      setEditingPlayer(null);
+    } catch (error) {
+      console.error('Failed to delete player:', error);
+      // Optionally, show an error message to the user
+    }
+  };
+  
   // Handle canceling edit
   const handleCancelEdit = () => {
     setShowHandicapEditor(false);
@@ -232,6 +253,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
         player={editingPlayer}
         onSave={handleSavePlayerEdit}
         onCancel={handleCancelEdit}
+        onDelete={handleDeletePlayer}
       />
     );
   }
