@@ -9,12 +9,18 @@ interface PlayerCardProps {
   holeNumber: number;
   par: number;
   grossScore: number;
+  strokes: number;
+  yardage?: number;
   onEdit: () => void;
 }
 
 interface PlayersFourBoxProps {
   onScoreChange: (playerIndex: number, score: number) => void;
   onJunkChange: (playerIndex: number, junk: JunkFlags) => void;
+  playerPars: number[];
+  playerYardages: number[];
+  playerStrokeIndexes: number[];
+  playerStrokes: number[];
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({ 
@@ -22,6 +28,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   team, 
   par, 
   grossScore,
+  strokes,
+  yardage,
   onEdit
 }) => {
   const teamColor = team === 'Red' ? '#e74c3c' : '#3498db';
@@ -53,10 +61,25 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
           display: 'inline-block'
         }}></span>
       </div>
-      <div style={{ fontSize: '15px' }}>
+      <div style={{ fontSize: '14px', display: 'flex', justifyContent: 'space-between' }}>
         <span style={{ marginRight: 8 }}>⭐ Par {par}</span>
+        {strokes > 0 && (
+          <span style={{ 
+            backgroundColor: teamColor,
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            borderRadius: '4px',
+            padding: '1px 6px'
+          }}>-{strokes}</span>
+        )}
       </div>
-      <div style={{ marginTop: 4 }}>
+      {yardage && yardage > 0 && (
+        <div style={{ fontSize: '13px', color: '#718096', marginTop: 2 }}>
+          <span>{yardage} yds</span>
+        </div>
+      )}
+      <div style={{ marginTop: 8 }}>
         <span style={{ fontWeight: 'bold' }}>gross {grossScore}</span>
         <span style={{ marginLeft: 8, color: '#666' }}>▾</span>
       </div>
@@ -64,7 +87,14 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   );
 };
 
-export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({ onScoreChange, onJunkChange }) => {
+export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({ 
+  onScoreChange, 
+  onJunkChange,
+  playerPars,
+  playerYardages,
+  playerStrokeIndexes,
+  playerStrokes
+}) => {
   const players = useGameStore(state => state.players);
   const playerTeams = useGameStore(state => state.playerTeams);
   const currentHole = useGameStore(state => state.match.currentHole);
@@ -110,7 +140,10 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({ onScoreChange, o
           // Get the gross score for this player if available
           const grossScore = currentHoleScore 
             ? currentHoleScore.gross[i] 
-            : holePar[currentHole - 1] || 4; // Default to par
+            : playerPars[i] || holePar[currentHole - 1] || 4; // Default to par
+          
+          // Get player-specific par from props, fall back to hole par
+          const par = playerPars[i] || holePar[currentHole - 1] || 4;
           
           return (
             <PlayerCard
@@ -119,8 +152,10 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({ onScoreChange, o
               team={playerTeams[i] as 'Red' | 'Blue'}
               playerIndex={i}
               holeNumber={currentHole}
-              par={holePar[currentHole - 1] || 4}
+              par={par}
               grossScore={grossScore}
+              strokes={playerStrokes[i] || 0}
+              yardage={playerYardages[i] || 0}
               onEdit={() => handleCardClick(i)}
             />
           );
@@ -132,8 +167,9 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({ onScoreChange, o
           playerIndex={activePlayerIndex}
           team={playerTeams[activePlayerIndex] as 'Red' | 'Blue'}
           currentHole={currentHole}
-          par={holePar[currentHole - 1] || 4}
-          initialScore={currentHoleScore?.gross[activePlayerIndex] || holePar[currentHole - 1] || 4}
+          par={playerPars[activePlayerIndex] || holePar[currentHole - 1] || 4}
+          initialScore={currentHoleScore?.gross[activePlayerIndex] || playerPars[activePlayerIndex] || holePar[currentHole - 1] || 4}
+          strokes={playerStrokes[activePlayerIndex] || 0}
           onScoreChange={handleScoreChange}
           onJunkChange={handleJunkChange}
           onClose={closeSheet}

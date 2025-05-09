@@ -136,7 +136,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               borderRadius: '4px',
               padding: '2px 8px',
             }}>
-              +{strokes} strokes
+              -{strokes} handicap {strokes === 1 ? 'stroke' : 'strokes'}
             </span>
           )}
         </div>
