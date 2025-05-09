@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useDatabase } from '../../hooks/useDatabase';
+import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import { Player, Team } from '../../store/gameStore';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
 import '../../App.css';
@@ -20,14 +20,15 @@ interface PlayerPreference {
 }
 
 const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
-  // Access database
+  // Access database with Firestore and Dexie fallback
   const { 
     players: dbPlayers, 
     isLoading, 
     createPlayer, 
     updatePlayer,
-    deletePlayerById
-  } = useDatabase();
+    deletePlayerById,
+    error
+  } = useFirestorePlayers();
   
   // Component state
   const [players, setPlayers] = useState<Player[]>([]);
@@ -173,7 +174,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   const handleDeletePlayer = async (playerId: string) => {
     try {
       await deletePlayerById(playerId);
-      // No need to call setPlayers here as useDatabase hook handles its own state update, which will propagate.
+      // No need to call setPlayers here as useFirestorePlayers hook handles its own state update, which will propagate.
       // However, we need to update selectedPlayers if the deleted player was selected.
       setSelectedPlayers(prev => prev.filter(p => p.id !== playerId));
       setShowHandicapEditor(false);
