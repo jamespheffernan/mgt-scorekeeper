@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore, JunkFlags } from '../../../store/gameStore';
 import { BottomSheet } from './BottomSheet';
 
@@ -108,6 +108,11 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null);
   // Track updated scores locally for immediate UI update
   const [localScores, setLocalScores] = useState<Record<number, number>>({});
+
+  // Reset local scores when the hole changes
+  useEffect(() => {
+    setLocalScores({});
+  }, [currentHole]);
 
   const handleCardClick = (index: number) => {
     setActivePlayerIndex(index);

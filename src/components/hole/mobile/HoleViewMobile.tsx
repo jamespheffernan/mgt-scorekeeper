@@ -199,7 +199,16 @@ export const HoleViewMobile: React.FC = () => {
     
     try {
       await enterHoleScores(currentHole, grossScores, junkFlags);
-      // No need to navigate - enterHoleScores will update the current hole in the store
+      // Reset junk flags for the next hole
+      const resetJunkFlags: JunkFlags[] = [
+        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
+        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
+        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
+        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false }
+      ];
+      setJunkFlags(resetJunkFlags);
+      
+      // The score values will be reset to par in the useEffect when currentHole changes
     } catch (error) {
       console.error('Error submitting scores:', error);
       setErrorMessage(
