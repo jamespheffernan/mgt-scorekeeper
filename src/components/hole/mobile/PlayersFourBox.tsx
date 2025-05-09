@@ -125,8 +125,68 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
 
   const closeSheet = () => setActivePlayerIndex(null);
 
+  // Group players by team
+  const redPlayerIndices: number[] = [];
+  const bluePlayerIndices: number[] = [];
+  
+  // Find players by team
+  playerTeams.forEach((team, index) => {
+    if (index < 4) { // Only process the first 4 players
+      if (team === 'Red') {
+        redPlayerIndices.push(index);
+      } else if (team === 'Blue') {
+        bluePlayerIndices.push(index);
+      }
+    }
+  });
+  
+  // Combine indices in order: All Red players, then all Blue players
+  const orderedIndices = [...redPlayerIndices, ...bluePlayerIndices];
+
   return (
     <div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        marginBottom: 8,
+        padding: '0 4px'
+      }}>
+        <div style={{ 
+          color: '#e74c3c', 
+          fontWeight: 'bold', 
+          fontSize: '15px',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <span style={{ 
+            width: 10, 
+            height: 10, 
+            borderRadius: '50%', 
+            backgroundColor: '#e74c3c',
+            display: 'inline-block',
+            marginRight: 6
+          }}></span>
+          RED TEAM
+        </div>
+        <div style={{ 
+          color: '#3498db', 
+          fontWeight: 'bold', 
+          fontSize: '15px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end'
+        }}>
+          BLUE TEAM
+          <span style={{ 
+            width: 10, 
+            height: 10, 
+            borderRadius: '50%', 
+            backgroundColor: '#3498db',
+            display: 'inline-block',
+            marginLeft: 6
+          }}></span>
+        </div>
+      </div>
       <div
         data-testid="players-grid"
         style={{ 
@@ -136,27 +196,27 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
           margin: '0 -4px', // Compensate for small screens
         }}
       >
-        {players.slice(0, 4).map((player, i) => {
+        {orderedIndices.map((playerIndex) => {
           // Get the gross score for this player if available
           const grossScore = currentHoleScore 
-            ? currentHoleScore.gross[i] 
-            : playerPars[i] || holePar[currentHole - 1] || 4; // Default to par
+            ? currentHoleScore.gross[playerIndex] 
+            : playerPars[playerIndex] || holePar[currentHole - 1] || 4; // Default to par
           
           // Get player-specific par from props, fall back to hole par
-          const par = playerPars[i] || holePar[currentHole - 1] || 4;
+          const par = playerPars[playerIndex] || holePar[currentHole - 1] || 4;
           
           return (
             <PlayerCard
-              key={player.id || i}
-              name={player.name}
-              team={playerTeams[i] as 'Red' | 'Blue'}
-              playerIndex={i}
+              key={players[playerIndex].id || playerIndex}
+              name={players[playerIndex].name}
+              team={playerTeams[playerIndex] as 'Red' | 'Blue'}
+              playerIndex={playerIndex}
               holeNumber={currentHole}
               par={par}
               grossScore={grossScore}
-              strokes={playerStrokes[i] || 0}
-              yardage={playerYardages[i] || 0}
-              onEdit={() => handleCardClick(i)}
+              strokes={playerStrokes[playerIndex] || 0}
+              yardage={playerYardages[playerIndex] || 0}
+              onEdit={() => handleCardClick(playerIndex)}
             />
           );
         })}
