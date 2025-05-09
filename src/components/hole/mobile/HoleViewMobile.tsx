@@ -7,6 +7,7 @@ import { allocateStrokes, allocateStrokesMultiTee } from '../../../calcEngine/st
 import { Course, TeeOption } from '../../../db/courseModel';
 import { millbrookDb } from '../../../db/millbrookDb';
 import CancelGameDialog from '../../CancelGameDialog';
+import EndGameDialog from '../../EndGameDialog';
 
 export const HoleViewMobile: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ export const HoleViewMobile: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showEndGameDialog, setShowEndGameDialog] = useState(false);
   
   // Get the current standings
   const getCurrentStandings = () => {
@@ -198,19 +200,24 @@ export const HoleViewMobile: React.FC = () => {
   const submitScores = async () => {
     setErrorMessage(null);
     setIsSubmitting(true);
+    const holeBeingSubmitted = currentHole;
     
     try {
-      await enterHoleScores(currentHole, grossScores, junkFlags);
-      // Reset junk flags for the next hole
-      const resetJunkFlags: JunkFlags[] = [
-        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
-        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
-        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
-        { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false }
-      ];
-      setJunkFlags(resetJunkFlags);
+      await enterHoleScores(holeBeingSubmitted, grossScores, junkFlags);
       
-      // The score values will be reset to par in the useEffect when currentHole changes
+      if (holeBeingSubmitted === 18) {
+        setShowEndGameDialog(true);
+      } else {
+        // Reset junk flags for the next hole
+        const resetJunkFlags: JunkFlags[] = [
+          { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
+          { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
+          { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
+          { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false }
+        ];
+        setJunkFlags(resetJunkFlags);
+        // Scores will reset via useEffect when currentHole (from store) changes
+      }
     } catch (error) {
       console.error('Error submitting scores:', error);
       setErrorMessage(
@@ -457,6 +464,9 @@ export const HoleViewMobile: React.FC = () => {
       {/* Dialogs */}
       {showCancelDialog && (
         <CancelGameDialog onClose={() => setShowCancelDialog(false)} />
+      )}
+      {showEndGameDialog && (
+        <EndGameDialog onClose={() => setShowEndGameDialog(false)} />
       )}
     </div>
   );

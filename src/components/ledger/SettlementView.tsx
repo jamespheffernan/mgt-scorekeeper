@@ -393,7 +393,7 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
           {match.bigGame && (
             <div className="stat-item">
               <div className="stat-label">Big Game</div>
-              <div className="stat-value">${gameStats.bigGamePoints}</div>
+              <div className="stat-value">{gameStats.bigGamePoints}</div>
             </div>
           )}
         </div>
