@@ -8,6 +8,7 @@ interface BottomSheetProps {
   currentHole: number;
   par: number;
   initialScore: number;
+  strokes: number;
   onScoreChange: (score: number) => void;
   onJunkChange: (junk: JunkFlags) => void;
   onClose: () => void;
@@ -19,6 +20,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   currentHole, 
   par, 
   initialScore,
+  strokes,
   onScoreChange, 
   onJunkChange, 
   onClose 
@@ -39,6 +41,12 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   
   const handleJunkChange = (flag: keyof JunkFlags) => {
     const updatedFlags = { ...junkFlags, [flag]: !junkFlags[flag] };
+    
+    // If turning off green from tee, also turn off three putts
+    if (flag === 'isOnGreenFromTee' && !updatedFlags.isOnGreenFromTee) {
+      updatedFlags.hadThreePutts = false;
+    }
+    
     setJunkFlags(updatedFlags);
     onJunkChange(updatedFlags);
   };
@@ -58,6 +66,13 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     if (score === par + 2) return { text: `${score} (Double Bogey)`, class: 'double-bogey-score' };
     return { text: score.toString(), class: '' };
   };
+  
+  // Determine which junk options should be visible
+  const isPar3 = par === 3;
+  const canHaveGreenie = isPar3;
+  const canHaveClosestToPin = isPar3;
+  const canHaveLongDrive = par >= 4; // Typically only on longer holes
+  const canHaveThreePutts = junkFlags.isOnGreenFromTee; // Only if on green from tee
   
   return (
     <div
@@ -110,6 +125,24 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         </button>
       </div>
       
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ fontSize: '15px' }}>
+          <span style={{ fontWeight: 'bold', marginRight: 12 }}>Par: {par}</span>
+          {strokes > 0 && (
+            <span style={{
+              backgroundColor: teamColor,
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              borderRadius: '4px',
+              padding: '2px 8px',
+            }}>
+              +{strokes} strokes
+            </span>
+          )}
+        </div>
+      </div>
+      
       <div style={{ marginBottom: 20 }}>
         <h4 style={{ marginBottom: 12 }}>Score</h4>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -149,42 +182,75 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             />
             Bunker Shot (Sandy)
           </label>
-          <label style={{ display: 'flex', alignItems: 'center' }}>
-            <input 
-              type="checkbox" 
-              checked={junkFlags.isOnGreenFromTee} 
-              onChange={() => handleJunkChange('isOnGreenFromTee')}
-              style={{ marginRight: 8 }}
-            />
-            On Green from Tee (Greenie)
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center' }}>
-            <input 
-              type="checkbox" 
-              checked={junkFlags.isClosestOnGreen} 
-              onChange={() => handleJunkChange('isClosestOnGreen')}
-              style={{ marginRight: 8 }}
-            />
-            Closest to Pin
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center' }}>
-            <input 
-              type="checkbox" 
-              checked={junkFlags.isLongDrive} 
-              onChange={() => handleJunkChange('isLongDrive')}
-              style={{ marginRight: 8 }}
-            />
-            Long Drive
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center' }}>
-            <input 
-              type="checkbox" 
-              checked={junkFlags.hadThreePutts} 
-              onChange={() => handleJunkChange('hadThreePutts')}
-              style={{ marginRight: 8 }}
-            />
-            Three Putts
-          </label>
+          
+          {canHaveGreenie && (
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="checkbox" 
+                checked={junkFlags.isOnGreenFromTee} 
+                onChange={() => handleJunkChange('isOnGreenFromTee')}
+                style={{ marginRight: 8 }}
+              />
+              On Green from Tee (Greenie)
+            </label>
+          )}
+          
+          {canHaveClosestToPin && (
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="checkbox" 
+                checked={junkFlags.isClosestOnGreen} 
+                onChange={() => handleJunkChange('isClosestOnGreen')}
+                style={{ marginRight: 8 }}
+              />
+              Closest to Pin
+            </label>
+          )}
+          
+          {canHaveLongDrive && (
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="checkbox" 
+                checked={junkFlags.isLongDrive} 
+                onChange={() => handleJunkChange('isLongDrive')}
+                style={{ marginRight: 8 }}
+              />
+              Long Drive
+            </label>
+          )}
+          
+          {canHaveThreePutts && (
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="checkbox" 
+                checked={junkFlags.hadThreePutts} 
+                onChange={() => handleJunkChange('hadThreePutts')}
+                style={{ marginRight: 8 }}
+              />
+              Three Putts
+            </label>
+          )}
+          
+          {/* Show note about context-specific junk options only if some are hidden */}
+          {(!canHaveGreenie || !canHaveClosestToPin || !canHaveLongDrive || 
+            (!canHaveThreePutts && junkFlags.isOnGreenFromTee === false)) && (
+            <div style={{ 
+              fontSize: '13px', 
+              color: '#666', 
+              marginTop: '8px',
+              padding: '8px',
+              backgroundColor: '#f9f9f9',
+              borderRadius: '4px'
+            }}>
+              Note: Some junk options are only available in specific contexts:
+              <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px' }}>
+                {!canHaveGreenie && <li>Greenies only available on par 3 holes</li>}
+                {!canHaveClosestToPin && <li>Closest to pin only available on par 3 holes</li>}
+                {!canHaveLongDrive && <li>Long drive only available on par 4+ holes</li>}
+                {!canHaveThreePutts && junkFlags.isOnGreenFromTee === false && <li>Three putts requires green from tee</li>}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       
