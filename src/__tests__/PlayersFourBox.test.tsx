@@ -42,11 +42,21 @@ describe('PlayersFourBox', () => {
   const mockScoreChange = jest.fn();
   const mockJunkChange = jest.fn();
 
+  // Sample props required by PlayersFourBox
+  const samplePars = [4, 4, 4, 4];
+  const sampleYardages = [400, 405, 390, 410];
+  const sampleStrokeIndexes = [1, 2, 3, 4];
+  const sampleStrokes = [0, 0, 0, 0];
+
   it('renders four player cards', () => {
     render(
       <PlayersFourBox 
         onScoreChange={mockScoreChange} 
         onJunkChange={mockJunkChange} 
+        playerPars={samplePars}
+        playerYardages={sampleYardages}
+        playerStrokeIndexes={sampleStrokeIndexes}
+        playerStrokes={sampleStrokes}
       />
     );
     const cards = screen.getAllByTestId('player-card');
@@ -58,6 +68,10 @@ describe('PlayersFourBox', () => {
       <PlayersFourBox 
         onScoreChange={mockScoreChange} 
         onJunkChange={mockJunkChange} 
+        playerPars={samplePars}
+        playerYardages={sampleYardages}
+        playerStrokeIndexes={sampleStrokeIndexes}
+        playerStrokes={sampleStrokes}
       />
     );
     const jimmyCard = screen.getByText('Jimmy');
