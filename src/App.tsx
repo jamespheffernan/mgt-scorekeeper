@@ -11,6 +11,10 @@ import { ResponsiveHoleView } from './components/hole/ResponsiveHoleView';  // I
 import { CoursePreview } from './components/setup/CoursePreview';
 import GameHistoryView from './components/GameHistory';
 import { TestFixes } from './TestFixes'; // Import our test component
+import SignUp from './components/auth/SignUp';
+import LogIn from './components/auth/LogIn';
+import UserProfile from './components/auth/UserProfile';
+import { useAuth } from './context/AuthContext';
 
 // Uncomment these for testing/development
 /*
@@ -21,6 +25,21 @@ import { PayoutCalculatorTest } from './components/PayoutCalculatorTest';
 import { JunkCalculatorTest } from './components/JunkCalculatorTest';
 import { BigGameCalculatorTest } from './components/BigGameCalculatorTest';
 */
+
+// Protected Route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { currentUser, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+  
+  if (!currentUser) {
+    return <Navigate to="/login" />;
+  }
+  
+  return <>{children}</>;
+};
 
 function App() {
   // Access store state
@@ -82,6 +101,7 @@ function App() {
           <header className="app-header">
             <h1>Millbrook Scorekeeper</h1>
             <div className="header-actions">
+              <UserProfile />
               <button 
                 className="course-manager-button"
                 onClick={toggleCourseManager}
@@ -119,12 +139,56 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />} />
-              <Route path="/setup" element={<MatchSetup />} />
-              <Route path="/hole/:holeNumber" element={<ResponsiveHoleView />} />
-              <Route path="/ledger" element={<LedgerView />} />
-              <Route path="/settlement" element={<SettlementView matchId={match.id} />} />
-              <Route path="/history" element={<GameHistoryView />} />
-              <Route path="/course-preview" element={<CoursePreview />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<LogIn />} />
+              <Route 
+                path="/setup" 
+                element={
+                  <ProtectedRoute>
+                    <MatchSetup />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/hole/:holeNumber" 
+                element={
+                  <ProtectedRoute>
+                    <ResponsiveHoleView />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ledger" 
+                element={
+                  <ProtectedRoute>
+                    <LedgerView />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settlement" 
+                element={
+                  <ProtectedRoute>
+                    <SettlementView matchId={match.id} />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/history" 
+                element={
+                  <ProtectedRoute>
+                    <GameHistoryView />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/course-preview" 
+                element={
+                  <ProtectedRoute>
+                    <CoursePreview />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>
