@@ -39,30 +39,34 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
       data-testid="player-card"
       onClick={onEdit}
       style={{
-        border: '1px solid #ccc',
-        borderLeft: `4px solid ${teamColor}`,
+        border: '1px solid #e1e5ea',
+        borderLeft: `3px solid ${teamColor}`,
         borderRadius: 8,
-        padding: 12,
-        height: '100%',
+        padding: '10px',
+        height: 'calc(100% - 20px)', // Account for padding
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#fff',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <strong style={{ fontSize: '16px' }}>{name}</strong>
-        <span style={{ 
-          width: 12, 
-          height: 12, 
-          borderRadius: '50%', 
-          backgroundColor: teamColor,
-          display: 'inline-block'
-        }}></span>
-      </div>
-      <div style={{ fontSize: '14px', display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ marginRight: 8 }}>⭐ Par {par}</span>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 6 
+      }}>
+        <strong style={{ 
+          fontSize: '15px', 
+          color: teamColor,
+          textTransform: 'lowercase',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          maxWidth: '80%',
+          whiteSpace: 'nowrap'
+        }}>{name}</strong>
+        
         {strokes > 0 && (
           <span style={{ 
             backgroundColor: teamColor,
@@ -70,18 +74,53 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             fontSize: '12px',
             fontWeight: 'bold',
             borderRadius: '4px',
-            padding: '1px 6px'
+            padding: '1px 6px',
+            marginLeft: 'auto'
           }}>-{strokes}</span>
         )}
       </div>
-      {yardage && yardage > 0 && (
-        <div style={{ fontSize: '13px', color: '#718096', marginTop: 2 }}>
-          <span>{yardage} yds</span>
+      
+      <div style={{ 
+        fontSize: '13px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '2px' 
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            fontSize: '12px', 
+            color: '#888' 
+          }}>
+            ⭐ Par {par}
+          </span>
         </div>
-      )}
-      <div style={{ marginTop: 8 }}>
-        <span style={{ fontWeight: 'bold' }}>gross {grossScore}</span>
-        <span style={{ marginLeft: 8, color: '#666' }}>▾</span>
+        
+        {yardage && yardage > 0 && (
+          <div style={{ fontSize: '12px', color: '#718096' }}>
+            <span>{yardage} yds</span>
+          </div>
+        )}
+      </div>
+      
+      <div style={{ 
+        marginTop: 'auto', 
+        paddingTop: '4px', 
+        display: 'flex', 
+        alignItems: 'center' 
+      }}>
+        <span style={{ 
+          fontWeight: 'bold',
+          fontSize: '14px'
+        }}>
+          gross {grossScore}
+        </span>
+        <span style={{ 
+          marginLeft: '4px', 
+          color: '#666', 
+          fontSize: '12px' 
+        }}>▾</span>
       </div>
     </div>
   );
@@ -169,7 +208,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   };
   
   return (
-    <div>
+    <div style={{ paddingBottom: '8px' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -179,37 +218,21 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
         <div style={{ 
           color: '#e74c3c', 
           fontWeight: 'bold', 
-          fontSize: '15px',
+          fontSize: '14px',
           display: 'flex',
           alignItems: 'center'
         }}>
-          <span style={{ 
-            width: 10, 
-            height: 10, 
-            borderRadius: '50%', 
-            backgroundColor: '#e74c3c',
-            display: 'inline-block',
-            marginRight: 6
-          }}></span>
           RED TEAM
         </div>
         <div style={{ 
           color: '#3498db', 
           fontWeight: 'bold', 
-          fontSize: '15px',
+          fontSize: '14px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end'
         }}>
           BLUE TEAM
-          <span style={{ 
-            width: 10, 
-            height: 10, 
-            borderRadius: '50%', 
-            backgroundColor: '#3498db',
-            display: 'inline-block',
-            marginLeft: 6
-          }}></span>
         </div>
       </div>
       <div
@@ -217,8 +240,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
         style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(2, 1fr)', 
-          gap: 8,
-          margin: '0 -4px', // Compensate for small screens
+          gap: 10,
+          margin: '0',
         }}
       >
         {/* Create pairs of players (one red, one blue) for each row */}

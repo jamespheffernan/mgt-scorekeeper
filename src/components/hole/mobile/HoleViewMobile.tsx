@@ -243,30 +243,76 @@ export const HoleViewMobile: React.FC = () => {
   // Get standings data
   const { redTotal, blueTotal } = getCurrentStandings();
   
+  // Calculate the height of the action bar for padding
+  const actionBarHeight = 70; // Reduced height
+  const footerHeight = 50; // Reduced height
+  const bottomSpacing = actionBarHeight + footerHeight;
+  
   return (
-    <div className="hole-view-mobile">
-      {/* Header */}
-      <div style={{ 
-        padding: '12px 16px', 
-        textAlign: 'center',
-        borderBottom: '1px solid #e2e8f0',
-        backgroundColor: '#f8fafc', 
-        marginBottom: 12
-      }}>
-        <h2 style={{ margin: 0, fontSize: '18px' }}>
-          Millbrook Scorekeeper <span style={{ opacity: 0.7 }}>(Hole {currentHole})</span>
-        </h2>
-      </div>
-      
-      {/* Hole Info Strip */}
-      <div style={{ 
-        margin: '0 8px 12px',
-        padding: '10px 12px',
-        backgroundColor: '#f1f5f9',
-        borderRadius: '8px',
-        fontSize: '13px',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+    <div className="hole-view-mobile" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Content container with padding at the bottom to prevent content from being hidden behind fixed buttons */}
+      <div style={{ paddingBottom: `${bottomSpacing}px`, margin: '0 auto', maxWidth: '540px' }}>
+        {/* Header Bar */}
+        <div style={{ 
+          backgroundColor: '#1a5e46', 
+          color: 'white',
+          padding: '12px 16px',
+          textAlign: 'center',
+          marginBottom: '12px'
+        }}>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: '24px', 
+            fontWeight: 'bold',
+            fontFamily: 'serif'
+          }}>
+            The Millbrook Game
+          </h1>
+        </div>
+        
+        {/* Hole Info Area */}
+        <div style={{ 
+          margin: '0 12px 16px',
+          padding: '15px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ 
+              margin: 0, 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: '#333',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              Millbrook Scorekeeper
+              <span style={{ 
+                fontSize: '16px', 
+                opacity: 0.7, 
+                fontWeight: 'normal',
+                marginTop: '4px'
+              }}>
+                (Hole {currentHole})
+              </span>
+            </h3>
+          </div>
+        </div>
+        
+        {/* Course Info Strip */}
+        <div style={{ 
+          margin: '0 12px 16px',
+          padding: '10px 15px',
+          backgroundColor: '#f5f9f7',
+          borderRadius: '8px',
+          fontSize: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ fontWeight: 'bold', marginRight: '20px' }}>Championship</div>
+          
           {match.playerTeeIds && match.playerTeeIds.some(id => Boolean(id)) ? (
             <>
               {/* Show first tee's info if available */}
@@ -278,28 +324,11 @@ export const HoleViewMobile: React.FC = () => {
                       const holeInfo = tee.holes?.find(h => h.number === currentHole);
                       if (holeInfo) {
                         return (
-                          <div key={teeId} style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'space-between',
-                            width: '100%',
-                          }}>
-                            <span>
-                              <span style={{ 
-                                display: 'inline-block',
-                                width: 12,
-                                height: 12,
-                                borderRadius: '50%',
-                                backgroundColor: tee.color.toLowerCase(),
-                                marginRight: 6,
-                                verticalAlign: 'middle'
-                              }}></span>
-                              {tee.name}
-                            </span>
-                            <span style={{ fontWeight: 'bold' }}>Par {holeInfo.par}</span>
-                            <span>{holeInfo.yardage} yds</span>
-                            <span>SI: {holeInfo.strokeIndex}</span>
-                          </div>
+                          <React.Fragment key={teeId}>
+                            <div style={{ fontWeight: 'bold' }}>Par {holeInfo.par}</div>
+                            <div>{holeInfo.yardage} yds</div>
+                            <div>SI: {holeInfo.strokeIndex}</div>
+                          </React.Fragment>
                         );
                       }
                     }
@@ -309,87 +338,115 @@ export const HoleViewMobile: React.FC = () => {
               )}
             </>
           ) : (
-            <span>Par {defaultPar}</span>
+            <div style={{ fontWeight: 'bold' }}>Par {defaultPar}</div>
           )}
         </div>
+        
+        {/* Standings Strip */}
+        <div style={{ 
+          margin: '0 12px 16px',
+          padding: '12px 15px',
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            marginBottom: 8,
+            fontSize: '15px',
+            fontWeight: 'bold'
+          }}>
+            <span style={{ 
+              color: '#e74c3c',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                display: 'inline-block',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: '#e74c3c'
+              }}></span>
+              Red {formatCurrency(redTotal)}
+            </span>
+            <span>Carry ${match.carry}</span>
+            <span style={{ 
+              color: '#3498db',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                display: 'inline-block',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: '#3498db'
+              }}></span>
+              Blue {formatCurrency(blueTotal)}
+            </span>
+          </div>
+          <div style={{ 
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontSize: '13px',
+            color: '#64748b'
+          }}>
+            <span>Base ${match.base}</span>
+            <span>{match.doubleUsedThisHole ? 'Double: YES' : '\u00A0'}</span>
+          </div>
+        </div>
+        
+        {/* Players Grid */}
+        <div style={{ margin: '0 12px' }}>
+          <PlayersFourBox 
+            onScoreChange={updateScore}
+            onJunkChange={updateJunk}
+            playerPars={playerPars}
+            playerYardages={playerYardages}
+            playerStrokeIndexes={playerSIs}
+            playerStrokes={playerStrokes}
+          />
+        </div>
+        
+        {/* Error message if any */}
+        {errorMessage && (
+          <div style={{ 
+            margin: '16px 12px 0', 
+            padding: '8px 12px', 
+            backgroundColor: '#fee2e2', 
+            color: '#b91c1c',
+            borderRadius: '4px',
+            fontSize: '14px'
+          }}>
+            {errorMessage}
+          </div>
+        )}
       </div>
       
-      {/* Standings Strip */}
+      {/* Fixed Action Buttons - Always visible at the bottom of the screen */}
       <div style={{ 
-        margin: '0 8px 16px',
-        padding: '12px',
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          marginBottom: 8,
-          fontSize: '15px',
-          fontWeight: 'bold'
-        }}>
-          <span style={{ color: '#e74c3c' }}>Red {formatCurrency(redTotal)}</span>
-          <span>Carry ${match.carry}</span>
-          <span style={{ color: '#3498db' }}>Blue {formatCurrency(blueTotal)}</span>
-        </div>
-        <div style={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '13px',
-          color: '#64748b'
-        }}>
-          <span>Base ${match.base}</span>
-          <span>{match.doubleUsedThisHole ? 'Double: YES' : '\u00A0'}</span>
-        </div>
-      </div>
-      
-      {/* Players Grid */}
-      <div style={{ margin: '0 8px' }}>
-        <PlayersFourBox 
-          onScoreChange={updateScore}
-          onJunkChange={updateJunk}
-          playerPars={playerPars}
-          playerYardages={playerYardages}
-          playerStrokeIndexes={playerSIs}
-          playerStrokes={playerStrokes}
-        />
-      </div>
-      
-      {/* Error message if any */}
-      {errorMessage && (
-        <div style={{ 
-          margin: '16px 8px 0', 
-          padding: '8px 12px', 
-          backgroundColor: '#fee2e2', 
-          color: '#b91c1c',
-          borderRadius: '4px',
-          fontSize: '14px'
-        }}>
-          {errorMessage}
-        </div>
-      )}
-      
-      {/* Action Buttons */}
-      <div style={{ 
-        position: 'sticky',
-        bottom: 0,
+        position: 'fixed',
+        bottom: footerHeight,
         left: 0,
         right: 0,
-        padding: '12px 8px',
+        padding: '10px',
         backgroundColor: '#fff',
         boxShadow: '0 -1px 3px rgba(0,0,0,0.1)',
-        marginTop: 16,
         display: 'flex',
         justifyContent: 'space-between',
-        gap: 8
+        gap: 8,
+        zIndex: 10
       }}>
         <button
           onClick={handleCallDouble}
           disabled={!isDoubleAvailable || match.doubleUsedThisHole || isSubmitting}
           style={{ 
             flex: 1,
-            padding: '10px 16px',
+            padding: '10px 0',
             backgroundColor: isDoubleAvailable && !match.doubleUsedThisHole && !isSubmitting 
               ? (trailingTeam === 'Red' ? '#e74c3c' : '#3498db') 
               : '#a0aec0',
@@ -397,7 +454,8 @@ export const HoleViewMobile: React.FC = () => {
             border: 'none',
             borderRadius: '6px',
             fontWeight: 'bold',
-            opacity: isDoubleAvailable && !match.doubleUsedThisHole && !isSubmitting ? 1 : 0.7,
+            fontSize: '14px',
+            opacity: isDoubleAvailable && !match.doubleUsedThisHole && !isSubmitting ? 1 : 0.4,
             cursor: isDoubleAvailable && !match.doubleUsedThisHole && !isSubmitting ? 'pointer' : 'not-allowed'
           }}
         >
@@ -408,12 +466,13 @@ export const HoleViewMobile: React.FC = () => {
           disabled={isSubmitting}
           style={{ 
             flex: 1.5,
-            padding: '10px 16px',
-            backgroundColor: '#10b981',
+            padding: '10px 0',
+            backgroundColor: '#1a5e46',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
             fontWeight: 'bold',
+            fontSize: '14px',
             opacity: isSubmitting ? 0.7 : 1,
             cursor: isSubmitting ? 'not-allowed' : 'pointer'
           }}
@@ -422,26 +481,30 @@ export const HoleViewMobile: React.FC = () => {
         </button>
       </div>
       
-      {/* Footer Links */}
+      {/* Fixed Footer Links */}
       <div style={{ 
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
         display: 'flex',
         justifyContent: 'center',
         gap: 24,
-        padding: '12px 0',
-        marginTop: 8,
+        padding: '10px 0',
+        backgroundColor: '#fff',
         borderTop: '1px solid #e2e8f0',
         fontSize: '14px',
-        color: '#64748b'
+        zIndex: 9
       }}>
         <button 
           onClick={viewLedger}
           style={{ 
             background: 'none',
+            color: '#1a5e46',
             border: 'none',
-            color: '#64748b',
-            textDecoration: 'underline',
-            cursor: 'pointer',
-            padding: 0
+            padding: '5px 10px',
+            fontWeight: 600,
+            cursor: 'pointer'
           }}
         >
           View Ledger
@@ -450,21 +513,36 @@ export const HoleViewMobile: React.FC = () => {
           onClick={cancelGame}
           style={{ 
             background: 'none',
+            color: '#e74c3c',
             border: 'none',
-            color: '#64748b',
-            textDecoration: 'underline',
-            cursor: 'pointer',
-            padding: 0
+            padding: '5px 10px',
+            fontWeight: 600,
+            cursor: 'pointer'
           }}
         >
           Cancel Game
         </button>
       </div>
       
+      {/* Version number */}
+      <div style={{
+        position: 'fixed',
+        bottom: 2,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        fontSize: '12px',
+        color: '#999',
+        marginTop: '5px'
+      }}>
+        v0.1.0
+      </div>
+      
       {/* Dialogs */}
       {showCancelDialog && (
         <CancelGameDialog onClose={() => setShowCancelDialog(false)} />
       )}
+      
       {showEndGameDialog && (
         <EndGameDialog onClose={() => setShowEndGameDialog(false)} />
       )}
