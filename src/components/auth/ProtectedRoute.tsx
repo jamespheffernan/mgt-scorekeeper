@@ -1,5 +1,4 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './auth.css';
 
@@ -8,16 +7,14 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { currentUser, loading, authInitialized } = useAuth();
+  const { loading, authInitialized } = useAuth();
   
+  // Only show loading while auth is initializing
   if (loading || !authInitialized) {
     return <div className="loading">Loading...</div>;
   }
   
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
-  
+  // Always render children, assuming anonymous auth will work
   return <>{children}</>;
 };
 

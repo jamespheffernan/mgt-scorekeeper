@@ -31,7 +31,7 @@ import { BigGameCalculatorTest } from './components/BigGameCalculatorTest';
 function App() {
   // Access store state
   const match = useGameStore(state => state.match);
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, authInitialized } = useAuth();
   
   // Component state
   const [showCourseManager, setShowCourseManager] = useState(false);
@@ -45,8 +45,8 @@ function App() {
   const hasActiveMatch = match && match.id && match.state === 'active';
   const isGameActive = match.id !== '' && match.state === 'active';
 
-  // If loading, show a simple loading screen to prevent any redirects
-  if (loading) {
+  // If loading or auth not initialized, show a simple loading screen to prevent any redirects
+  if (loading || !authInitialized) {
     return <div className="loading-screen">Loading...</div>;
   }
   
@@ -88,19 +88,13 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={
-                currentUser 
-                  ? (hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />)
-                  : <Navigate to="/login" />
+                hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />
               } />
               <Route path="/login" element={<LogIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route 
                 path="/setup" 
-                element={
-                  <ProtectedRoute>
-                    <MatchSetup />
-                  </ProtectedRoute>
-                } 
+                element={<MatchSetup />} 
               />
               <Route 
                 path="/hole/:holeNumber" 
