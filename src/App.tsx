@@ -16,6 +16,7 @@ import LogIn from './components/auth/LogIn';
 import UserProfile from './components/auth/UserProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import TopBar from './components/TopBar';
+import { useAuth } from './context/AuthContext';
 
 // Uncomment these for testing/development
 /*
@@ -30,6 +31,7 @@ import { BigGameCalculatorTest } from './components/BigGameCalculatorTest';
 function App() {
   // Access store state
   const match = useGameStore(state => state.match);
+  const { currentUser, loading } = useAuth();
   
   // Component state
   const [showCourseManager, setShowCourseManager] = useState(false);
@@ -42,6 +44,11 @@ function App() {
   // Check if there's an active match
   const hasActiveMatch = match && match.id && match.state === 'active';
   const isGameActive = match.id !== '' && match.state === 'active';
+
+  // If loading, show a simple loading screen to prevent any redirects
+  if (loading) {
+    return <div className="loading-screen">Loading...</div>;
+  }
   
   return (
     <ErrorBoundary>
@@ -80,7 +87,13 @@ function App() {
           
           <main>
             <Routes>
-              <Route path="/" element={hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />} />
+              <Route path="/" element={
+                currentUser 
+                  ? (hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />)
+                  : <Navigate to="/login" />
+              } />
+              <Route path="/login" element={<LogIn />} />
+              <Route path="/signup" element={<SignUp />} />
               <Route 
                 path="/setup" 
                 element={

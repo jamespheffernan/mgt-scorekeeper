@@ -8,9 +8,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, authInitialized } = useAuth();
   
-  if (loading) {
+  if (loading || !authInitialized) {
     return <div className="loading">Loading...</div>;
   }
   
