@@ -15,6 +15,7 @@ import SignUp from './components/auth/SignUp';
 import LogIn from './components/auth/LogIn';
 import UserProfile from './components/auth/UserProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import TopBar from './components/TopBar';
 
 // Uncomment these for testing/development
 /*
@@ -47,7 +48,7 @@ function App() {
       <Router>
         <div className="millbrook-app">
           <header className="app-header">
-            <h1>Millbrook Scorekeeper</h1>
+            <TopBar />
             <div className="header-actions">
               <UserProfile />
               <button 
@@ -80,8 +81,6 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/login" element={<LogIn />} />
               <Route 
                 path="/setup" 
                 element={

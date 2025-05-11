@@ -4502,3 +4502,75 @@ select option {
   margin: 0 2px;
   display: inline-block; /* To allow a little spacing if names are long */
 }
+
+/* Add or update these styles for team assignment buttons */
+.team-button.red {
+  background-color: var(--color-red);
+  color: #fff;
+  border: none;
+}
+.team-button.red.active {
+  background-color: #b71c1c;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.15);
+}
+.team-button.blue {
+  background-color: var(--color-blue);
+  color: #fff;
+  border: none;
+}
+.team-button.blue.active {
+  background-color: #1565c0;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+}
+.team-button.full-width {
+  width: 100%;
+  margin-bottom: 4px;
+}
+.current-team-indicator.red {
+  color: var(--color-red);
+  font-weight: bold;
+  margin-top: 2px;
+}
+.current-team-indicator.blue {
+  color: var(--color-blue);
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+/* Make the player roster container scrollable */
+.player-roster-container,
+.mobile-player-roster {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.player-lists-container.mobile-scrollable-list-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  margin-bottom: 16px;
+}
+
+/* Sticky header and confirm button remain as before */
+.selected-players-summary.mobile-selected-players-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.confirm-selection-section.mobile-confirm-button-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: white;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
+  padding-bottom: 8px;
+}

@@ -290,15 +290,20 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
                     <div className="team-assignment-controls mobile-team-controls">
                       <button 
                         onClick={() => updateTeam(i, 'Red')} 
-                        className={`team-button red ${teamForSlot === 'Red' ? 'active' : ''} mobile-team-button`}
+                        className={`team-button red full-width ${teamForSlot === 'Red' ? 'active' : ''} mobile-team-button`}
                         disabled={!player}
-                       >R</button>
+                       >
+                        {teamForSlot === 'Red' ? '✓ ' : ''}Red Team
+                      </button>
                       <button 
                         onClick={() => updateTeam(i, 'Blue')} 
-                        className={`team-button blue ${teamForSlot === 'Blue' ? 'active' : ''} mobile-team-button`}
+                        className={`team-button blue full-width ${teamForSlot === 'Blue' ? 'active' : ''} mobile-team-button`}
                         disabled={!player}
-                      >B</button>
+                      >
+                        {teamForSlot === 'Blue' ? '✓ ' : ''}Blue Team
+                      </button>
                     </div>
+                    <div className={`current-team-indicator ${teamForSlot.toLowerCase()}`}>{teamForSlot} Team</div>
                   </>
                 ) : (
                   <span className="empty-slot-text">Player {i + 1}</span>
