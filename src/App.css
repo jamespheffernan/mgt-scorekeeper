@@ -1,17 +1,35 @@
 /* Base styling */
 :root {
-  --color-red: #e74c3c;
-  --color-blue: #3498db;
-  --color-green: #27ae60;
-  --color-gray: #95a5a6;
-  --color-dark: #2c3e50;
-  --color-light: #ecf0f1;
-  --color-primary: #3498db;
-  --color-secondary: #2ecc71;
-  --color-error: #e74c3c;
-  --border-radius: 8px;
-  --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  color: #343a40;
+  --color-red: #D64533;
+  --color-blue: #2F80ED;
+  --color-brand: #1A5E46;
+  --color-brand90: #1d684f;
+  --color-brand20: #e4efe8;
+  --color-grey90: #1A202C;
+  --color-grey60: #4A5568;
+  --color-grey30: #CBD5E0;
+  --color-white: #FFFFFF;
+  --color-green: var(--color-brand);
+  --color-gray: var(--color-grey60);
+  --color-dark: var(--color-grey90);
+  --color-light: var(--color-brand20);
+  --color-primary: var(--color-brand);
+  --color-secondary: #20c66c;
+  --color-error: var(--color-red);
+  --border-radius: 12px;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --header-height: 56px;
+  --header-safe-area: env(safe-area-inset-top, 0px);
+  --spacing-unit: 8px;
+  color: var(--color-grey90);
+}
+
+html, body {
+  background: var(--color-brand20);
+}
+
+.safe-wrapper {
+  padding-top: env(safe-area-inset-top);
 }
 
 * {
@@ -21,11 +39,24 @@
 }
 
 body {
+  padding: 0;
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: var(--color-light);
   color: var(--color-dark);
   line-height: 1.6;
+}
+
+.millbrook-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  margin-top: calc(var(--header-height) + var(--header-safe-area));
+  padding: 16px 8px;
+  flex: 1;
 }
 
 .app-container {
@@ -38,10 +69,20 @@ body {
 }
 
 .app-header {
-  text-align: center;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-gray);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  background-color: white;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  gap: 8px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .app-content {
@@ -1453,17 +1494,46 @@ input:focus, select:focus {
 }
 
 .course-manager-button {
-  padding: 0.5rem 1rem;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  background-color: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
 }
 
 .course-manager-button:hover {
-  background-color: #5a6268;
+  background-color: rgba(26, 94, 70, 0.1);
+}
+
+.nav-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.nav-button:hover {
+  background-color: #16513d;
+  text-decoration: none;
 }
 
 /* Hole Info Styles */
@@ -4587,4 +4657,267 @@ select option {
   font-size: 1.5rem;
   background-color: var(--color-light);
   z-index: 1000;
+}
+
+/* Button styles */
+.btn { 
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+.btn-primary { 
+  background: var(--color-brand); 
+  color: white; 
+}
+.btn-primary:hover {
+  background: var(--color-brand90);
+}
+.btn-danger { 
+  background: var(--color-red); 
+  color: white;
+}
+.btn-danger:hover {
+  opacity: 0.9;
+}
+.btn-disabled { 
+  background: var(--color-grey30); 
+  color: var(--color-grey60); 
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Add this after the button styles */
+
+/* Global spacing & utility classes */
+.rounded {
+  border-radius: var(--border-radius);
+}
+
+.rounded-sm {
+  border-radius: 4px;
+}
+
+.gap-grid {
+  gap: var(--spacing-unit);
+}
+
+/* Card component styling */
+.card {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: calc(var(--spacing-unit) * 2);
+  margin-bottom: var(--spacing-unit);
+}
+
+/* Bottom safe area */
+.bottom-safe-area {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Team colors */
+.text-red {
+  color: var(--color-red);
+}
+
+.text-blue {
+  color: var(--color-blue);
+}
+
+.bg-brand {
+  background-color: var(--color-brand);
+}
+
+.bg-brand20 {
+  background-color: var(--color-brand20);
+}
+
+.bg-grey30 {
+  background-color: var(--color-grey30);
+}
+
+.text-grey90 {
+  color: var(--color-grey90);
+}
+
+.text-grey60 {
+  color: var(--color-grey60);
+}
+
+/* Flex utilities */
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.mb-3 {
+  margin-bottom: 12px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.mr-2 {
+  margin-right: 8px;
+}
+
+.my-3 {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.h-8 {
+  height: 32px;
+}
+
+.h-10 {
+  height: 40px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.px-2 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.px-3 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.py-2 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.p-3 {
+  padding: 12px;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+/* Font utilities */
+.text-sm {
+  font-size: 14px;
+}
+
+.text-base {
+  font-size: 16px;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+.text-xl {
+  font-size: 20px;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+/* Layout utilities */
+.fixed {
+  position: fixed;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-x-0 {
+  left: 0;
+  right: 0;
+}
+
+.inset-y-0 {
+  top: 0;
+  bottom: 0;
+}
+
+.top-0 {
+  top: 0;
+}
+
+.bottom-0 {
+  bottom: 0;
+}
+
+.left-0 {
+  left: 0;
+}
+
+.z-40 {
+  z-index: 40;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+/* Grid utilities */
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Shadow utilities */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-inner {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
 }

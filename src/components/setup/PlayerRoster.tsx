@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import { Player, Team } from '../../store/gameStore';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
+import { Chip } from '../Chip';
 import '../../App.css';
 
 // Interface for component props
@@ -269,6 +270,60 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     !displayRecentPlayers.some(rp => rp.id === player.id) // Ensure we use the already filtered recent players
   );
 
+  // Selected Players section in the component
+  const SelectedPlayers = () => (
+    <div className="selected-players mb-4">
+      <h4 className="text-base font-medium mb-2">Selected Players ({selectedPlayers.length}/4)</h4>
+      <div className="selected-grid flex flex-wrap gap-2">
+        {selectedPlayers.map((player, idx) => (
+          <div key={player.id} className="flex items-center">
+            <Chip
+              name={player.name}
+              onRemove={() => togglePlayer(player)}
+            />
+            <select
+              value={teams[idx]}
+              onChange={(e) => updateTeam(idx, e.target.value as Team)}
+              className="ml-2 h-8 rounded px-2 text-sm border border-grey30"
+            >
+              <option value="Red">Red</option>
+              <option value="Blue">Blue</option>
+            </select>
+          </div>
+        ))}
+        {/* Empty slots */}
+        {Array.from({ length: 4 - selectedPlayers.length }, (_, i) => (
+          <div key={`empty-${i}`} className="h-8 px-3 bg-grey30 rounded-full text-grey60 flex items-center">
+            Player {selectedPlayers.length + i + 1}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Search Box section in the component
+  const SearchBox = () => (
+    <div className="search-container mb-4">
+      <input
+        type="text"
+        placeholder="Search players..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full h-10 px-3 border rounded"
+      />
+    </div>
+  );
+
+  // Add Player Button section in the component
+  const AddPlayerButton = () => (
+    <button
+      onClick={() => setShowAddForm(true)}
+      className="add-player-button btn-primary w-full h-10 rounded"
+      disabled={selectedPlayers.length >= 4}
+    >
+      Add New Player
+    </button>
+  );
 
   return (
     <div className="player-roster-container mobile-player-roster">
@@ -276,89 +331,13 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
       {error && <div className="error-message mobile-error">{error}</div>}
 
       {/* Selected Players Summary - Crucial for Mobile */}
-      <div className="selected-players-summary mobile-selected-players-sticky">
-        <h4>Selected Players ({selectedPlayers.length}/4)</h4>
-        <div className="selected-player-slots mobile-flex-grid-4">
-          {Array.from({ length: 4 }).map((_, i) => {
-            const player = selectedPlayers[i];
-            const teamForSlot = teams[i] || (i < 2 ? 'Red' : 'Blue'); // Default if not enough teams
-            return (
-              <div key={i} className={`selected-player-slot ${player ? 'filled' : 'empty'} mobile-player-slot ${teamForSlot?.toLowerCase()}`}>
-                {player ? (
-                  <>
-                    <span className="player-name-display">{player.name} ({player.index.toFixed(1)})</span>
-                    <div className="team-assignment-controls mobile-team-controls">
-                      <button 
-                        onClick={() => updateTeam(i, 'Red')} 
-                        className={`team-button red full-width ${teamForSlot === 'Red' ? 'active' : ''} mobile-team-button`}
-                        disabled={!player}
-                       >
-                        {teamForSlot === 'Red' ? '✓ ' : ''}Red Team
-                      </button>
-                      <button 
-                        onClick={() => updateTeam(i, 'Blue')} 
-                        className={`team-button blue full-width ${teamForSlot === 'Blue' ? 'active' : ''} mobile-team-button`}
-                        disabled={!player}
-                      >
-                        {teamForSlot === 'Blue' ? '✓ ' : ''}Blue Team
-                      </button>
-                    </div>
-                    <div className={`current-team-indicator ${teamForSlot.toLowerCase()}`}>{teamForSlot} Team</div>
-                  </>
-                ) : (
-                  <span className="empty-slot-text">Player {i + 1}</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <SelectedPlayers />
 
       {/* Search Bar */}
-      <div className="search-bar-container mobile-search-section">
-        <input
-          type="text"
-          placeholder="Search players..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="player-search-input mobile-input-fullwidth"
-          aria-label="Search players"
-        />
-      </div>
+      <SearchBox />
 
       {/* Add New Player Button/Form */}
-      <div className="add-player-section mobile-add-player-section">
-        {!showAddForm ? (
-          <button onClick={() => setShowAddForm(true)} className="add-player-button mobile-button-fullwidth primary-action-button">
-            Add New Player
-          </button>
-        ) : (
-          <div className="add-player-form mobile-form">
-            <h4>New Player Details</h4>
-            <input
-              type="text"
-              placeholder="Name"
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
-              className="mobile-input-fullwidth"
-              aria-label="New player name"
-            />
-            <input
-              type="number"
-              placeholder="Index (e.g., 10.4)"
-              value={newPlayerIndex}
-              onChange={(e) => setNewPlayerIndex(e.target.value)}
-              className="mobile-input-fullwidth"
-              step="0.1"
-              aria-label="New player handicap index"
-            />
-            <div className="form-actions mobile-form-actions">
-              <button onClick={handleAddPlayer} className="save-button mobile-button primary-action-button">Save Player</button>
-              <button onClick={() => setShowAddForm(false)} className="cancel-button mobile-button secondary-action-button">Cancel</button>
-            </div>
-          </div>
-        )}
-      </div>
+      <AddPlayerButton />
 
       {/* Player Lists */}
       <div className="player-lists-container mobile-scrollable-list-container">

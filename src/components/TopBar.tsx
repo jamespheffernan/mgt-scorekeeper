@@ -1,30 +1,15 @@
 import React from 'react';
 
-export default function TopBar() {
-  return (
-    <div style={styles.container}>
-      <span style={styles.title}>The Millbrook Game</span>
-    </div>
-  );
+interface TopBarProps {
+  title?: string;
 }
 
-const styles = {
-  container: {
-    height: 56,
-    backgroundColor: '#1a5e46',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-  },
-  title: {
-    color: '#fff',
-    fontSize: 32,
-    fontFamily: 'Pacifico, "Brush Script MT", cursive, sans-serif',
-    letterSpacing: 3,
-    fontWeight: 400,
-    textShadow: '1px 2px 6px rgba(0,0,0,0.18)',
-    padding: '0 16px',
-    whiteSpace: 'nowrap',
-  },
-}; 
+export default function TopBar({ title = "The Millbrook Game" }: TopBarProps) {
+  return (
+    <header className="safe-wrapper fixed top-0 inset-x-0 h-14 flex items-center justify-center bg-brand shadow-md z-50">
+      <h1 className="text-white text-lg font-semibold tracking-wide">
+        {title}
+      </h1>
+    </header>
+  );
+} 
