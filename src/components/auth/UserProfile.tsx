@@ -6,6 +6,11 @@ import './auth.css';
 const UserProfile: React.FC = () => {
   const { currentUser, logOut, loading } = useAuth();
 
+  // Hide UI for anonymous or not-logged-in users
+  if (!currentUser || currentUser.isAnonymous) {
+    return null;
+  }
+
   const handleLogOut = async () => {
     try {
       await logOut();
@@ -18,24 +23,16 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="user-profile">
-      {currentUser ? (
-        <div className="user-info">
-          <span className="user-email">{currentUser.email}</span>
-          <button 
-            className="logout-button"
-            onClick={handleLogOut}
-            disabled={loading}
-          >
-            {loading ? 'Logging Out...' : 'Log Out'}
-          </button>
-        </div>
-      ) : (
-        <div className="auth-links">
-          <Link to="/login" className="auth-link">Log In</Link>
-          <span className="auth-divider">|</span>
-          <Link to="/signup" className="auth-link">Sign Up</Link>
-        </div>
-      )}
+      <div className="user-info">
+        <span className="user-email">{currentUser.email}</span>
+        <button 
+          className="logout-button"
+          onClick={handleLogOut}
+          disabled={loading}
+        >
+          {loading ? 'Logging Out...' : 'Log Out'}
+        </button>
+      </div>
     </div>
   );
 };

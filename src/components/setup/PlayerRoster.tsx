@@ -80,7 +80,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   }).slice(0, 6); // Limit to 6 most recent
   
   // Get remaining players (not in recent list)
-  const remainingPlayers = players.filter(player => 
+  const remainingPlayersLogic = players.filter(player => 
     !recentPlayers.some(rp => rp.id === player.id)
   );
   
@@ -92,10 +92,14 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
         return prev.filter(p => p.id !== player.id);
       }
       
-      // If we already have 4 players selected, replace the last one
+      // If we already have 4 players selected, do not add more (UI should guide this)
+      // For now, simple replacement of the last one if trying to add a 5th.
+      // This behavior might need refinement based on desired UX.
       if (prev.length >= 4) {
+         // alert("You can only select 4 players."); // Or some other UI feedback
+         // return prev; // Prevent adding more than 4
         const newSelection = [...prev];
-        newSelection[3] = player;
+        newSelection[3] = player; // Example: replace last
         return newSelection;
       }
       
@@ -119,14 +123,18 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     
     try {
       const index = parseFloat(newPlayerIndex);
-      if (isNaN(index)) return;
+      if (isNaN(index) || index < 0 || index > 54) { // Basic validation for index
+        alert("Please enter a valid handicap index (e.g., 0 to 54).");
+        return;
+      }
       
       const newPlayer = await createPlayer({
         name: newPlayerName,
         index,
       });
       
-      setPlayers(prev => [...prev, newPlayer]);
+      // The useFirestorePlayers hook will update dbPlayers, which useEffect will pick up to update local players state
+      // setPlayers(prev => [...prev, newPlayer]); // This might be redundant if dbPlayers updates promptly
       setNewPlayerName('');
       setNewPlayerIndex('');
       setShowAddForm(false);
@@ -137,6 +145,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
       }
     } catch (error) {
       console.error('Failed to create player:', error);
+      alert('Failed to create player. See console for details.');
     }
   };
   
@@ -150,23 +159,19 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // Handle saving player changes
   const handleSavePlayerEdit = async (updatedPlayer: Player) => {
     try {
-      const savedPlayer = await updatePlayer(updatedPlayer);
-      
-      // Update the players list
-      setPlayers(prev => 
-        prev.map(p => p.id === savedPlayer.id ? savedPlayer : p)
-      );
+      await updatePlayer(updatedPlayer);
+      // dbPlayers will update via the hook, triggering useEffect to update local players state
       
       // Update selected players if needed
       setSelectedPlayers(prev => 
-        prev.map(p => p.id === savedPlayer.id ? savedPlayer : p)
+        prev.map(p => p.id === updatedPlayer.id ? updatedPlayer : p)
       );
       
-      // Close the editor
       setShowHandicapEditor(false);
       setEditingPlayer(null);
     } catch (error) {
       console.error('Failed to update player:', error);
+      alert('Failed to update player. See console for details.');
     }
   };
   
@@ -174,14 +179,13 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   const handleDeletePlayer = async (playerId: string) => {
     try {
       await deletePlayerById(playerId);
-      // No need to call setPlayers here as useFirestorePlayers hook handles its own state update, which will propagate.
-      // However, we need to update selectedPlayers if the deleted player was selected.
+      // dbPlayers will update, local players state will update via useEffect
       setSelectedPlayers(prev => prev.filter(p => p.id !== playerId));
       setShowHandicapEditor(false);
       setEditingPlayer(null);
     } catch (error) {
       console.error('Failed to delete player:', error);
-      // Optionally, show an error message to the user
+      alert('Failed to delete player. See console for details.');
     }
   };
   
@@ -193,24 +197,23 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   
   // Handle final selection
   const handleConfirmSelection = () => {
-    if (selectedPlayers.length !== 4) return;
+    if (selectedPlayers.length !== 4) {
+      alert("Please select exactly 4 players.");
+      return;
+    }
     
-    // Update player preferences in localStorage
     const updatedPrefs = [...playerPreferences];
-    
     selectedPlayers.forEach((player, index) => {
       const existingPrefIndex = updatedPrefs.findIndex(p => p.playerId === player.id);
-      const team = teams[index];
+      const team = teams[index]; // Assuming teams array aligns with selectedPlayers
       
       if (existingPrefIndex >= 0) {
-        // Update existing preference
         updatedPrefs[existingPrefIndex] = {
           ...updatedPrefs[existingPrefIndex],
           lastUsed: new Date().toISOString(),
           defaultTeam: team
         };
       } else {
-        // Add new preference
         updatedPrefs.push({
           playerId: player.id,
           lastUsed: new Date().toISOString(),
@@ -219,222 +222,220 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
       }
     });
     
-    // Save updated preferences
     setPlayerPreferences(updatedPrefs);
     localStorage.setItem(PLAYER_PREFERENCES_KEY, JSON.stringify(updatedPrefs));
     
-    // Call the parent callback
     onPlayersSelected(selectedPlayers, teams);
   };
   
   // Assign default teams based on preferences
   useEffect(() => {
     if (selectedPlayers.length > 0) {
-      const updatedTeams = [...teams];
-      
-      selectedPlayers.forEach((player, index) => {
+      const updatedTeams = selectedPlayers.map((player, index) => {
         const pref = playerPreferences.find(p => p.playerId === player.id);
-        if (pref?.defaultTeam) {
-          updatedTeams[index] = pref.defaultTeam;
-        }
-      });
+        return pref?.defaultTeam || teams[index] || (index < 2 ? 'Red' : 'Blue'); // Fallback team logic
+      }) as Team[]; // Ensure it's correctly typed
       
-      setTeams(updatedTeams);
+      // Only update if there's a change to avoid potential loops, though selectedPlayers dependency should handle this.
+      if (JSON.stringify(updatedTeams) !== JSON.stringify(teams.slice(0, selectedPlayers.length))) {
+         setTeams(prevTeams => {
+            const newTeamsState = [...prevTeams] as Team[];
+            selectedPlayers.forEach((_, idx) => {
+                if(updatedTeams[idx]) newTeamsState[idx] = updatedTeams[idx];
+            });
+            return newTeamsState;
+         });
+      }
     }
-  }, [selectedPlayers]);
-  
+  // Only run if selectedPlayers or playerPreferences change. Avoid direct dependency on 'teams' if it causes loops.
+  }, [selectedPlayers, playerPreferences]); 
+
+
   if (isLoading) {
-    return <div>Loading players...</div>;
+    return <div className="loading-message mobile-loading">Loading players...</div>;
   }
-  
-  // Render the handicap editor if active
-  if (showHandicapEditor && editingPlayer) {
-    return (
-      <QuickHandicapEditor
-        player={editingPlayer}
-        onSave={handleSavePlayerEdit}
-        onCancel={handleCancelEdit}
-        onDelete={handleDeletePlayer}
-      />
-    );
-  }
-  
+
+  // Filtered players based on search query
+  const filteredPlayers = players.filter(player =>
+    player.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Separate recent and remaining from the filtered list
+  const displayRecentPlayers = filteredPlayers.filter(player =>
+    recentPlayers.some(rp => rp.id === player.id)
+  );
+  // Ensure remainingPlayersLogic is used here, or re-filter from 'players' not 'filteredPlayers' if that was the intent
+  const displayRemainingPlayers = filteredPlayers.filter(player => 
+    !displayRecentPlayers.some(rp => rp.id === player.id) // Ensure we use the already filtered recent players
+  );
+
+
   return (
-    <div className="player-roster">
-      <h3>Select Players</h3>
-      
-      {/* Search input */}
-      <div className="search-container">
+    <div className="player-roster-container mobile-player-roster">
+      {/* Error Display */}
+      {error && <div className="error-message mobile-error">{error}</div>}
+
+      {/* Selected Players Summary - Crucial for Mobile */}
+      <div className="selected-players-summary mobile-selected-players-sticky">
+        <h4>Selected Players ({selectedPlayers.length}/4)</h4>
+        <div className="selected-player-slots mobile-flex-grid-4">
+          {Array.from({ length: 4 }).map((_, i) => {
+            const player = selectedPlayers[i];
+            const teamForSlot = teams[i] || (i < 2 ? 'Red' : 'Blue'); // Default if not enough teams
+            return (
+              <div key={i} className={`selected-player-slot ${player ? 'filled' : 'empty'} mobile-player-slot ${teamForSlot?.toLowerCase()}`}>
+                {player ? (
+                  <>
+                    <span className="player-name-display">{player.name} ({player.index.toFixed(1)})</span>
+                    <div className="team-assignment-controls mobile-team-controls">
+                      <button 
+                        onClick={() => updateTeam(i, 'Red')} 
+                        className={`team-button red ${teamForSlot === 'Red' ? 'active' : ''} mobile-team-button`}
+                        disabled={!player}
+                       >R</button>
+                      <button 
+                        onClick={() => updateTeam(i, 'Blue')} 
+                        className={`team-button blue ${teamForSlot === 'Blue' ? 'active' : ''} mobile-team-button`}
+                        disabled={!player}
+                      >B</button>
+                    </div>
+                  </>
+                ) : (
+                  <span className="empty-slot-text">Player {i + 1}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="search-bar-container mobile-search-section">
         <input
           type="text"
           placeholder="Search players..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="player-search"
+          className="player-search-input mobile-input-fullwidth"
+          aria-label="Search players"
         />
       </div>
-      
-      {/* Selected players display */}
-      <div className="selected-players">
-        <h4>Selected Players: {selectedPlayers.length}/4</h4>
-        <div className="selected-grid">
-          {selectedPlayers.map((player, index) => (
-            <div key={player.id} className="selected-player">
-              <div className="player-info">
-                <span>{player.name} ({player.index})</span>
-                <button 
-                  className="remove-btn"
-                  onClick={() => togglePlayer(player)}
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="team-selector">
-                <label>Team:</label>
-                <select
-                  value={teams[index]}
-                  onChange={(e) => updateTeam(index, e.target.value as Team)}
-                >
-                  <option value="Red">Red</option>
-                  <option value="Blue">Blue</option>
-                </select>
-              </div>
-            </div>
-          ))}
-          
-          {/* Placeholder slots for unselected players */}
-          {Array.from({ length: 4 - selectedPlayers.length }).map((_, i) => (
-            <div key={`empty-${i}`} className="selected-player empty">
-              <span>Select player {selectedPlayers.length + i + 1}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Recent players section */}
-      {recentPlayers.length > 0 && (
-        <div className="player-list-section">
-          <h4>Recent Players</h4>
-          <div className="player-list">
-            {recentPlayers.map(player => {
-              const isSelected = selectedPlayers.some(p => p.id === player.id);
-              const pref = playerPreferences.find(p => p.playerId === player.id);
-              
-              return (
-                <div 
-                  key={player.id}
-                  className={`player-item ${isSelected ? 'selected' : ''}`}
-                  onClick={() => togglePlayer(player)}
-                >
-                  <div className="player-checkbox">
-                    {isSelected ? '✓' : '○'}
-                  </div>
-                  <div className="player-details">
-                    <span className="player-name">{player.name}</span>
-                    <span className="player-index">{player.index}</span>
-                    {pref?.defaultTeam && (
-                      <span className={`team-indicator team-${pref.defaultTeam.toLowerCase()}`}>
-                        {pref.defaultTeam}
-                      </span>
-                    )}
-                  </div>
-                  <button 
-                    className="edit-player-btn" 
-                    onClick={(e) => handleEditPlayer(player, e)}
-                    title="Edit player"
-                  >
-                    ✎
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      
-      {/* All other players section */}
-      <div className="player-list-section">
-        <h4>All Players</h4>
-        <div className="player-list">
-          {remainingPlayers
-            .filter(player => player.name.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map(player => {
-              const isSelected = selectedPlayers.some(p => p.id === player.id);
-              
-              return (
-                <div 
-                  key={player.id}
-                  className={`player-item ${isSelected ? 'selected' : ''}`}
-                  onClick={() => togglePlayer(player)}
-                >
-                  <div className="player-checkbox">
-                    {isSelected ? '✓' : '○'}
-                  </div>
-                  <div className="player-details">
-                    <span className="player-name">{player.name}</span>
-                    <span className="player-index">{player.index}</span>
-                  </div>
-                  <button 
-                    className="edit-player-btn" 
-                    onClick={(e) => handleEditPlayer(player, e)}
-                    title="Edit player"
-                  >
-                    ✎
-                  </button>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-      
-      {/* Add new player button & form */}
-      {!showAddForm ? (
-        <button 
-          className="add-player-button"
-          onClick={() => setShowAddForm(true)}
-        >
-          + Add New Player
-        </button>
-      ) : (
-        <div className="add-player-form">
-          <h4>Add New Player</h4>
-          <div className="form-row">
+
+      {/* Add New Player Button/Form */}
+      <div className="add-player-section mobile-add-player-section">
+        {!showAddForm ? (
+          <button onClick={() => setShowAddForm(true)} className="add-player-button mobile-button-fullwidth primary-action-button">
+            Add New Player
+          </button>
+        ) : (
+          <div className="add-player-form mobile-form">
+            <h4>New Player Details</h4>
             <input
               type="text"
-              placeholder="Player Name"
+              placeholder="Name"
               value={newPlayerName}
               onChange={(e) => setNewPlayerName(e.target.value)}
+              className="mobile-input-fullwidth"
+              aria-label="New player name"
             />
-          </div>
-          <div className="form-row">
             <input
               type="number"
-              step="0.1"
-              placeholder="Handicap Index"
+              placeholder="Index (e.g., 10.4)"
               value={newPlayerIndex}
               onChange={(e) => setNewPlayerIndex(e.target.value)}
+              className="mobile-input-fullwidth"
+              step="0.1"
+              aria-label="New player handicap index"
             />
+            <div className="form-actions mobile-form-actions">
+              <button onClick={handleAddPlayer} className="save-button mobile-button primary-action-button">Save Player</button>
+              <button onClick={() => setShowAddForm(false)} className="cancel-button mobile-button secondary-action-button">Cancel</button>
+            </div>
           </div>
-          <div className="form-actions">
-            <button onClick={() => setShowAddForm(false)}>Cancel</button>
-            <button 
-              onClick={handleAddPlayer}
-              disabled={!newPlayerName || !newPlayerIndex}
-            >
-              Add Player
-            </button>
+        )}
+      </div>
+
+      {/* Player Lists */}
+      <div className="player-lists-container mobile-scrollable-list-container">
+        {displayRecentPlayers.length > 0 && (
+          <div className="player-list-section mobile-list-section">
+            <h5>Recent Players</h5>
+            {displayRecentPlayers.map(player => (
+              <div 
+                key={player.id} 
+                className={`player-item mobile-player-item ${selectedPlayers.some(p => p.id === player.id) ? 'selected' : ''}`}
+                onClick={() => togglePlayer(player)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => e.key === 'Enter' && togglePlayer(player) }
+                aria-pressed={selectedPlayers.some(p => p.id === player.id)}
+              >
+                <span className="player-name-display">{player.name} ({player.index.toFixed(1)})</span>
+                <button 
+                  onClick={(e) => handleEditPlayer(player, e)} 
+                  className="edit-player-button mobile-edit-button icon-button"
+                  aria-label={`Edit ${player.name}`}
+                >
+                  ✎
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+
+        {displayRemainingPlayers.length > 0 && (
+          <div className="player-list-section mobile-list-section">
+            <h5>{searchQuery ? 'Search Results' : (displayRecentPlayers.length > 0 ? 'Other Players' : 'All Players')}</h5>
+            {displayRemainingPlayers.map(player => (
+              <div 
+                key={player.id} 
+                className={`player-item mobile-player-item ${selectedPlayers.some(p => p.id === player.id) ? 'selected' : ''}`}
+                onClick={() => togglePlayer(player)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => e.key === 'Enter' && togglePlayer(player) }
+                aria-pressed={selectedPlayers.some(p => p.id === player.id)}
+              >
+                <span className="player-name-display">{player.name} ({player.index.toFixed(1)})</span>
+                <button 
+                  onClick={(e) => handleEditPlayer(player, e)} 
+                  className="edit-player-button mobile-edit-button icon-button"
+                  aria-label={`Edit ${player.name}`}
+                >
+                  ✎
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+         {filteredPlayers.length === 0 && !isLoading && (
+            <p className="no-players-message mobile-centered-text">
+              {searchQuery ? `No players found matching "${searchQuery}".` : "No players available. Try adding some!"}
+            </p>
+          )}
+      </div>
       
-      {/* Confirm selection button */}
-      <button
-        className="confirm-button"
-        disabled={selectedPlayers.length !== 4}
-        onClick={handleConfirmSelection}
-      >
-        Continue with Selected Players
-      </button>
+      {/* Handicap Editor Modal */}
+      {showHandicapEditor && editingPlayer && (
+        <QuickHandicapEditor
+          player={editingPlayer}
+          onSave={handleSavePlayerEdit}
+          onCancel={handleCancelEdit}
+          onDelete={handleDeletePlayer}
+        />
+      )}
+
+      {/* Action Button to Confirm */}
+      <div className="confirm-selection-section mobile-confirm-button-sticky">
+        <button 
+          onClick={handleConfirmSelection} 
+          disabled={selectedPlayers.length !== 4}
+          className="confirm-button mobile-button-fullwidth primary-action-button"
+          aria-live="polite"
+        >
+          {selectedPlayers.length === 4 ? 'Confirm Players & Set Course' : `Select ${4 - selectedPlayers.length} More Player(s)`}
+        </button>
+      </div>
     </div>
   );
 };

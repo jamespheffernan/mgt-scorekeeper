@@ -10,7 +10,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ResponsiveHoleView } from './components/hole/ResponsiveHoleView';  // Import the responsive component
 import { CoursePreview } from './components/setup/CoursePreview';
 import GameHistoryView from './components/GameHistory';
-import { TestFixes } from './TestFixes'; // Import our test component
+// import { TestFixes } from './TestFixes'; // Comment out or remove if TestFixes.tsx will be deleted
 import SignUp from './components/auth/SignUp';
 import LogIn from './components/auth/LogIn';
 import UserProfile from './components/auth/UserProfile';
@@ -32,52 +32,15 @@ function App() {
   
   // Component state
   const [showCourseManager, setShowCourseManager] = useState(false);
-  const [showTestFixes, setShowTestFixes] = useState(false);
   
   // Toggle course manager
   const toggleCourseManager = () => {
     setShowCourseManager(!showCourseManager);
-    setShowTestFixes(false);
-  };
-  
-  // Toggle test fixes
-  const toggleTestFixes = () => {
-    setShowTestFixes(!showTestFixes);
-    setShowCourseManager(false);
   };
   
   // Check if there's an active match
   const hasActiveMatch = match && match.id && match.state === 'active';
   const isGameActive = match.id !== '' && match.state === 'active';
-  
-  // Show the test fixes component when enabled
-  if (showTestFixes) {
-    return (
-      <ErrorBoundary>
-        <div className="millbrook-app">
-          <header className="app-header">
-            <h1>Millbrook Scorekeeper - Test Mode</h1>
-            <div className="header-actions">
-              <button 
-                className="course-manager-button"
-                onClick={toggleTestFixes}
-              >
-                Back to Game
-              </button>
-            </div>
-          </header>
-          
-          <main>
-            <TestFixes />
-          </main>
-          
-          <footer className="app-footer">
-            <div className="app-version">v0.1.0</div>
-          </footer>
-        </div>
-      </ErrorBoundary>
-    );
-  }
   
   return (
     <ErrorBoundary>
@@ -92,13 +55,6 @@ function App() {
                 onClick={toggleCourseManager}
               >
                 {showCourseManager ? 'Back to Game' : 'Course Manager'}
-              </button>
-              <button 
-                className="test-fixes-button"
-                onClick={toggleTestFixes}
-                style={{ marginLeft: '10px' }}
-              >
-                Test Fixes
               </button>
               {isGameActive && !showCourseManager && (
                 <Link 

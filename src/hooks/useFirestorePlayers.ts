@@ -15,15 +15,21 @@ export function useFirestorePlayers() {
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useAuth();
 
+  // Define the global players collection path
+  const globalPlayersCollection = 'sharedPlayers';
+
   // Load player data on mount or when user auth state changes
   useEffect(() => {
     const loadPlayers = async () => {
       try {
+        console.log('[useFirestorePlayers] Setting isLoading to true');
         setIsLoading(true);
         
+        // We still check for currentUser to decide if we fetch from Firestore or fallback/do nothing
         if (currentUser) {
-          // User is logged in - fetch from Firestore
-          const playersRef = collection(db, `users/${currentUser.uid}/players`);
+          console.log('[useFirestorePlayers] Current user found:', currentUser.uid, '- Fetching from global sharedPlayers collection');
+          // User is logged in - fetch from Firestore global collection
+          const playersRef = collection(db, globalPlayersCollection);
           const q = query(playersRef, orderBy('name'));
           const snapshot = await getDocs(q);
           
@@ -33,15 +39,18 @@ export function useFirestorePlayers() {
           });
           
           setPlayers(loadedPlayers);
+          console.log('[useFirestorePlayers] Players loaded from Firestore:', loadedPlayers);
           
           // Also save to local DB for offline access
           for (const player of loadedPlayers) {
             await millbrookDb.savePlayer(player);
           }
         } else {
-          // No user - fetch from local DB
+          // No user - fetch from local DB (could be stale global list or empty)
+          console.log('[useFirestorePlayers] No current user, fetching from local DB');
           const localPlayers = await millbrookDb.getAllPlayers();
           setPlayers(localPlayers);
+          console.log('[useFirestorePlayers] Players loaded from local DB:', localPlayers);
         }
         
         setError(null);
@@ -50,15 +59,20 @@ export function useFirestorePlayers() {
         setError('Failed to load players');
         
         // Fallback to local DB if Firestore fails
+        // This fallback is a bit tricky with a global list if the error is not user-specific
+        // For now, let's assume if Firestore fails for a logged-in user, we try local.
         if (currentUser) {
           try {
+            console.log('[useFirestorePlayers] Firestore failed, attempting local DB fallback for global list');
             const localPlayers = await millbrookDb.getAllPlayers();
             setPlayers(localPlayers);
+            console.log('[useFirestorePlayers] Players loaded from local DB after fallback:', localPlayers);
           } catch (localErr) {
             console.error('Local DB fallback failed:', localErr);
           }
         }
       } finally {
+        console.log('[useFirestorePlayers] Setting isLoading to false in finally block');
         setIsLoading(false);
       }
     };
@@ -76,9 +90,9 @@ export function useFirestorePlayers() {
     try {
       setIsLoading(true);
       
-      // Save to Firestore if user is logged in
+      // Save to Firestore global collection if user is logged in
       if (currentUser) {
-        const playersRef = collection(db, `users/${currentUser.uid}/players`);
+        const playersRef = collection(db, globalPlayersCollection);
         
         const docRef = await addDoc(playersRef, {
           ...newPlayer,
@@ -108,16 +122,27 @@ export function useFirestorePlayers() {
     try {
       setIsLoading(true);
       
-      // Update in Firestore if user is logged in
+      // Create a shallow copy to modify for Firestore
+      const playerToSave: { [key: string]: any } = { ...player };
+
+      // Remove undefined fields before saving to Firestore
+      for (const key in playerToSave) {
+        if (playerToSave[key] === undefined) {
+          delete playerToSave[key];
+        }
+      }
+
+      // Update in Firestore global collection if user is logged in
       if (currentUser) {
-        const playerRef = doc(db, `users/${currentUser.uid}/players/${player.id}`);
+        const playerRef = doc(db, globalPlayersCollection, player.id);
+        // Use the cleaned playerToSave object and merge: true
         await setDoc(playerRef, {
-          ...player,
-          updatedAt: new Date().toISOString()
-        });
+          ...playerToSave,
+          updatedAt: new Date().toISOString() // Ensure updatedAt is always fresh
+        }, { merge: true });
       }
       
-      // Always update in local DB
+      // Always update in local DB (use the original player object with potentially undefined fields, as Dexie handles them)
       await millbrookDb.savePlayer(player);
       
       setPlayers(prevPlayers => 
@@ -139,9 +164,9 @@ export function useFirestorePlayers() {
     try {
       setIsLoading(true);
       
-      // Delete from Firestore if user is logged in
+      // Delete from Firestore global collection if user is logged in
       if (currentUser) {
-        const playerRef = doc(db, `users/${currentUser.uid}/players/${playerId}`);
+        const playerRef = doc(db, globalPlayersCollection, playerId);
         await deleteDoc(playerRef);
       }
       
