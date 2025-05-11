@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
 import { useGameStore } from './store/gameStore';
-import { MatchSetup } from './components/setup/MatchSetup';
+import MatchSetup from './components/setup/MatchSetup';
 import SettlementView from './components/ledger/SettlementView';
 import { LedgerView } from './components/ledger/LedgerView';
 import { ErrorBoundary } from './components/ErrorBoundary';
