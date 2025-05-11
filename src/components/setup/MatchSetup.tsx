@@ -125,4 +125,6 @@ export const MatchSetup = () => {
       {renderSetupStep()}
     </div>
   );
-}; 
+};
+
+export default MatchSetup; 
