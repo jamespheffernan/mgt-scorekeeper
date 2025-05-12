@@ -128,7 +128,7 @@ export const MatchSetup = () => {
   return (
     <>
       <TopBar title="Game Setup" />
-      <div className="setup-container mobile-setup-container" style={{ marginTop: '56px', padding: '16px' }}>
+      <div className="setup-container mobile-setup-container">
         {renderSetupStep()}
       </div>
     </>
