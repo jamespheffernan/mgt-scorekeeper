@@ -2,117 +2,111 @@ import React, { useEffect } from 'react';
 import { useRosterStore } from '../../store/rosterStore';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Player } from '../../db/API-GameState';
-import { MatchRoster } from '../../types/player';
 import './PlayersRoster.css';
 
 interface TeamPillProps {
   teamName: 'red' | 'blue';
   playerCount: number;
   players: Player[];
-  onClick: () => void;
 }
 
-const TeamPill: React.FC<TeamPillProps> = ({ 
-  teamName, 
-  playerCount, 
+const TeamPill: React.FC<TeamPillProps> = ({
+  teamName,
+  playerCount,
   players,
-  onClick
 }) => {
-  // Determine max 3 players to show avatars for
-  const displayPlayers = players.slice(0, 3);
-  
-  // Get initials from player name
   const getInitials = (player: Player): string => {
-    // If first/last are available in the extended Player type, use them
-    if ('first' in player && 'last' in player) {
-      return `${(player as any).first.charAt(0)}${(player as any).last.charAt(0)}`;
+    if ('first' in player && player.first && 'last' in player && player.last) {
+      return `${player.first.charAt(0)}${player.last.charAt(0)}`;
     }
-    
-    // Otherwise, use the existing name field
-    const nameParts = player.name.split(' ');
+    const nameParts = player.name ? player.name.split(' ') : [];
     if (nameParts.length >= 2) {
       return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`;
     }
-    return player.name.substring(0, 2).toUpperCase();
+    return player.name ? player.name.substring(0, 2).toUpperCase() : '??';
   };
-  
-  // State to track count changes for animation
+
   const [prevCount, setPrevCount] = React.useState(playerCount);
   const [animate, setAnimate] = React.useState(false);
-  
-  // Add animation when count changes
+
   useEffect(() => {
-    if (prevCount !== playerCount && prevCount !== 0) {
+    if (playerCount !== prevCount) {
       setAnimate(true);
-      setTimeout(() => setAnimate(false), 300);
+      const timer = setTimeout(() => setAnimate(false), 300);
+      return () => clearTimeout(timer);
     }
     setPrevCount(playerCount);
   }, [playerCount, prevCount]);
-  
+
+  const displayPlayers = players.slice(0, 3);
+
   return (
-    <button 
-      className={`team-pill ${teamName} ${animate ? 'pulse-animation' : ''}`}
-      onClick={onClick}
-    >
+    <div className={`team-pill ${teamName} ${animate ? 'pulse-animation' : ''}`}>
       <div className="avatar-stack">
-        {displayPlayers.map((player, index) => (
-          <div 
-            key={player.id} 
+        {displayPlayers.map((player) => (
+          <div
+            key={player.id}
             className="avatar-circle"
+            title={player.name}
           >
             {getInitials(player)}
           </div>
         ))}
+        {players.length > displayPlayers.length && (
+          <div className="avatar-circle extra-count">
+            +{players.length - displayPlayers.length}
+          </div>
+        )}
       </div>
-      <span>{playerCount}</span>
-    </button>
+      <span className="pill-count">{playerCount}</span>
+    </div>
   );
 };
 
-interface TopPillsProps {
-  onOpenSheet: () => void;
-}
-
-export const TopPills: React.FC<TopPillsProps> = ({ onOpenSheet }) => {
+export const TopPills: React.FC = () => {
   const roster = useRosterStore(state => state.roster);
-  const [players, setPlayers] = React.useState<Player[]>([]);
-  
-  // Load players data
+  const [rosterPlayers, setRosterPlayers] = React.useState<Player[]>([]);
+
   React.useEffect(() => {
-    const loadPlayers = async () => {
+    const loadRosterPlayerDetails = async () => {
+      const allRosterIds = [...roster.red, ...roster.blue];
+      if (allRosterIds.length === 0) {
+        setRosterPlayers([]);
+        return;
+      }
       try {
+        console.debug("Fetching all players to update pill details.");
         const allPlayers = await millbrookDb.getAllPlayers();
-        setPlayers(allPlayers);
+        const playersDetails = allPlayers.filter(p => allRosterIds.includes(p.id));
+        setRosterPlayers(playersDetails);
       } catch (error) {
-        console.error('Failed to load players:', error);
+        console.error('Failed to load player details for pills:', error);
+        setRosterPlayers([]);
       }
     };
-    
-    loadPlayers();
-  }, [roster]); // Reload when roster changes
-  
-  // Get players by team
+
+    loadRosterPlayerDetails();
+  }, [roster]);
+
   const getPlayersByTeam = (teamName: 'red' | 'blue'): Player[] => {
     const teamIds = roster[teamName];
-    return players.filter(player => teamIds.includes(player.id));
+    return rosterPlayers.filter(player => teamIds.includes(player.id));
   };
-  
+
   const redPlayers = getPlayersByTeam('red');
   const bluePlayers = getPlayersByTeam('blue');
-  
+
   return (
     <div className="top-pills">
-      <TeamPill 
-        teamName="red" 
-        playerCount={roster.red.length} 
-        players={redPlayers} 
-        onClick={onOpenSheet} 
+      <TeamPill
+        teamName="red"
+        playerCount={roster.red.length}
+        players={redPlayers}
       />
-      <TeamPill 
-        teamName="blue" 
-        playerCount={roster.blue.length} 
-        players={bluePlayers} 
-        onClick={onOpenSheet} 
+      <TeamPill
+        teamName="blue"
+        playerCount={roster.blue.length}
+        players={bluePlayers}
       />
     </div>
   );

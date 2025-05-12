@@ -13,7 +13,7 @@ export const PotRow: React.FC<PotRowProps> = ({ red, holeValue, blue, carryingAm
       <span className="text-red">{red}</span>
       <div className="flex flex-col items-center">
         <span className="font-medium">{holeValue}</span>
-        {carryingAmount && carryingAmount > 0 && (
+        {(carryingAmount || 0) > 0 && (
           <span className="text-sm text-gray-500">
             carrying ${carryingAmount}
           </span>

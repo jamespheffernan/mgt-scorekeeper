@@ -1,0 +1,52 @@
+/* AddPlayerForm.css */
+
+.add-player-form-content {
+  /* Inherits .modal-content styles from App.css */
+  /* Add specific styles if needed, e.g., width */
+  max-width: 400px; /* Or your preferred width */
+  padding: 20px;
+}
+
+.add-player-form-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.form-group input[type="number"] {
+  /* Ensure number input doesn't look too different or small */
+}
+
+.form-error {
+  color: #dc3545; /* Red for errors */
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* .dialog-actions are styled in App.css, ensure they work here */
+/* If .cancel-button and .confirm-button need specific overrides for this form, add them */ 

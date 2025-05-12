@@ -5,6 +5,8 @@ import { millbrookDb } from '../db/millbrookDb';
 import { Player } from '../db/API-GameState';
 import { useAuth } from '../context/AuthContext';
 import { generateUUID } from '../utils/uuid';
+import { splitNameParts } from '../utils/nameFormatter';
+import { ensurePlayerNameConsistency } from '../utils/nameFormatter';
 
 /**
  * Hook to provide Firestore database access for players with Dexie fallback
@@ -80,15 +82,33 @@ export function useFirestorePlayers() {
 
   // Create a new player
   const createPlayer = async (playerData: Omit<Player, 'id'>): Promise<Player> => {
+    // Make sure we have first/last fields
+    let { first, last, name } = playerData;
+    
+    // If we have a name but no first/last, split it
+    if (name && (!first || !last)) {
+      const nameParts = splitNameParts(name);
+      first = nameParts.first;
+      last = nameParts.last;
+    }
+    
+    // If we have first/last but no name, generate it
+    if (!name && (first || last)) {
+      name = `${first} ${last}`.trim();
+    }
+    
     const newPlayer: Player = {
       ...playerData,
-      id: generateUUID()
+      id: generateUUID(),
+      first: first || '',
+      last: last || '',
+      name: name || ''
     };
 
     try {
       setIsLoading(true);
       
-      // Always try to save to Firestore, regardless of authentication
+      // Always try to save to Firestore
       try {
         const playersRef = collection(db, globalPlayersCollection);
         
@@ -123,8 +143,11 @@ export function useFirestorePlayers() {
     try {
       setIsLoading(true);
       
+      // Ensure name field stays in sync with first/last
+      const updatedPlayer = ensurePlayerNameConsistency(player);
+      
       // Create a shallow copy to modify for Firestore
-      const playerToSave: { [key: string]: any } = { ...player };
+      const playerToSave: { [key: string]: any } = { ...updatedPlayer };
 
       // Remove undefined fields before saving to Firestore
       for (const key in playerToSave) {
@@ -133,13 +156,12 @@ export function useFirestorePlayers() {
         }
       }
 
-      // Always try to update in Firestore, regardless of authentication
+      // Always try to update in Firestore
       try {
         const playerRef = doc(db, globalPlayersCollection, player.id);
-        // Use the cleaned playerToSave object and merge: true
         await setDoc(playerRef, {
           ...playerToSave,
-          updatedAt: new Date().toISOString() // Ensure updatedAt is always fresh
+          updatedAt: new Date().toISOString()
         }, { merge: true });
       } catch (firestoreErr) {
         console.error('Failed to update in Firestore:', firestoreErr);
@@ -147,13 +169,13 @@ export function useFirestorePlayers() {
       }
       
       // Always update in local DB
-      await millbrookDb.savePlayer(player);
+      await millbrookDb.savePlayer(updatedPlayer);
       
       setPlayers(prevPlayers => 
-        prevPlayers.map(p => p.id === player.id ? player : p)
+        prevPlayers.map(p => p.id === player.id ? updatedPlayer : p)
       );
       
-      return player;
+      return updatedPlayer;
     } catch (err) {
       console.error('Error updating player:', err);
       setError('Failed to update player');

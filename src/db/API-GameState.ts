@@ -9,7 +9,9 @@ export type Team = 'Red' | 'Blue';
 
 export interface Player {
   id: string;          // uuid
-  name: string;
+  name: string;        // Keep for backwards compatibility 
+  first: string;       // New field for first name
+  last: string;        // New field for last name
   index: number;       // GHIN / WHS handicap index (e.g. 8.4)
   ghin?: string;
   defaultTeam?: Team;
@@ -99,10 +101,16 @@ export interface GameHistory {
   id: string;                  // Same as match.id for reference
   date: string;                // ISO date when match was played
   courseName: string;          // Name of the course
-  playerNames: [string, string, string, string]; // Player names for easy reference
-  teamAssignments: [Team, Team, Team, Team];     // Team assignments
-  finalScores: [number, number, number, number]; // Final player scores
-  teamTotals: [number, number];                 // Final team totals [Red, Blue]
+  
+  // Update to store first/last names
+  playerInfo: Array<{
+    id: string;
+    first: string;
+    last: string;
+    team: Team;
+  }>;
+ 
+  teamTotals: [number, number];             // Final team totals [Red, Blue]
   bigGameTotal: number;        // Final Big Game total if applicable
   startTime: string;           // ISO timestamp when game started
   endTime: string;             // ISO timestamp when game ended

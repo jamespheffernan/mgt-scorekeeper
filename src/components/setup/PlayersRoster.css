@@ -40,6 +40,8 @@ html, body, #root /* Adjust #root if your root id is different */ {
 
   /* Add significant padding to ensure overflow is obvious */
   padding: 16px;
+  padding-top: 70px; /* Increased top padding to account for fixed header */
+  padding-bottom: 100px; /* Add significant bottom padding for any buttons/UI elements */
   min-height: 0; /* Helps in flex contexts */
 
   /* Remove redundant/potentially conflicting fixed height styles */
@@ -49,6 +51,7 @@ html, body, #root /* Adjust #root if your root id is different */ {
 
 /* --- Inline Roster Container --- */
 .player-roster-inline {
+  padding-bottom: 135px;
   /* Must NOT scroll */
   overflow: visible !important;
   height: auto !important;
@@ -61,7 +64,7 @@ html, body, #root /* Adjust #root if your root id is different */ {
 /* --- Player List --- */
 ul.player-list {
   list-style: none;
-  padding: 0;
+  padding-bottom: 135px;
   margin: 0;
   /* Must NOT scroll */
   overflow: visible !important;
@@ -75,13 +78,17 @@ ul.player-list {
   align-items: center;
   justify-content: space-between;
   padding: 12px 8px;
+  width: 100%;
+  box-sizing: border-box;
   border-bottom: 1px solid #e9ecef; /* Light border for separation */
 }
 
 .player-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  margin-right: 8px;
 }
 
 .player-initials {
@@ -95,22 +102,37 @@ ul.player-list {
   justify-content: center;
   font-weight: bold;
   font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.player-info > div:last-child {
+  white-space: normal; /* Explicitly allow content to wrap */
+  word-break: break-word; /* Allow long words/names to break and wrap if necessary */
 }
 
 .player-name {
   font-weight: 500;
+  /* word-break: break-word; Or break-all, if very long single names are an issue */
 }
 
 .player-index {
-  font-size: 0.85rem;
-  color: #6c757d;
+  color: #666;
   margin-left: 4px;
+  /* white-space: nowrap; Removed to allow index to wrap with name if space is tight */
+  white-space: normal; /* Allow index to wrap with name */
 }
 
 .player-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-shrink: 0;
+}
+
+.team-selection {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
 }
 
 .team-selection button {
@@ -134,12 +156,52 @@ ul.player-list {
   border-color: #3498db;
 }
 
+.team-radio {
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.team-radio.red {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.team-radio.blue {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.team-radio.selected {
+  border-color: #007bff;
+  color: white;
+}
+
+.team-radio.red.selected {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.team-radio.blue.selected {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
 .remove-player-button {
   background: none;
   border: none;
-  color: #6c757d;
+  color: #888;
   cursor: pointer;
   padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .remove-player-button:hover {
@@ -327,5 +389,36 @@ ul.player-list {
 
 .fab-add-player:hover {
   background-color: #27ae60; /* Hover color */
+  transform: scale(1.05); /* Slight scale effect on hover */
+}
+
+/* --- Start Match Button Styling --- */
+.start-match-button {
+  position: fixed; /* Position relative to viewport like the FAB */
+  bottom: 24px;    /* Same distance from bottom as FAB */
+  right: 92px;     /* Position to the left of the FAB (24px + 56px + 12px) */
+  z-index: 20;     /* Same z-index as FAB */
+  
+  height: 56px;    /* Same height as FAB */
+  border-radius: 28px; /* Rounded like the FAB */
+  
+  background-color: #1A5E46; /* Millbrook green theme */
+  color: white;
+  border: none;
+  padding: 0 24px;  /* Horizontal padding */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Shadow for depth, matching FAB */
+  cursor: pointer;
+  transition: transform 0.2s ease-out, background-color 0.2s ease;
+}
+
+.start-match-button:hover {
+  background-color: #27ae60; /* Hover color, matching FAB */
   transform: scale(1.05); /* Slight scale effect on hover */
 } 

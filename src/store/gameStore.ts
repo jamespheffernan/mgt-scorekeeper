@@ -542,9 +542,12 @@ export const useGameStore = create(
             id: match.id,
             date: match.date,
             courseName,
-            playerNames: players.map(p => p.name) as [string, string, string, string],
-            teamAssignments: playerTeams as [Team, Team, Team, Team],
-            finalScores: finalScores as [number, number, number, number],
+            playerInfo: players.map((p, idx) => ({
+              id: p.id,
+              first: p.first || '',
+              last: p.last || '',
+              team: playerTeams[idx]
+            })),
             teamTotals: [redTotal, blueTotal] as [number, number],
             bigGameTotal: match.bigGameTotal,
             startTime: match.startTime || endTime, // Fallback if no start time
@@ -595,9 +598,12 @@ export const useGameStore = create(
             id: match.id,
             date: match.date,
             courseName: "Unknown Course", // We could look this up like in finishRound
-            playerNames: players.map(p => p.name) as [string, string, string, string],
-            teamAssignments: playerTeams as [Team, Team, Team, Team],
-            finalScores: [0, 0, 0, 0],
+            playerInfo: players.map((p, idx) => ({
+              id: p.id,
+              first: p.first || '',
+              last: p.last || '',
+              team: playerTeams[idx]
+            })),
             teamTotals: [0, 0],
             bigGameTotal: 0,
             startTime: match.startTime || endTime, // Fallback if no start time

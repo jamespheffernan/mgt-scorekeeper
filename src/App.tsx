@@ -18,6 +18,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import TopBar from './components/TopBar';
 import { useAuth } from './context/AuthContext';
 import { PlayersScreen } from './components/setup/PlayersScreen';
+import TeeSelectionScreen from './components/setup/TeeSelectionScreen';
 
 // Uncomment these for testing/development
 /*
@@ -75,6 +76,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PlayersScreen />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/tee-selection" 
+                element={
+                  <ProtectedRoute>
+                    <TeeSelectionScreen />
                   </ProtectedRoute>
                 } 
               />
