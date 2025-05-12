@@ -7,6 +7,7 @@ import {
 } from './API-GameState';
 import { Course } from './courseModel';
 import { MILLBROOK_COURSE_DATA } from './millbrookCourseData';
+import { MatchRoster } from '../types/player';
 
 /**
  * Millbrook Game Scorekeeper Database
@@ -18,6 +19,7 @@ class MillbrookDatabase extends Dexie {
   gameStates!: Table<GameState, string>;
   courses!: Table<Course, string>;
   gameHistory!: Table<GameHistory, string>;
+  matchState!: Table<{id: string, roster?: MatchRoster}, string>;
 
   constructor() {
     super('millbrookDb');
@@ -44,6 +46,31 @@ class MillbrookDatabase extends Dexie {
     // Add game history table in version 4
     this.version(4).stores({
       gameHistory: 'id, date, isComplete'
+    });
+
+    // Add match state table and player name splitting in version 5
+    this.version(5).stores({
+      players: 'id, name, first, last, index, ghin, defaultTeam, preferredTee, lastUsed',
+      matchState: 'id'
+    }).upgrade(tx => {
+      // Split existing names into first/last
+      return tx.table('players').toCollection().modify(player => {
+        if (!player.first || !player.last) {
+          const nameParts = player.name.split(' ');
+          if (nameParts.length >= 2) {
+            player.first = nameParts[0];
+            player.last = nameParts.slice(1).join(' ');
+          } else {
+            player.first = player.name;
+            player.last = '';
+          }
+        }
+        
+        // Ensure ghin field exists
+        if (player.ghin === undefined) {
+          player.ghin = '';
+        }
+      });
     });
   }
 

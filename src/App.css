@@ -2287,7 +2287,6 @@ input:focus, select:focus {
 /* Player info container */
 .player-info {
   display: flex;
-  flex-direction: column;
   margin-bottom: 8px;
 }
 
