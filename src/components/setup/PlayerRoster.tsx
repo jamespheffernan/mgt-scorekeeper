@@ -379,6 +379,53 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
       {/* Add New Player Button/Form */}
       <AddPlayerButton />
 
+      {/* Add Player Form */}
+      {showAddForm && (
+        <div className="add-player-form mb-4">
+          <h4 className="text-base font-medium mb-2">Add New Player</h4>
+          <div className="form-group">
+            <label htmlFor="new-player-name">Name:</label>
+            <input
+              id="new-player-name"
+              type="text"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              className="w-full h-10 px-3 border rounded mb-3"
+              placeholder="Enter player name"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="new-player-index">Handicap Index:</label>
+            <input
+              id="new-player-index"
+              type="number"
+              step="0.1"
+              min="0"
+              max="54"
+              value={newPlayerIndex}
+              onChange={(e) => setNewPlayerIndex(e.target.value)}
+              className="w-full h-10 px-3 border rounded mb-3"
+              placeholder="Enter handicap index (e.g. 10.4)"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="cancel-button flex-1 h-10 rounded"
+              onClick={() => setShowAddForm(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="save-button flex-1 h-10 rounded"
+              onClick={handleAddPlayer}
+              disabled={!newPlayerName || !newPlayerIndex}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Player Lists */}
       <div className="player-lists-container mobile-scrollable-list-container">
         {displayRecentPlayers.length > 0 && (
