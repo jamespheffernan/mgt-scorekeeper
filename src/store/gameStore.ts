@@ -201,67 +201,55 @@ export const useGameStore = create(
 
       // Create a new match
       createMatch: (players, teams, matchOptions: MatchOptions) => {
-        console.log('createMatch called with:', { players, teams, matchOptions });
         const today = new Date().toISOString().split('T')[0];
         const playerIds = players.map(p => p.id) as [string, string, string, string];
         const startTime = new Date().toISOString();
         
-        try {
-          set({
-            match: {
-              id: crypto.randomUUID(),
-              date: today,
-              bigGame: matchOptions.bigGame,
-              playerIds,
-              holePar: Array(18).fill(4),  // Default all holes to par 4
-              holeSI: Array(18).fill(0).map((_, i) => i + 1),   // Default stroke indexes 1-18
-              state: 'active',
-              currentHole: 1,
-              carry: 0,
-              base: 1,  // First hole starts with $1
-              doubles: 0,
-              bigGameTotal: 0,
-              courseId: matchOptions.courseId,
-              playerTeeIds: matchOptions.playerTeeIds,
-              doubleUsedThisHole: false,  // Initialize to false
-              startTime: startTime        // Record when the game started
-            },
-            players,
-            playerTeams: teams,
-            holeScores: [],
-            ledger: [],
-            junkEvents: [],
-            bigGameRows: [],
-            isDoubleAvailable: false,
-            trailingTeam: undefined
+        set({
+          match: {
+            id: crypto.randomUUID(),
+            date: today,
+            bigGame: matchOptions.bigGame,
+            playerIds,
+            holePar: Array(18).fill(4),  // Default all holes to par 4
+            holeSI: Array(18).fill(0).map((_, i) => i + 1),   // Default stroke indexes 1-18
+            state: 'active',
+            currentHole: 1,
+            carry: 0,
+            base: 1,  // First hole starts with $1
+            doubles: 0,
+            bigGameTotal: 0,
+            courseId: matchOptions.courseId,
+            playerTeeIds: matchOptions.playerTeeIds,
+            doubleUsedThisHole: false,  // Initialize to false
+            startTime: startTime        // Record when the game started
+          },
+          players,
+          playerTeams: teams,
+          holeScores: [],
+          ledger: [],
+          junkEvents: [],
+          bigGameRows: [],
+          isDoubleAvailable: false,
+          trailingTeam: undefined
+        });
+        
+        // Also save the initial game state to IndexedDB
+        const gameState = get();
+        millbrookDb.saveGameState(gameState).catch(err => {
+          console.error('Error saving initial game state:', err);
+        });
+        
+        // Update player lastUsed timestamps
+        players.forEach(player => {
+          const updatedPlayer = {
+            ...player,
+            lastUsed: startTime
+          };
+          millbrookDb.savePlayer(updatedPlayer).catch(err => {
+            console.error('Error updating player last used time:', err);
           });
-          console.log('Match created successfully, state updated');
-          
-          // Also save the initial game state to IndexedDB
-          const gameState = get();
-          console.log('Game state after match creation:', { 
-            matchId: gameState.match.id,
-            players: gameState.players.length
-          });
-          
-          millbrookDb.saveGameState(gameState).catch(err => {
-            console.error('Error saving initial game state:', err);
-          });
-          
-          // Update player lastUsed timestamps
-          players.forEach(player => {
-            const updatedPlayer = {
-              ...player,
-              lastUsed: startTime
-            };
-            millbrookDb.savePlayer(updatedPlayer).catch(err => {
-              console.error('Error updating player last used time:', err);
-            });
-          });
-        } catch (error) {
-          console.error('Error in createMatch:', error);
-          throw error; // Re-throw to allow error handling upstream
-        }
+        });
       },
 
       // Enter scores for a hole

@@ -99,55 +99,27 @@ const TeeSelectionScreen: React.FC = () => {
   
   // Create the match and start
   const handleCreateMatch = () => {
-    console.log('Start Match clicked - creating match and navigating');
-    
-    try {
-      // Validation
-      if (!selectedCourseId || playerTeeIds.some(id => !id)) {
-        console.log('Validation failed:', { selectedCourseId, playerTeeIds });
-        alert('Please select a course and tees for all players');
-        return;
-      }
-      
-      // Convert roster players to game players
-      const { players, teams } = convertToGamePlayers(dbPlayers);
-      
-      // Check if all required players were found
-      if (players.length !== 4 || teams.length !== 4) {
-        console.error('Player conversion failed - not enough players found');
-        alert('Error: Some selected players could not be found. Please go back to roster and try again.');
-        return;
-      }
-      
-      // Create match with selected options - IMPORTANT: DO NOT RESET STORE UNTIL AFTER MATCH CREATION
-      createMatch(players, teams, {
-        bigGame,
-        courseId: selectedCourseId,
-        playerTeeIds: playerTeeIds as [string, string, string, string]
-      });
-      
-      // Critical: Create a slight delay to ensure state propagation before navigating
-      // Use a Promise approach for better control
-      new Promise<void>((resolve) => {
-        // Wait for state updates to propagate
-        setTimeout(() => {
-          // Reset setup flow state after match is created
-          reset();
-          resolve();
-        }, 100);
-      })
-      .then(() => {
-        console.log('State updates complete, now navigating to hole/1');
-        // Use replace:true to prevent back navigation issues
-        navigate('/hole/1', { replace: true });
-      })
-      .catch((error) => {
-        console.error('Error in navigation process:', error);
-      });
-    } catch (error) {
-      console.error('Error in handleCreateMatch:', error);
-      alert('An error occurred while creating the match. Please try again.');
+    // Validation
+    if (!selectedCourseId || playerTeeIds.some(id => !id)) {
+      alert('Please select a course and tees for all players');
+      return;
     }
+    
+    // Convert roster players to game players
+    const { players, teams } = convertToGamePlayers(dbPlayers);
+    
+    // Create match with selected options
+    createMatch(players, teams, {
+      bigGame,
+      courseId: selectedCourseId,
+      playerTeeIds: playerTeeIds as [string, string, string, string]
+    });
+    
+    // Reset setup flow state
+    reset();
+    
+    // Navigate to first hole
+    navigate('/hole/1');
   };
   
   if (isLoading || playersLoading) {

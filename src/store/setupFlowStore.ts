@@ -19,7 +19,7 @@ interface SetupFlowState {
   setPlayerTee: (playerIndex: number, teeId: string) => void;
   setAllTees: (teeIds: string[]) => void;
   setBigGame: (enabled: boolean) => void;
-  reset: () => boolean;
+  reset: () => void;
   
   // Helper functions
   convertToGamePlayers: (rosterPlayers: RosterPlayer[]) => {
@@ -51,13 +51,7 @@ export const useSetupFlowStore = create<SetupFlowState>((set, get) => ({
   }),
   setAllTees: (teeIds) => set({ playerTeeIds: teeIds }),
   setBigGame: (enabled) => set({ bigGame: enabled }),
-  reset: () => {
-    console.log('Resetting setupFlowStore to initial state...');
-    console.log('Before reset:', get());
-    set(initialState);
-    console.log('After reset:', get());
-    return true; // Indicate success
-  },
+  reset: () => set(initialState),
   
   // Convert roster players to game players
   convertToGamePlayers: (rosterPlayers) => {
