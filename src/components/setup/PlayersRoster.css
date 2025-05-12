@@ -321,8 +321,8 @@ ul.player-list {
 }
 
 .fab-add-player svg {
-  width: 28px; /* Adjust icon size as needed */
-  height: 28px; /* Adjust icon size as needed */
+  width: 24px; /* Adjusted icon size */
+  height: 24px; /* Adjusted icon size */
 }
 
 .fab-add-player:hover {

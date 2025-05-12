@@ -98,6 +98,8 @@ export const PlayersScreen: React.FC = () => {
             aria-label="Add New Player"
             title="Add New Player"
           >
+            {/* Plus Icon */}
+            <span style={{ fontSize: '28px', lineHeight: '1', marginRight: '4px' }}>+</span> 
             {/* SVG Person Icon */}
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
