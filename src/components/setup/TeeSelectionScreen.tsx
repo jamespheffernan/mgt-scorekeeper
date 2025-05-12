@@ -99,27 +99,32 @@ const TeeSelectionScreen: React.FC = () => {
   
   // Create the match and start
   const handleCreateMatch = () => {
-    // Validation
-    if (!selectedCourseId || playerTeeIds.some(id => !id)) {
-      alert('Please select a course and tees for all players');
-      return;
+    console.log('Testing direct navigation strategy');
+
+    try {
+      // Skip everything - just try to navigate directly
+      console.log('Attempting direct navigation to /hole/1');
+      
+      // Use the navigate function with replace to force a new history entry
+      navigate('/hole/1', { replace: true });
+      
+      console.log('Navigation command executed');
+      
+      // If we get here, the navigation command didn't throw an error
+      // but we might still be on the tee-selection page
+      setTimeout(() => {
+        console.log('Current location after navigation attempt:', window.location.pathname);
+        
+        // If still on tee-selection, try an alternative approach with window.location
+        if (window.location.pathname.includes('tee-selection')) {
+          console.log('Still on tee-selection, trying window.location.href approach');
+          window.location.href = '/hole/1';
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      alert('Error navigating to hole view: ' + String(error));
     }
-    
-    // Convert roster players to game players
-    const { players, teams } = convertToGamePlayers(dbPlayers);
-    
-    // Create match with selected options
-    createMatch(players, teams, {
-      bigGame,
-      courseId: selectedCourseId,
-      playerTeeIds: playerTeeIds as [string, string, string, string]
-    });
-    
-    // Reset setup flow state
-    reset();
-    
-    // Navigate to first hole
-    navigate('/hole/1');
   };
   
   if (isLoading || playersLoading) {

@@ -63,7 +63,17 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={
-                hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />
+                (() => {
+                  console.log('Root path, checking active match:', { 
+                    hasActiveMatch, 
+                    matchId: match.id, 
+                    matchState: match.state, 
+                    currentHole: match.currentHole 
+                  });
+                  return hasActiveMatch 
+                    ? <Navigate to={`/hole/${match.currentHole}`} /> 
+                    : <Navigate to="/setup" />;
+                })()
               } />
               <Route path="/login" element={<LogIn />} />
               <Route path="/signup" element={<SignUp />} />
@@ -90,9 +100,21 @@ function App() {
               <Route 
                 path="/hole/:holeNumber" 
                 element={
-                  <ProtectedRoute>
-                    <ResponsiveHoleView />
-                  </ProtectedRoute>
+                  (() => {
+                    console.log('Rendering /hole/:holeNumber route with:', {
+                      hasValidMatch: match && match.id && match.state === 'active',
+                      matchId: match.id,
+                      matchState: match.state,
+                      currentHole: match.currentHole
+                    });
+                    
+                    // Always render the component through ProtectedRoute to ensure consistent auth handling
+                    return (
+                      <ProtectedRoute>
+                        <ResponsiveHoleView />
+                      </ProtectedRoute>
+                    );
+                  })()
                 } 
               />
               <Route 
