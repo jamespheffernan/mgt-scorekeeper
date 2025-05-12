@@ -187,7 +187,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 onChange={() => handleJunkChange('hadBunkerShot')}
                 style={{ marginRight: 8 }}
               />
-              Bunker Shot (Sandy)
+              Sandy
             </label>
             
             {canHaveGreenie && (
@@ -198,7 +198,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   onChange={() => handleJunkChange('isOnGreenFromTee')}
                   style={{ marginRight: 8 }}
                 />
-                On Green from Tee (Greenie)
+                Greenie
               </label>
             )}
             

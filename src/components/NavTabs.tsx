@@ -11,9 +11,10 @@ interface NavItem {
 interface NavTabsProps {
   items: NavItem[];
   current: string;
+  onTabClick?: (id: string) => void;
 }
 
-export const NavTabs: React.FC<NavTabsProps> = ({ items, current }) => {
+export const NavTabs: React.FC<NavTabsProps> = ({ items, current, onTabClick }) => {
   const navigate = useNavigate();
   
   return (
@@ -25,7 +26,13 @@ export const NavTabs: React.FC<NavTabsProps> = ({ items, current }) => {
                     ${current === i.id
                         ? 'bg-brand text-white'
                         : 'bg-grey30 text-grey90'}`}
-          onClick={() => navigate(i.href)}>
+          onClick={() => {
+            if (onTabClick) {
+              onTabClick(i.id);
+            } else {
+              navigate(i.href);
+            }
+          }}>
           {i.label}
         </button>
       ))}

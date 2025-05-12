@@ -13,6 +13,7 @@ import { PageHeader } from '../../PageHeader';
 import { SectionCard } from '../../SectionCard';
 import { PotRow } from '../../PotRow';
 import { BottomNav } from '../../BottomNav';
+import { NavTabs } from '../../NavTabs';
 
 export const HoleViewMobile: React.FC = () => {
   const navigate = useNavigate();
@@ -57,16 +58,30 @@ export const HoleViewMobile: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showEndGameDialog, setShowEndGameDialog] = useState(false);
+
+  // Define navigation items for NavTabs
+  const navItems = [
+    { id: 'viewLedger', label: 'View Ledger', href: '/ledger' },
+    { id: 'cancelGame', label: 'Cancel Game', href: '#' } // href: '#' or handle click separately
+  ];
+
+  // Handle navigation for NavTabs, specifically for cancel game
+  const handleNavTabClick = (itemId: string) => {
+    if (itemId === 'cancelGame') {
+      setShowCancelDialog(true);
+    } else {
+      const item = navItems.find(nav => nav.id === itemId);
+      if(item && item.href !== '#') navigate(item.href);
+    }
+  };
   
   // Get the current standings
   const getCurrentStandings = () => {
     if (ledger.length === 0) return { redTotal: 0, blueTotal: 0 };
     
     const lastLedgerEntry = ledger[ledger.length - 1];
-    // Find the first player index for each team
     const firstRedIndex = playerTeams.findIndex(team => team === 'Red');
     const firstBlueIndex = playerTeams.findIndex(team => team === 'Blue');
-    // Use only one player's running total per team
     const redTotal = lastLedgerEntry.runningTotals[firstRedIndex] ?? 0;
     const blueTotal = lastLedgerEntry.runningTotals[firstBlueIndex] ?? 0;
     return {
@@ -155,26 +170,24 @@ export const HoleViewMobile: React.FC = () => {
     let strokes: number[] = [0, 0, 0, 0];
     
     try {
-      if (match.courseId && match.playerTeeIds) {
-        // Try to use multi-tee stroke allocation if possible
-        const playerSIs: number[][] = players.map((_, pIdx) => {
-          const pteeId = match.playerTeeIds?.[pIdx];
+      if (match.courseId && match.playerTeeIds && players.length === 4) { // Ensure players array is populated
+        const playerSpecificSIs: number[][] = players.map((_, pIdx) => {
+          const pteeId = match.playerTeeIds![pIdx]; // Added non-null assertion as we check playerTeeIds above
           const ptee = courseData.teeOptions.find(t => t.id === pteeId);
           if (ptee && ptee.holes) {
-            return Array.from({ length: 18 }, (_, i) => {
+            return Array.from({ length: 18 }, (__, i) => {
               const holeInfo = ptee.holes.find(h => h.number === i + 1);
               return holeInfo ? holeInfo.strokeIndex : i + 1;
             });
           }
-          return Array.from({ length: 18 }, (_, i) => i + 1);
+          return Array.from({ length: 18 }, (__, i) => i + 1); // Fallback
         });
         
-        const strokeMatrix = allocateStrokesMultiTee(playerIndexes, playerSIs);
-        strokes = strokeMatrix.map(playerStrokes => playerStrokes[currentHole - 1]);
-      } else {
-        // Fall back to standard allocation
+        const strokeMatrix = allocateStrokesMultiTee(playerIndexes, playerSpecificSIs);
+        strokes = strokeMatrix.map(playerStrokesArray => playerStrokesArray[currentHole - 1]);
+      } else if (players.length === 4) { // Fallback if no course/tee specifics but players exist
         const strokeMatrix = allocateStrokes(playerIndexes, match.holeSI);
-        strokes = strokeMatrix.map(playerStrokes => playerStrokes[currentHole - 1]);
+        strokes = strokeMatrix.map(playerStrokesArray => playerStrokesArray[currentHole - 1]);
       }
     } catch (error) {
       console.error('Error calculating strokes:', error);
@@ -206,15 +219,11 @@ export const HoleViewMobile: React.FC = () => {
   const submitScores = async () => {
     setIsSubmitting(true);
     setErrorMessage(null);
-    
     try {
       await enterHoleScores(currentHole, grossScores, junkFlags);
-      
-      // If we're on hole 18, show the end game dialog
       if (currentHole === 18) {
         setShowEndGameDialog(true);
       } else {
-        // Navigate to the next hole
         navigate(`/hole/${currentHole + 1}`);
       }
     } catch (error) {
@@ -225,26 +234,21 @@ export const HoleViewMobile: React.FC = () => {
     }
   };
   
-  // Navigate to ledger view
-  const viewLedger = () => {
-    navigate('/ledger');
-  };
-  
-  // Cancel the game
+  // Cancel the game (used by NavTabs if that path is taken)
   const cancelGame = async () => {
     try {
       await cancelMatch();
-      navigate('/');
+      navigate('/'); // Navigate to home/main menu after cancellation
     } catch (error) {
       console.error('Error canceling game:', error);
       setErrorMessage('Failed to cancel game. Please try again.');
     }
   };
   
-  // End the game after hole 18
+  // End the game after hole 18 (primarily for EndGameDialog to call if needed, though it handles its own)
+  // This function might become redundant if EndGameDialog always handles its own logic.
   const endGame = async () => {
     try {
-      // Finish the round in the store
       await useGameStore.getState().finishRound();
       navigate('/settlement');
     } catch (error) {
@@ -255,18 +259,23 @@ export const HoleViewMobile: React.FC = () => {
   
   // Render method
   return (
-    <div className="hole-view mobile-hole-view">
+    <div className="hole-view mobile-hole-view pb-20">
       <TopBar title="The Millbrook Game" />
       
-      <div className="hole-content" style={{ marginTop: '56px', padding: '16px' }}>
+      <div className="hole-content px-4 pt-16">
         <PageHeader 
-          title="Millbrook Scorekeeper" 
+          title="" 
           subtitle={`Hole ${currentHole}`} 
+        />
+
+        <NavTabs 
+          items={navItems} 
+          current={ '' }
         />
 
         <SectionCard>
           <div className="mobile-hole-info">
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm">
               <span>Championship</span>
               <span>Par {defaultPar}</span>
               <span>{playerYardages[0] || 0} yds</span>
@@ -277,13 +286,15 @@ export const HoleViewMobile: React.FC = () => {
         
         <SectionCard>
           <PotRow 
-            red={`Red +$${Math.abs(getCurrentStandings().redTotal)}`}
-            carry={`Carry $${match.base}`}
-            blue={`Blue +$${Math.abs(getCurrentStandings().blueTotal)}`}
+            red={formatCurrency(getCurrentStandings().redTotal)}
+            holeValue={`Hole Value $${match.base}`}
+            blue={formatCurrency(getCurrentStandings().blueTotal)}
+            carryingAmount={match.carry}
           />
         </SectionCard>
         
-        <div className="player-scores-container">
+        <SectionCard className="mb-4">
+          <h3 className="text-lg font-semibold mb-3">Enter Scores</h3>
           <PlayersFourBox
             onScoreChange={updateScore}
             onJunkChange={updateJunk}
@@ -292,7 +303,7 @@ export const HoleViewMobile: React.FC = () => {
             playerStrokeIndexes={playerSIs}
             playerStrokes={playerStrokes}
           />
-        </div>
+        </SectionCard>
         
         {errorMessage && (
           <div className="error-message">
@@ -304,14 +315,14 @@ export const HoleViewMobile: React.FC = () => {
           {trailingTeam && isDoubleAvailable && (
             <button
               onClick={handleCallDouble}
-              className={`btn ${trailingTeam === 'Red' ? 'btn-danger' : 'btn-primary'} mr-2`}
+              className={`btn ${trailingTeam === 'Red' ? 'btn-red' : 'btn-blue'} mr-2`}
               disabled={isSubmitting}
             >
               CALL DOUBLE
             </button>
           )}
           {!isDoubleAvailable && match.doubles > 0 && (
-            <div className="double-used-indicator">
+            <div className="double-used-indicator px-3 py-2 text-sm bg-grey30 text-grey60 rounded">
               Double already used
             </div>
           )}
@@ -320,25 +331,9 @@ export const HoleViewMobile: React.FC = () => {
             className="btn btn-primary flex-1"
             disabled={isSubmitting}
           >
-            SUBMIT SCORES
+            {isSubmitting ? 'SUBMITTING...' : 'SUBMIT SCORES'}
           </button>
         </BottomNav>
-        
-        <div className="hole-actions">
-          <button
-            onClick={() => setShowCancelDialog(true)}
-            className="cancel-game-button"
-          >
-            Cancel Game
-          </button>
-        </div>
-        
-        <button
-          onClick={viewLedger}
-          className="view-ledger-button mb-4"
-        >
-          View Ledger
-        </button>
       </div>
       
       {showCancelDialog && (

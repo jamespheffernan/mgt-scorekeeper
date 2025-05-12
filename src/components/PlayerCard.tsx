@@ -8,6 +8,15 @@ interface PlayerCardProps {
   className?: string;
 }
 
+const toTitleCase = (str: string): string => {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 export const PlayerCard: React.FC<PlayerCardProps> = ({ 
   teamColor, 
   playerName, 
@@ -20,7 +29,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
              style={{ '--team-color': teamColor } as React.CSSProperties} />
       
       <div className="pl-2">
-        <h3 className="text-base font-medium mb-1">{playerName}</h3>
+        <h3 className="text-base font-medium mb-1" style={{ color: teamColor }}>{toTitleCase(playerName)}</h3>
         <div className="grid grid-cols-2 gap-2">
           {children}
         </div>

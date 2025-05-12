@@ -34,16 +34,14 @@ function App() {
   const { currentUser, loading, authInitialized } = useAuth();
   
   // Component state
-  const [showCourseManager, setShowCourseManager] = useState(false);
-  
-  // Toggle course manager
-  const toggleCourseManager = () => {
-    setShowCourseManager(!showCourseManager);
-  };
+  // const [showCourseManager, setShowCourseManager] = useState(false);
+  // const toggleCourseManager = () => {
+  //   setShowCourseManager(!showCourseManager);
+  // };
   
   // Check if there's an active match
   const hasActiveMatch = match && match.id && match.state === 'active';
-  const isGameActive = match.id !== '' && match.state === 'active';
+  // const isGameActive = match.id !== '' && match.state === 'active'; // No longer directly used here for links
 
   // If loading or auth not initialized, show a simple loading screen to prevent any redirects
   if (loading || !authInitialized) {
@@ -56,33 +54,8 @@ function App() {
         <div className="millbrook-app">
           <header className="app-header">
             <TopBar />
-            <div className="header-actions">
-              <UserProfile />
-              <button 
-                className="course-manager-button"
-                onClick={toggleCourseManager}
-              >
-                {showCourseManager ? 'Back to Game' : 'Course Manager'}
-              </button>
-              {isGameActive && !showCourseManager && (
-                <Link 
-                  to="/ledger" 
-                  className="nav-button"
-                  style={{ marginLeft: '10px' }}
-                >
-                  View Ledger
-                </Link>
-              )}
-              {!isGameActive && !showCourseManager && (
-                <Link 
-                  to="/history" 
-                  className="nav-button"
-                  style={{ marginLeft: '10px' }}
-                >
-                  Game History
-                </Link>
-              )}
-            </div>
+            {/* The header-actions div has been removed to prevent overlay issues */}
+            {/* UserProfile, Course Manager, and other global links need a new home, e.g., inside TopBar or a sidebar */}
           </header>
           
           <main>

@@ -270,36 +270,76 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     !displayRecentPlayers.some(rp => rp.id === player.id) // Ensure we use the already filtered recent players
   );
 
-  // Selected Players section in the component
-  const SelectedPlayers = () => (
-    <div className="selected-players mb-4">
-      <h4 className="text-base font-medium mb-2">Selected Players ({selectedPlayers.length}/4)</h4>
-      <div className="selected-grid flex flex-wrap gap-2">
-        {selectedPlayers.map((player, idx) => (
-          <div key={player.id} className="flex items-center">
-            <Chip
-              name={player.name}
-              onRemove={() => togglePlayer(player)}
-            />
-            <select
-              value={teams[idx]}
-              onChange={(e) => updateTeam(idx, e.target.value as Team)}
-              className="ml-2 h-8 rounded px-2 text-sm border border-grey30"
-            >
-              <option value="Red">Red</option>
-              <option value="Blue">Blue</option>
-            </select>
-          </div>
-        ))}
-        {/* Empty slots */}
-        {Array.from({ length: 4 - selectedPlayers.length }, (_, i) => (
-          <div key={`empty-${i}`} className="h-8 px-3 bg-grey30 rounded-full text-grey60 flex items-center">
-            Player {selectedPlayers.length + i + 1}
-          </div>
-        ))}
+  // Selected Players section (4-box split by team)
+  const SelectedPlayers = () => {
+    // Build arrays of players by team keeping original index for team updates
+    const blue: { player: Player; idx: number }[] = [];
+    const red: { player: Player; idx: number }[] = [];
+    selectedPlayers.forEach((p, i) => {
+      if (teams[i] === 'Blue') blue.push({ player: p, idx: i });
+      else red.push({ player: p, idx: i });
+    });
+
+    return (
+      <div className="selected-players mb-4">
+        <h4 className="text-base font-medium mb-2">Selected Players ({selectedPlayers.length}/4)</h4>
+        {/* 2x2 grid: Blue (L) | Red (R) */}
+        <div className="selected-grid grid grid-cols-2 gap-2">
+          {[0, 1].map((row) => (
+            <>
+              {/* Blue cell */}
+              <div key={`blue-${row}`} className="flex items-center">
+                {blue[row] ? (
+                  <>
+                    <Chip name={blue[row].player.name} onRemove={() => togglePlayer(blue[row].player)} />
+                    <select
+                      value={teams[blue[row].idx]}
+                      onChange={(e) => updateTeam(blue[row].idx, e.target.value as Team)}
+                      className="ml-2 h-8 rounded px-2 text-sm border border-grey30"
+                    >
+                      <option value="Red">Red</option>
+                      <option value="Blue">Blue</option>
+                    </select>
+                  </>
+                ) : (
+                  <div
+                    className="h-8 px-3 rounded-full flex items-center text-blue"
+                    style={{ backgroundColor: 'var(--color-blue)', opacity: 0.15 }}
+                  >
+                    Player {row + 1}
+                  </div>
+                )}
+              </div>
+
+              {/* Red cell */}
+              <div key={`red-${row}`} className="flex items-center">
+                {red[row] ? (
+                  <>
+                    <Chip name={red[row].player.name} onRemove={() => togglePlayer(red[row].player)} />
+                    <select
+                      value={teams[red[row].idx]}
+                      onChange={(e) => updateTeam(red[row].idx, e.target.value as Team)}
+                      className="ml-2 h-8 rounded px-2 text-sm border border-grey30"
+                    >
+                      <option value="Red">Red</option>
+                      <option value="Blue">Blue</option>
+                    </select>
+                  </>
+                ) : (
+                  <div
+                    className="h-8 px-3 rounded-full flex items-center text-red"
+                    style={{ backgroundColor: 'var(--color-red)', opacity: 0.15 }}
+                  >
+                    Player {row + 3}
+                  </div>
+                )}
+              </div>
+            </>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Search Box section in the component
   const SearchBox = () => (

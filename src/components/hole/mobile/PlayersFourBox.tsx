@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useGameStore, JunkFlags } from '../../../store/gameStore';
+import { useGameStore, JunkFlags, Player as PlayerType, Team } from '../../../store/gameStore';
 import { BottomSheet } from './BottomSheet';
+import { PlayerCard as NewPlayerCard } from '../../PlayerCard';
+import { colors } from '../../../theme/tokens';
 
-interface PlayerCardProps {
+interface InternalPlayerDisplayCardProps {
   name: string;
-  team: 'Red' | 'Blue';
-  playerIndex: number;
-  holeNumber: number;
+  team: Team;
   par: number;
   grossScore: number;
   strokes: number;
+  strokeIndex: number;
   yardage?: number;
   onEdit: () => void;
 }
@@ -23,105 +24,37 @@ interface PlayersFourBoxProps {
   playerStrokes: number[];
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ 
+const OldPlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({ 
   name, 
   team, 
   par, 
   grossScore,
   strokes,
+  strokeIndex,
   yardage,
   onEdit
 }) => {
-  const teamColor = team === 'Red' ? '#e74c3c' : '#3498db';
+  const teamColor = team === 'Red' ? colors.red : colors.blue;
   
   return (
-    <div
-      data-testid="player-card"
-      onClick={onEdit}
-      style={{
-        border: '1px solid #e1e5ea',
-        borderLeft: `3px solid ${teamColor}`,
-        borderRadius: 8,
-        padding: '10px',
-        height: 'calc(100% - 20px)', // Account for padding
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: '#fff',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-      }}
-    >
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: 6 
-      }}>
-        <strong style={{ 
-          fontSize: '15px', 
-          color: teamColor,
-          textTransform: 'lowercase',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          maxWidth: '80%',
-          whiteSpace: 'nowrap'
-        }}>{name}</strong>
+    <div onClick={onEdit} className="cursor-pointer">
+      <NewPlayerCard 
+        playerName={name} 
+        teamColor={teamColor}
+      >
+        <div className="text-xs text-grey60">Par {par}</div>
+        <div className="text-xs text-grey60">SI: {strokeIndex}</div>
+        {yardage && yardage > 0 && <div className="text-xs text-grey60">{yardage} yds</div>}
+        <div>{/* Empty div for grid balance or future use */}</div>
         
+        <div className="text-sm font-semibold col-span-2 mt-1">Gross {grossScore}</div>
         {strokes > 0 && (
-          <span style={{ 
-            backgroundColor: teamColor,
-            color: 'white',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            borderRadius: '4px',
-            padding: '1px 6px',
-            marginLeft: 'auto'
-          }}>-{strokes}</span>
-        )}
-      </div>
-      
-      <div style={{ 
-        fontSize: '13px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '2px' 
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            fontSize: '12px', 
-            color: '#888' 
-          }}>
-            ⭐ Par {par}
-          </span>
-        </div>
-        
-        {yardage && yardage > 0 && (
-          <div style={{ fontSize: '12px', color: '#718096' }}>
-            <span>{yardage} yds</span>
+          <div className="text-xs font-semibold col-span-2"
+               style={{ color: teamColor }}>
+            Strokes: -{strokes}
           </div>
         )}
-      </div>
-      
-      <div style={{ 
-        marginTop: 'auto', 
-        paddingTop: '4px', 
-        display: 'flex', 
-        alignItems: 'center' 
-      }}>
-        <span style={{ 
-          fontWeight: 'bold',
-          fontSize: '14px'
-        }}>
-          gross {grossScore}
-        </span>
-        <span style={{ 
-          marginLeft: '4px', 
-          color: '#666', 
-          fontSize: '12px' 
-        }}>▾</span>
-      </div>
+      </NewPlayerCard>
     </div>
   );
 };
@@ -134,21 +67,16 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   playerStrokeIndexes,
   playerStrokes
 }) => {
-  const players = useGameStore(state => state.players);
+  const storePlayers = useGameStore(state => state.players);
   const playerTeams = useGameStore(state => state.playerTeams);
   const currentHole = useGameStore(state => state.match.currentHole);
   const holePar = useGameStore(state => state.match.holePar);
-  
-  // Get the gross scores for the current hole if available
   const holeScores = useGameStore(state => state.holeScores);
   const currentHoleScore = holeScores.find(score => score.hole === currentHole);
   
-  // Local UI state
   const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null);
-  // Track updated scores locally for immediate UI update
   const [localScores, setLocalScores] = useState<Record<number, number>>({});
 
-  // Reset local scores when the hole changes
   useEffect(() => {
     setLocalScores({});
   }, [currentHole]);
@@ -159,11 +87,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
 
   const handleScoreChange = (score: number) => {
     if (activePlayerIndex !== null) {
-      // Update the local score state for immediate feedback
-      setLocalScores({
-        ...localScores,
-        [activePlayerIndex]: score
-      });
+      setLocalScores(prev => ({ ...prev, [activePlayerIndex]: score }));
       onScoreChange(activePlayerIndex, score);
     }
   };
@@ -176,129 +100,75 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
 
   const closeSheet = () => setActivePlayerIndex(null);
 
-  // Group players by team
-  const redPlayerIndices: number[] = [];
-  const bluePlayerIndices: number[] = [];
-  
-  // Find players by team
-  playerTeams.forEach((team, index) => {
-    if (index < 4) { // Only process the first 4 players
-      if (team === 'Red') {
-        redPlayerIndices.push(index);
-      } else if (team === 'Blue') {
-        bluePlayerIndices.push(index);
-      }
-    }
-  });
-  
-  // Get the current score for a player, prioritizing local updates
   const getPlayerScore = (playerIndex: number): number => {
-    // First check if there's a local update
-    if (localScores[playerIndex] !== undefined) {
-      return localScores[playerIndex];
-    }
-    
-    // Then check if there's a submitted score from the store
-    if (currentHoleScore && currentHoleScore.gross[playerIndex] !== undefined) {
-      return currentHoleScore.gross[playerIndex];
-    }
-    
-    // Fall back to par
+    if (localScores[playerIndex] !== undefined) return localScores[playerIndex];
+    if (currentHoleScore && currentHoleScore.gross[playerIndex] !== undefined) return currentHoleScore.gross[playerIndex];
     return playerPars[playerIndex] || holePar[currentHole - 1] || 4;
   };
   
+  // Split players by team, preserving their original index
+  const blue: { player: PlayerType; idx: number }[] = [];
+  const red: { player: PlayerType; idx: number }[] = [];
+  storePlayers.forEach((player, i) => {
+    if (playerTeams[i] === 'Blue') blue.push({ player, idx: i });
+    else red.push({ player, idx: i });
+  });
+
   return (
-    <div style={{ paddingBottom: '8px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        marginBottom: 8,
-        padding: '0 4px'
-      }}>
-        <div style={{ 
-          color: '#e74c3c', 
-          fontWeight: 'bold', 
-          fontSize: '14px',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          RED TEAM
-        </div>
-        <div style={{ 
-          color: '#3498db', 
-          fontWeight: 'bold', 
-          fontSize: '14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end'
-        }}>
-          BLUE TEAM
-        </div>
-      </div>
-      <div
-        data-testid="players-grid"
-        style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(2, 1fr)', 
-          gap: 10,
-          margin: '0',
-        }}
-      >
-        {/* Create pairs of players (one red, one blue) for each row */}
-        {redPlayerIndices.map((redIndex, i) => {
-          const redPlayerIndex = redIndex;
-          const bluePlayerIndex = bluePlayerIndices[i] !== undefined ? bluePlayerIndices[i] : -1;
-          
-          return (
-            <React.Fragment key={`row-${i}`}>
-              {/* Red player card */}
-              {redPlayerIndex !== -1 && (
-                <PlayerCard
-                  key={players[redPlayerIndex].id || redPlayerIndex}
-                  name={players[redPlayerIndex].name}
-                  team={playerTeams[redPlayerIndex] as 'Red' | 'Blue'}
-                  playerIndex={redPlayerIndex}
-                  holeNumber={currentHole}
-                  par={playerPars[redPlayerIndex] || holePar[currentHole - 1] || 4}
-                  grossScore={getPlayerScore(redPlayerIndex)}
-                  strokes={playerStrokes[redPlayerIndex] || 0}
-                  yardage={playerYardages[redPlayerIndex] || 0}
-                  onEdit={() => handleCardClick(redPlayerIndex)}
+    <div className="mb-2">
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1].map(row => (
+          <React.Fragment key={row}>
+            {/* Red team cell (now left) */}
+            <div>
+              {red[row] ? (
+                <OldPlayerCardDisplay
+                  name={red[row].player.name}
+                  team={playerTeams[red[row].idx] as Team}
+                  par={playerPars[red[row].idx]}
+                  grossScore={getPlayerScore(red[row].idx)}
+                  strokes={playerStrokes[red[row].idx]}
+                  strokeIndex={playerStrokeIndexes[red[row].idx]}
+                  yardage={playerYardages[red[row].idx]}
+                  onEdit={() => handleCardClick(red[row].idx)}
                 />
+              ) : (
+                <div className="h-20 rounded bg-red-100 flex items-center justify-center opacity-50">Red</div>
               )}
-              
-              {/* Blue player card */}
-              {bluePlayerIndex !== -1 && (
-                <PlayerCard
-                  key={players[bluePlayerIndex].id || bluePlayerIndex}
-                  name={players[bluePlayerIndex].name}
-                  team={playerTeams[bluePlayerIndex] as 'Red' | 'Blue'}
-                  playerIndex={bluePlayerIndex}
-                  holeNumber={currentHole}
-                  par={playerPars[bluePlayerIndex] || holePar[currentHole - 1] || 4}
-                  grossScore={getPlayerScore(bluePlayerIndex)}
-                  strokes={playerStrokes[bluePlayerIndex] || 0}
-                  yardage={playerYardages[bluePlayerIndex] || 0}
-                  onEdit={() => handleCardClick(bluePlayerIndex)}
+            </div>
+            {/* Blue team cell (now right) */}
+            <div>
+              {blue[row] ? (
+                <OldPlayerCardDisplay
+                  name={blue[row].player.name}
+                  team={playerTeams[blue[row].idx] as Team}
+                  par={playerPars[blue[row].idx]}
+                  grossScore={getPlayerScore(blue[row].idx)}
+                  strokes={playerStrokes[blue[row].idx]}
+                  strokeIndex={playerStrokeIndexes[blue[row].idx]}
+                  yardage={playerYardages[blue[row].idx]}
+                  onEdit={() => handleCardClick(blue[row].idx)}
                 />
+              ) : (
+                <div className="h-20 rounded bg-blue-100 flex items-center justify-center opacity-50">Blue</div>
               )}
-            </React.Fragment>
-          );
-        })}
+            </div>
+          </React.Fragment>
+        ))}
       </div>
-      
-      {activePlayerIndex !== null && (
-        <BottomSheet
-          playerName={players[activePlayerIndex].name}
-          playerIndex={activePlayerIndex}
-          team={playerTeams[activePlayerIndex] as 'Red' | 'Blue'}
-          currentHole={currentHole}
-          par={playerPars[activePlayerIndex] || holePar[currentHole - 1] || 4}
-          initialScore={getPlayerScore(activePlayerIndex)}
-          strokes={playerStrokes[activePlayerIndex] || 0}
-          onScoreChange={handleScoreChange}
-          onJunkChange={handleJunkChange}
+
+      {activePlayerIndex !== null && storePlayers[activePlayerIndex] && (
+        <BottomSheet 
           onClose={closeSheet}
+          playerName={storePlayers[activePlayerIndex].name}
+          playerIndex={activePlayerIndex}
+          team={playerTeams[activePlayerIndex] as Team}
+          currentHole={currentHole}
+          par={playerPars[activePlayerIndex]}
+          initialScore={getPlayerScore(activePlayerIndex)}
+          strokes={playerStrokes[activePlayerIndex]}
+          onScoreChange={handleScoreChange} 
+          onJunkChange={handleJunkChange} 
         />
       )}
     </div>
