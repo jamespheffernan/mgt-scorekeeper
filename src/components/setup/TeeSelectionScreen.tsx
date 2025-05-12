@@ -1,5 +1,4 @@
 import "./PlayersRoster.css";
-import './PlayersRoster.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetupFlowStore } from '../../store/setupFlowStore';
@@ -11,7 +10,7 @@ import TopBar from '../TopBar';
 import { Stepper } from '../Stepper';
 import { SectionCard } from '../SectionCard';
 
-export const TeeSelectionScreen: React.FC = () => {
+const TeeSelectionScreen: React.FC = () => {
   const navigate = useNavigate();
   const { players: dbPlayers, isLoading: playersLoading } = useFirestorePlayers();
   const { 
