@@ -99,31 +99,54 @@ const TeeSelectionScreen: React.FC = () => {
   
   // Create the match and start
   const handleCreateMatch = () => {
-    console.log('Testing direct navigation strategy');
-
+    console.log('Start Match clicked - creating match and navigating');
+    
     try {
-      // Skip everything - just try to navigate directly
-      console.log('Attempting direct navigation to /hole/1');
+      // Validation
+      if (!selectedCourseId || playerTeeIds.some(id => !id)) {
+        console.log('Validation failed:', { selectedCourseId, playerTeeIds });
+        alert('Please select a course and tees for all players');
+        return;
+      }
       
-      // Use the navigate function with replace to force a new history entry
-      navigate('/hole/1', { replace: true });
+      // Convert roster players to game players
+      const { players, teams } = convertToGamePlayers(dbPlayers);
       
-      console.log('Navigation command executed');
+      // Check if all required players were found
+      if (players.length !== 4 || teams.length !== 4) {
+        console.error('Player conversion failed - not enough players found');
+        alert('Error: Some selected players could not be found. Please go back to roster and try again.');
+        return;
+      }
       
-      // If we get here, the navigation command didn't throw an error
-      // but we might still be on the tee-selection page
-      setTimeout(() => {
-        console.log('Current location after navigation attempt:', window.location.pathname);
-        
-        // If still on tee-selection, try an alternative approach with window.location
-        if (window.location.pathname.includes('tee-selection')) {
-          console.log('Still on tee-selection, trying window.location.href approach');
-          window.location.href = '/hole/1';
-        }
-      }, 100);
+      // Create match with selected options - IMPORTANT: DO NOT RESET STORE UNTIL AFTER MATCH CREATION
+      createMatch(players, teams, {
+        bigGame,
+        courseId: selectedCourseId,
+        playerTeeIds: playerTeeIds as [string, string, string, string]
+      });
+      
+      // Critical: Create a slight delay to ensure state propagation before navigating
+      // Use a Promise approach for better control
+      new Promise<void>((resolve) => {
+        // Wait for state updates to propagate
+        setTimeout(() => {
+          // Reset setup flow state after match is created
+          reset();
+          resolve();
+        }, 100);
+      })
+      .then(() => {
+        console.log('State updates complete, now navigating to hole/1');
+        // Use replace:true to prevent back navigation issues
+        navigate('/hole/1', { replace: true });
+      })
+      .catch((error) => {
+        console.error('Error in navigation process:', error);
+      });
     } catch (error) {
-      console.error('Navigation error:', error);
-      alert('Error navigating to hole view: ' + String(error));
+      console.error('Error in handleCreateMatch:', error);
+      alert('An error occurred while creating the match. Please try again.');
     }
   };
   
