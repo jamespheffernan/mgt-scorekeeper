@@ -17,6 +17,7 @@ import UserProfile from './components/auth/UserProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import TopBar from './components/TopBar';
 import { useAuth } from './context/AuthContext';
+import { PlayersScreen } from './components/setup/PlayersScreen';
 
 // Uncomment these for testing/development
 /*
@@ -68,6 +69,14 @@ function App() {
               <Route 
                 path="/setup" 
                 element={<MatchSetup />} 
+              />
+              <Route 
+                path="/roster" 
+                element={
+                  <ProtectedRoute>
+                    <PlayersScreen />
+                  </ProtectedRoute>
+                } 
               />
               <Route 
                 path="/hole/:holeNumber" 

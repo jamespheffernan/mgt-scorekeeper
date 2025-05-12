@@ -4,6 +4,7 @@ import { Player, Team } from '../../store/gameStore';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
 import { Chip } from '../Chip';
 import '../../App.css';
+import './PlayersRoster.css';
 
 // Interface for component props
 interface PlayerRosterProps {
