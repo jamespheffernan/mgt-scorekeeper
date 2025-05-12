@@ -271,6 +271,7 @@ export const HoleViewMobile: React.FC = () => {
         <NavTabs 
           items={navItems} 
           current={ '' }
+          onTabClick={handleNavTabClick}
         />
 
         <SectionCard>
