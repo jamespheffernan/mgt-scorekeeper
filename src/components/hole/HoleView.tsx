@@ -9,6 +9,15 @@ import { JunkFlags } from '../../calcEngine/junkCalculator';
 import { millbrookDb } from '../../db/millbrookDb';
 import { allocateStrokes, allocateStrokesMultiTee } from '../../calcEngine/strokeAllocator';
 
+const toTitleCase = (str: string): string => {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 export const HoleView = () => {
   const navigate = useNavigate();
   
@@ -406,7 +415,7 @@ export const HoleView = () => {
           <div className="player-standings">
             {players.map((player, index) => (
               <div key={player.id} className={`player-standing team-${playerTeams[index].toLowerCase()}`}>
-                <div className="player-name">{player.name}</div>
+                <div className="player-name">{toTitleCase(player.name)}</div>
                 <div className="player-team-badge">{playerTeams[index]}</div>
                 <div className="player-amount">{formatCurrency(lastLedgerEntry.runningTotals[index])}</div>
                 {getPlayerJunkTotal(player.id) > 0 && (
@@ -507,7 +516,7 @@ export const HoleView = () => {
                   <span className={`player-team-badge ${playerTeams[index].toLowerCase()}`}>
                     {playerTeams[index]}
                   </span>
-                  <span className="player-name-display">{player.name}</span>
+                  <span className="player-name-display">{toTitleCase(player.name)}</span>
                 </div>
                 
                 {teeInfo.name && (

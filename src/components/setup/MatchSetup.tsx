@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useGameStore, Player, Team } from '../../store/gameStore';
 import { CourseSetup } from './CourseSetup';
 import PlayerRoster from './PlayerRoster';
+import { Stepper } from '../Stepper';
+import TopBar from '../TopBar';
+import { SectionCard } from '../SectionCard';
 import '../../App.css';
 
 interface MatchSetupProps {
@@ -66,7 +69,7 @@ export const MatchSetup = () => {
       case SetupStep.PLAYERS:
         return (
           <>
-            <h2>Step 1 of 2: Select Players</h2>
+            <Stepper current={1} of={2} />
             <PlayerRoster onPlayersSelected={handlePlayersSelected} />
             <div className="setup-actions mobile-full-width-buttons">
               <button 
@@ -82,33 +85,35 @@ export const MatchSetup = () => {
       case SetupStep.COURSE:
         return (
           <>
-            <h2>Step 2 of 2: Game & Course Options</h2>
-            <div className="game-options mobile-section">
-              <div className="big-game-toggle-container">
-                <label className="big-game-toggle mobile-touch-target">
-                  <input 
-                    type="checkbox"
-                    checked={bigGame}
-                    onChange={(e) => setBigGame(e.target.checked)}
-                  />
-                  <span className="toggle-label">Enable "Big Game" scoring</span>
-                </label>
-                <button 
-                  onClick={() => setShowBigGameExplanation(!showBigGameExplanation)}
-                  className="learn-more-button"
-                >
-                  {showBigGameExplanation ? 'Hide details' : 'Learn more'}
-                </button>
-                {showBigGameExplanation && (
-                  <div className="big-game-explanation mobile-text-block">
-                    When enabled, the app will track the two lowest net scores on each hole.
-                    The total is shared with other groups playing in the Big Game.
-                    <br />
-                    <strong>Note:</strong> Big Game has different rules for gimmes and pick-ups than the Millbrook side match.
-                  </div>
-                )}
+            <Stepper current={2} of={2} />
+            <SectionCard>
+              <div className="game-options">
+                <div className="big-game-toggle-container">
+                  <label className="big-game-toggle mobile-touch-target">
+                    <input 
+                      type="checkbox"
+                      checked={bigGame}
+                      onChange={(e) => setBigGame(e.target.checked)}
+                    />
+                    <span className="toggle-label">Enable "Big Game" scoring</span>
+                  </label>
+                  <button 
+                    onClick={() => setShowBigGameExplanation(!showBigGameExplanation)}
+                    className="learn-more-button"
+                  >
+                    {showBigGameExplanation ? 'Hide details' : 'Learn more'}
+                  </button>
+                  {showBigGameExplanation && (
+                    <div className="big-game-explanation mobile-text-block">
+                      When enabled, the app will track the two lowest net scores on each hole.
+                      The total is shared with other groups playing in the Big Game.
+                      <br />
+                      <strong>Note:</strong> Big Game has different rules for gimmes and pick-ups than the Millbrook side match.
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </SectionCard>
             
             <CourseSetup 
               selectedPlayers={players} 
@@ -121,9 +126,12 @@ export const MatchSetup = () => {
   };
   
   return (
-    <div className="setup-container mobile-setup-container">
-      {renderSetupStep()}
-    </div>
+    <>
+      <TopBar title="Game Setup" />
+      <div className="setup-container mobile-setup-container" style={{ marginTop: '56px', padding: '16px' }}>
+        {renderSetupStep()}
+      </div>
+    </>
   );
 };
 
