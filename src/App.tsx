@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
 import { useGameStore } from './store/gameStore';
-import MatchSetup from './components/setup/MatchSetup';
+// import MatchSetup from './components/setup/MatchSetup';
 import SettlementView from './components/ledger/SettlementView';
 import { LedgerView } from './components/ledger/LedgerView';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -111,14 +111,16 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={
-                hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/setup" />
+                hasActiveMatch ? <Navigate to={`/hole/${match.currentHole}`} /> : <Navigate to="/roster" />
               } />
               <Route path="/login" element={<LogIn />} />
               <Route path="/signup" element={<SignUp />} />
+              {/* 
               <Route 
                 path="/setup" 
                 element={<MatchSetup />} 
-              />
+              /> 
+              */}
               <Route 
                 path="/roster" 
                 element={
