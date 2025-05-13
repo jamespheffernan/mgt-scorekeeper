@@ -26,18 +26,53 @@ interface PlayerPreference {
 // Helper function to sort players by last name
 const sortPlayersByLastName = (players: Player[]): Player[] => {
   return [...players].sort((a, b) => {
-    // Use last name for primary sort
-    const lastNameA = a.last?.toLowerCase() || '';
-    const lastNameB = b.last?.toLowerCase() || '';
+    // Handle cases where last name might not be present
+    const getLastName = (player: Player): string => {
+      // If last name exists and is not empty, use it
+      if (player.last && player.last.trim() !== '') {
+        return player.last.toLowerCase();
+      }
+      // For players with no last name, try to extract from the name field if it exists
+      else if (player.name) {
+        const nameParts = player.name.split(' ');
+        // If name has multiple parts, use everything after the first part as last name
+        if (nameParts.length > 1) {
+          return nameParts.slice(1).join(' ').toLowerCase();
+        }
+      }
+      // Default case: no last name found
+      return '';
+    };
     
-    if (lastNameA !== lastNameB) {
-      return lastNameA.localeCompare(lastNameB);
+    const lastNameA = getLastName(a);
+    const lastNameB = getLastName(b);
+    
+    // If both have last names, compare them
+    if (lastNameA !== '' && lastNameB !== '') {
+      if (lastNameA !== lastNameB) {
+        return lastNameA.localeCompare(lastNameB);
+      }
+    } 
+    // If only one has a last name, that one comes after
+    else if (lastNameA !== '' && lastNameB === '') {
+      return 1;
+    }
+    else if (lastNameA === '' && lastNameB !== '') {
+      return -1;
     }
     
-    // If last names are the same, use first name as secondary sort
+    // If last names are the same or both empty, use first name
     const firstNameA = a.first?.toLowerCase() || '';
     const firstNameB = b.first?.toLowerCase() || '';
-    return firstNameA.localeCompare(firstNameB);
+    
+    if (firstNameA !== firstNameB) {
+      return firstNameA.localeCompare(firstNameB);
+    }
+    
+    // If first names are also the same, fall back to full name
+    const fullNameA = getFullName(a).toLowerCase();
+    const fullNameB = getFullName(b).toLowerCase();
+    return fullNameA.localeCompare(fullNameB);
   });
 };
 
