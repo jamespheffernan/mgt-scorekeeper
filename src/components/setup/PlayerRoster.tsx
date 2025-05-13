@@ -5,7 +5,7 @@ import { QuickHandicapEditor } from './QuickHandicapEditor';
 import { Chip } from '../Chip';
 import '../../App.css';
 import './PlayersRoster.css';
-import { getFullName } from '../../utils/nameUtils';
+import { getFullName, splitNameParts } from '../../utils/nameUtils';
 import PlayerName from '../../components/PlayerName';
 
 // Interface for component props
@@ -23,57 +23,40 @@ interface PlayerPreference {
   defaultTeam?: Team;
 }
 
-// Helper function to sort players by last name
+// Simple helper function to sort players by last name, then first name
 const sortPlayersByLastName = (players: Player[]): Player[] => {
-  return [...players].sort((a, b) => {
-    // Handle cases where last name might not be present
-    const getLastName = (player: Player): string => {
-      // If last name exists and is not empty, use it
-      if (player.last && player.last.trim() !== '') {
-        return player.last.toLowerCase();
-      }
-      // For players with no last name, try to extract from the name field if it exists
-      else if (player.name) {
-        const nameParts = player.name.split(' ');
-        // If name has multiple parts, use everything after the first part as last name
-        if (nameParts.length > 1) {
-          return nameParts.slice(1).join(' ').toLowerCase();
-        }
-      }
-      // Default case: no last name found
-      return '';
-    };
+  // Log the players before sorting for diagnostic purposes
+  console.log('Players before sorting:', players.map(p => ({ 
+    id: p.id, 
+    first: p.first || '', 
+    last: p.last || '', 
+    name: p.name || ''
+  })));
+  
+  const sorted = [...players].sort((a, b) => {
+    // Compare last names
+    const lastA = (a.last || '').toLowerCase();
+    const lastB = (b.last || '').toLowerCase();
     
-    const lastNameA = getLastName(a);
-    const lastNameB = getLastName(b);
-    
-    // If both have last names, compare them
-    if (lastNameA !== '' && lastNameB !== '') {
-      if (lastNameA !== lastNameB) {
-        return lastNameA.localeCompare(lastNameB);
-      }
-    } 
-    // If only one has a last name, that one comes after
-    else if (lastNameA !== '' && lastNameB === '') {
-      return 1;
-    }
-    else if (lastNameA === '' && lastNameB !== '') {
-      return -1;
+    if (lastA !== lastB) {
+      return lastA.localeCompare(lastB);
     }
     
-    // If last names are the same or both empty, use first name
-    const firstNameA = a.first?.toLowerCase() || '';
-    const firstNameB = b.first?.toLowerCase() || '';
-    
-    if (firstNameA !== firstNameB) {
-      return firstNameA.localeCompare(firstNameB);
-    }
-    
-    // If first names are also the same, fall back to full name
-    const fullNameA = getFullName(a).toLowerCase();
-    const fullNameB = getFullName(b).toLowerCase();
-    return fullNameA.localeCompare(fullNameB);
+    // If last names are the same, compare first names
+    const firstA = (a.first || '').toLowerCase();
+    const firstB = (b.first || '').toLowerCase();
+    return firstA.localeCompare(firstB);
   });
+  
+  // Log the players after sorting for diagnostic purposes
+  console.log('Players after sorting by last name:', sorted.map(p => ({ 
+    id: p.id, 
+    first: p.first || '', 
+    last: p.last || '', 
+    sortKey: ((p.last || '') + ' ' + (p.first || '')).toLowerCase()
+  })));
+  
+  return sorted;
 };
 
 const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
@@ -92,6 +75,9 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>(['Red', 'Blue', 'Red', 'Blue']);
   
+  // Debug mode state
+  const [debugMode, setDebugMode] = useState(true);
+  
   // Search functionality
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -108,10 +94,50 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showHandicapEditor, setShowHandicapEditor] = useState(false);
 
+  // Function to migrate player data from legacy format
+  const migratePlayersWithLegacyData = async (playersToCheck: Player[]) => {
+    const playersToUpdate: Player[] = [];
+    
+    playersToCheck.forEach(player => {
+      // Check if the player has only 'name' field but missing or empty first/last
+      if (player.name && (!player.first || !player.last || player.first === '' || player.last === '')) {
+        const { first, last } = splitNameParts(player.name);
+        
+        // Only update if we have valid parts to split
+        if (first || last) {
+          playersToUpdate.push({
+            ...player,
+            first: first || '',
+            last: last || '',
+            // We'll keep the original name for backward compatibility, but clients should use first/last
+          });
+        }
+      }
+    });
+    
+    // Update players in database if any need migration
+    if (playersToUpdate.length > 0) {
+      console.log(`Migrating ${playersToUpdate.length} players from legacy format...`);
+      
+      // Update each player
+      for (const player of playersToUpdate) {
+        try {
+          await updatePlayer(player);
+          console.log(`Migrated player: ${player.first} ${player.last}`);
+        } catch (error) {
+          console.error(`Failed to migrate player ${player.id}:`, error);
+        }
+      }
+    }
+  };
+
   // Load players and preferences on component mount
   useEffect(() => {
     // Set players from database
     setPlayers(dbPlayers);
+    
+    // Attempt to migrate any players with legacy data format
+    migratePlayersWithLegacyData(dbPlayers);
     
     // Load player preferences from localStorage
     const savedPrefs = localStorage.getItem(PLAYER_PREFERENCES_KEY);
@@ -456,6 +482,27 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     <div className="player-roster-container mobile-player-roster">
       {/* Error Display */}
       {error && <div className="error-message mobile-error">{error}</div>}
+
+      {/* Debug Information */}
+      {debugMode && (
+        <div style={{ background: '#ffe0e0', padding: '8px', margin: '8px 0', fontSize: '12px', border: '1px solid #ff0000' }}>
+          <h4>Debug Mode</h4>
+          <button onClick={() => setDebugMode(false)} style={{ fontSize: '12px', padding: '2px 5px' }}>Hide Debug</button>
+          <div>
+            <strong>Players data:</strong>
+            <pre style={{ maxHeight: '100px', overflow: 'auto', fontSize: '10px' }}>
+              {JSON.stringify(players.slice(0, 3).map(p => ({
+                id: p.id.substring(0, 8),
+                first: p.first || '',
+                last: p.last || '',
+                sortKey: `${p.last || ''}, ${p.first || ''}`
+              })), null, 2)}
+              {players.length > 3 ? `... and ${players.length - 3} more` : ''}
+            </pre>
+          </div>
+          <div>Check browser console for complete sorting logs</div>
+        </div>
+      )}
 
       {/* Selected Players Summary - Crucial for Mobile */}
       <SelectedPlayers />
