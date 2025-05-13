@@ -13,9 +13,6 @@ export default function TopBar({ title = "The Millbrook Game" }: TopBarProps) {
       <h1 className="topbar-title">
         {title}
       </h1>
-      <Link to="/roster" className={location.pathname === '/roster' ? 'active' : ''}>
-        Alpha
-      </Link>
     </header>
   );
 } 
