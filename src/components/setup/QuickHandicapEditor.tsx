@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Player } from '../../store/gameStore';
 import '../../App.css';
+import { formatPlayerName } from '../../utils/nameFormatter';
 
 interface QuickHandicapEditorProps {
   player: Player;
@@ -15,6 +16,9 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
   onCancel, 
   onDelete 
 }) => {
+  // Add state for first/last name
+  const [firstNameValue, setFirstNameValue] = useState(player.first || '');
+  const [lastNameValue, setLastNameValue] = useState(player.last || '');
   const [indexValue, setIndexValue] = useState(player.index.toString());
   const [ghinValue, setGhinValue] = useState(player.ghin || '');
   const [notes, setNotes] = useState(player.notes || '');
@@ -47,6 +51,9 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
     
     const updatedPlayer: Player = {
       ...player,
+      first: firstNameValue,
+      last: lastNameValue,
+      name: `${firstNameValue} ${lastNameValue}`.trim(),
       index: parseFloat(indexValue),
       ghin: ghinValue || undefined,
       notes: notes || undefined,
@@ -58,7 +65,7 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
   
   // Handle delete button click
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete ${player.name}? This action cannot be undone.`)) {
+    if (window.confirm(`Are you sure you want to delete ${formatPlayerName(player)}? This action cannot be undone.`)) {
       onDelete(player.id);
     }
   };
@@ -67,7 +74,27 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
     <div className="quick-handicap-editor">
       <div className="editor-container">
         <div className="editor-form">
-          <h2>Edit Player: {player.name}</h2>
+          <h2>Edit Player</h2>
+          
+          <div className="form-group">
+            <label htmlFor="player-first-name">First Name:</label>
+            <input
+              id="player-first-name"
+              type="text"
+              value={firstNameValue}
+              onChange={(e) => setFirstNameValue(e.target.value)}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="player-last-name">Last Name:</label>
+            <input
+              id="player-last-name"
+              type="text"
+              value={lastNameValue}
+              onChange={(e) => setLastNameValue(e.target.value)}
+            />
+          </div>
           
           <div className="form-group">
             <label htmlFor="handicap-index">Handicap Index:</label>
@@ -109,7 +136,7 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
           <button
             className="save-button"
             onClick={handleSave}
-            disabled={!isValid}
+            disabled={!isValid || !firstNameValue}
           >
             Save Changes
           </button>

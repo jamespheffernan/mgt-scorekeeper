@@ -1,5 +1,295 @@
 /* Player Roster Styles */
 
+/* Ensure parent elements allow height */
+html, body, #root /* Adjust #root if your root id is different */ {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scroll if #root is full height */
+}
+
+/* --- PlayersScreen IS the scroll container --- */
+.players-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Takes height from html/body/#root */
+  max-height: 100vh; /* Explicitly limit height */
+  overflow: hidden; /* Crucial: Prevent .players-screen itself from scrolling its direct children */
+  background-color: #f8f9fa; /* Example background */
+}
+
+/* --- Sticky Pills Wrapper --- */
+.sticky-pills-wrapper {
+  position: sticky; /* Sticks relative to players-screen */
+  top: 0; /* Sticks to the top of .players-screen */
+  z-index: 10;
+  background-color: #ffffff; /* Ensure background */
+  padding: 12px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0; /* Prevent this part from shrinking */
+}
+
+/* --- Scrollable Content Area --- */
+.players-content-scrollable { 
+  /* Let flexbox determine the base size and allow growth */
+  flex: 1 1 auto; /* Short for flex-grow: 1, flex-shrink: 1, flex-basis: auto */
+
+  /* The crucial part: Make this element scroll */
+  overflow-y: scroll; /* Force scrollbar */
+  overflow-x: hidden;
+
+  /* Add significant padding to ensure overflow is obvious */
+  padding: 16px;
+  padding-top: 70px; /* Increased top padding to account for fixed header */
+  padding-bottom: 100px; /* Add significant bottom padding for any buttons/UI elements */
+  min-height: 0; /* Helps in flex contexts */
+
+  /* Remove redundant/potentially conflicting fixed height styles */
+  /* height: auto; */
+  /* max-height: none; */
+}
+
+/* --- Inline Roster Container --- */
+.player-roster-inline {
+  padding-bottom: 135px;
+  /* Must NOT scroll */
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+.players-title {
+  margin-bottom: 16px; /* Space below title */
+}
+
+/* --- Player List --- */
+ul.player-list {
+  list-style: none;
+  padding-bottom: 135px;
+  margin: 0;
+  /* Must NOT scroll */
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Individual Player Row Styling (example) */
+.player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 8px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e9ecef; /* Light border for separation */
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  margin-right: 8px;
+}
+
+.player-initials {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.player-info > div:last-child {
+  white-space: normal; /* Explicitly allow content to wrap */
+  word-break: break-word; /* Allow long words/names to break and wrap if necessary */
+}
+
+.player-name {
+  font-weight: 500;
+  /* word-break: break-word; Or break-all, if very long single names are an issue */
+}
+
+.player-index {
+  color: #666;
+  margin-left: 4px;
+  /* white-space: nowrap; Removed to allow index to wrap with name if space is tight */
+  white-space: normal; /* Allow index to wrap with name */
+}
+
+.player-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.team-selection {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.team-selection button {
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  background-color: #fff;
+}
+
+.team-selection button.red.selected {
+  background-color: #e74c3c; /* Red team color */
+  color: white;
+  border-color: #e74c3c;
+}
+
+.team-selection button.blue.selected {
+  background-color: #3498db; /* Blue team color */
+  color: white;
+  border-color: #3498db;
+}
+
+.team-radio {
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.team-radio.red {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.team-radio.blue {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.team-radio.selected {
+  border-color: #007bff;
+  color: white;
+}
+
+.team-radio.red.selected {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.team-radio.blue.selected {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.remove-player-button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-player-button:hover {
+  color: #dc3545;
+}
+
+/* Loading/Error/Empty State Styling */
+.roster-message {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d; /* Gray color */
+}
+.roster-message.error {
+  color: #dc3545; /* Red color for errors */
+}
+.roster-message .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Styling for pills in TopPills.tsx */
+.top-pills {
+  display: flex;
+  justify-content: space-around; /* Or space-between */
+  align-items: center;
+  padding: 8px 0; /* Adjust as needed */
+}
+
+.team-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px; /* Rounded pill shape */
+  font-weight: bold;
+  cursor: default; /* No longer clickable for opening sheet */
+  min-width: 100px; /* Ensure some minimum width */
+  justify-content: center;
+  border: none; /* Remove button default border */
+}
+
+.team-pill.red {
+  background-color: #e74c3c; /* Red team color */
+  color: white;
+}
+
+.team-pill.blue {
+  background-color: #3498db; /* Blue team color */
+  color: white;
+}
+
+.avatar-stack {
+  display: flex;
+}
+
+.avatar-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-left: -8px; /* Create overlap */
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.avatar-stack .avatar-circle:first-child {
+  margin-left: 0;
+}
+
+.pill-count {
+  font-size: 0.9rem;
+}
+
+.pulse-animation {
+  animation: pulse 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
 /* PlayerScreen */
 .players-screen {
   background-color: #f9f9f9;
@@ -8,12 +298,6 @@
 
 .players-content {
   padding: 16px;
-}
-
-.players-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 16px;
 }
 
 .players-description {
@@ -35,167 +319,6 @@
 
 .manage-players-button:hover {
   background-color: #27ae60;
-}
-
-/* Top Pills */
-.top-pills {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* Team Pills */
-.team-pill {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  font-weight: 500;
-  color: white;
-  transition: transform 0.2s ease;
-}
-
-.team-pill:hover {
-  transform: translateY(-2px);
-}
-
-.team-pill.red {
-  background-color: #E74C3C;
-}
-
-.team-pill.blue {
-  background-color: #2979FF;
-}
-
-/* Avatar Circles */
-.avatar-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-  border: 2px solid white;
-  margin-right: 8px;
-}
-
-.avatar-stack {
-  display: flex;
-  margin-right: 8px;
-}
-
-.avatar-stack .avatar-circle {
-  margin-left: -8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.avatar-stack .avatar-circle:first-child {
-  margin-left: 0;
-}
-
-/* Player Row */
-.player-row {
-  display: flex;
-  align-items: center;
-  height: 48px;
-  padding: 0 16px;
-  border-bottom: 1px solid #eee;
-  position: relative;
-  overflow: hidden;
-  background-color: white;
-  justify-content: space-between;
-}
-
-.player-info {
-  display: flex;
-  align-items: center;
-  flex: 1;
-}
-
-.player-initials {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  margin-right: 12px;
-}
-
-/* Player actions container */
-.player-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Remove player button */
-.remove-player-button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #f1f1f1;
-  color: #777;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.remove-player-button:hover {
-  background-color: #ff5252;
-  color: white;
-}
-
-/* Team Selection Radio Buttons */
-.team-selection {
-  display: flex;
-  gap: 8px;
-}
-
-.team-radio {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.team-radio.red {
-  border: 1px solid #E74C3C;
-  color: #E74C3C;
-}
-
-.team-radio.red.selected {
-  background-color: #E74C3C;
-  color: white;
-}
-
-.team-radio.blue {
-  border: 1px solid #2979FF;
-  color: #2979FF;
-}
-
-.team-radio.blue.selected {
-  background-color: #2979FF;
-  color: white;
 }
 
 /* Bottom Sheet */
@@ -233,13 +356,69 @@
   }
 }
 
-/* Animation for pill when count changes */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+/* --- Floating Action Button (FAB) Styling --- */
+.fab-add-player {
+  position: fixed; /* Position relative to viewport */
+  bottom: 24px;    /* Distance from bottom */
+  right: 24px;     /* Distance from right */
+  z-index: 20;     /* Ensure it\'s above most content */
+
+  width: 56px;     /* Standard FAB size */
+  height: 56px;    /* Standard FAB size */
+  border-radius: 50%; /* Make it circular */
+
+  background-color: #1A5E46; /* Your theme color */
+  color: white;             /* Icon color */
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* font-size: 28px;  Remove or reduce as we use an SVG */
+  /* line-height: 1;   Remove or adjust */
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+  cursor: pointer;
+  transition: transform 0.2s ease-out, background-color 0.2s ease;
 }
 
-.pulse-animation {
-  animation: pulse 0.3s ease;
+.fab-add-player svg {
+  width: 24px; /* Adjusted icon size */
+  height: 24px; /* Adjusted icon size */
+}
+
+.fab-add-player:hover {
+  background-color: #27ae60; /* Hover color */
+  transform: scale(1.05); /* Slight scale effect on hover */
+}
+
+/* --- Start Match Button Styling --- */
+.start-match-button {
+  position: fixed; /* Position relative to viewport like the FAB */
+  bottom: 24px;    /* Same distance from bottom as FAB */
+  right: 92px;     /* Position to the left of the FAB (24px + 56px + 12px) */
+  z-index: 20;     /* Same z-index as FAB */
+  
+  height: 56px;    /* Same height as FAB */
+  border-radius: 28px; /* Rounded like the FAB */
+  
+  background-color: #1A5E46; /* Millbrook green theme */
+  color: white;
+  border: none;
+  padding: 0 24px;  /* Horizontal padding */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Shadow for depth, matching FAB */
+  cursor: pointer;
+  transition: transform 0.2s ease-out, background-color 0.2s ease;
+}
+
+.start-match-button:hover {
+  background-color: #27ae60; /* Hover color, matching FAB */
+  transform: scale(1.05); /* Slight scale effect on hover */
 } 

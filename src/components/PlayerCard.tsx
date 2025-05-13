@@ -1,25 +1,18 @@
 import React from 'react';
 import { grid } from '../theme/tokens';
+import { formatPlayerName, toTitleCase } from '../utils/nameFormatter';
+import { Player } from '../db/API-GameState';
 
 interface PlayerCardProps {
   teamColor: string;
-  playerName: string;
+  player: Player;
   children: React.ReactNode;
   className?: string;
 }
 
-const toTitleCase = (str: string): string => {
-  if (!str) return '';
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
-
 export const PlayerCard: React.FC<PlayerCardProps> = ({ 
   teamColor, 
-  playerName, 
+  player,
   children,
   className = ''
 }) => {
@@ -29,7 +22,9 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
              style={{ '--team-color': teamColor } as React.CSSProperties} />
       
       <div className="pl-2">
-        <h3 className="text-base font-medium mb-1" style={{ color: teamColor }}>{toTitleCase(playerName)}</h3>
+        <h3 className="text-base font-medium mb-1" style={{ color: teamColor }}>
+          {toTitleCase(formatPlayerName(player))}
+        </h3>
         <div className="grid grid-cols-2 gap-2">
           {children}
         </div>

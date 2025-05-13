@@ -41,7 +41,8 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   
   // State for new player form
-  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerFirst, setNewPlayerFirst] = useState('');
+  const [newPlayerLast, setNewPlayerLast] = useState('');
   const [newPlayerIndex, setNewPlayerIndex] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   
@@ -121,23 +122,24 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   
   // Handle adding a new player
   const handleAddPlayer = async () => {
-    if (!newPlayerName || !newPlayerIndex) return;
+    if ((!newPlayerFirst && !newPlayerLast) || !newPlayerIndex) return;
     
     try {
       const index = parseFloat(newPlayerIndex);
-      if (isNaN(index) || index < 0 || index > 54) { // Basic validation for index
+      if (isNaN(index) || index < 0 || index > 54) {
         alert("Please enter a valid handicap index (e.g., 0 to 54).");
         return;
       }
       
       const newPlayer = await createPlayer({
-        name: newPlayerName,
+        first: newPlayerFirst,
+        last: newPlayerLast,
+        name: `${newPlayerFirst} ${newPlayerLast}`.trim(),
         index,
       });
       
-      // The useFirestorePlayers hook will update dbPlayers, which useEffect will pick up to update local players state
-      // setPlayers(prev => [...prev, newPlayer]); // This might be redundant if dbPlayers updates promptly
-      setNewPlayerName('');
+      setNewPlayerFirst('');
+      setNewPlayerLast('');
       setNewPlayerIndex('');
       setShowAddForm(false);
       
@@ -252,15 +254,33 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // Only run if selectedPlayers or playerPreferences change. Avoid direct dependency on 'teams' if it causes loops.
   }, [selectedPlayers, playerPreferences]); 
 
+  // Enhanced search function that searches in both first and last name
+  const filterPlayers = (players: Player[], query: string): Player[] => {
+    if (!query) return players;
+    
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    return players.filter(player => {
+      const fullName = `${player.first} ${player.last}`.toLowerCase();
+      const firstName = (player.first || '').toLowerCase();
+      const lastName = (player.last || '').toLowerCase();
+      const legacyName = (player.name || '').toLowerCase();
+      
+      return (
+        fullName.includes(normalizedQuery) || 
+        firstName.includes(normalizedQuery) || 
+        lastName.includes(normalizedQuery) ||
+        legacyName.includes(normalizedQuery)
+      );
+    });
+  };
 
   if (isLoading) {
     return <div className="loading-message mobile-loading">Loading players...</div>;
   }
 
   // Filtered players based on search query
-  const filteredPlayers = players.filter(player =>
-    player.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPlayers = filterPlayers(players, searchQuery);
 
   // Separate recent and remaining from the filtered list
   const displayRecentPlayers = filteredPlayers.filter(player =>
@@ -385,14 +405,25 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
         <div className="add-player-form mb-4">
           <h4 className="text-base font-medium mb-2">Add New Player</h4>
           <div className="form-group">
-            <label htmlFor="new-player-name">Name:</label>
+            <label htmlFor="new-player-first">First Name:</label>
             <input
-              id="new-player-name"
+              id="new-player-first"
               type="text"
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
+              value={newPlayerFirst}
+              onChange={(e) => setNewPlayerFirst(e.target.value)}
               className="w-full h-10 px-3 border rounded mb-3"
-              placeholder="Enter player name"
+              placeholder="Enter first name"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="new-player-last">Last Name:</label>
+            <input
+              id="new-player-last"
+              type="text"
+              value={newPlayerLast}
+              onChange={(e) => setNewPlayerLast(e.target.value)}
+              className="w-full h-10 px-3 border rounded mb-3"
+              placeholder="Enter last name"
             />
           </div>
           <div className="form-group">
@@ -419,7 +450,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
             <button
               className="save-button flex-1 h-10 rounded"
               onClick={handleAddPlayer}
-              disabled={!newPlayerName || !newPlayerIndex}
+              disabled={!newPlayerFirst || !newPlayerLast || !newPlayerIndex}
             >
               Save
             </button>

@@ -1,0 +1,160 @@
+/* Tee Selection Styling */
+.tee-selection {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--box-shadow);
+}
+
+.tee-selection h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--color-dark);
+  font-weight: 600;
+}
+
+.player-tee-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-grey30);
+}
+
+.player-tee-row:last-child {
+  border-bottom: none;
+}
+
+.tee-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tee-selector select {
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-grey30);
+  background-color: var(--color-white);
+  font-size: 0.9rem;
+  color: var(--color-grey90);
+  cursor: pointer;
+}
+
+.tee-color-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.course-selection {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--box-shadow);
+}
+
+.course-selection label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--color-grey90);
+}
+
+.course-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-grey30);
+  background-color: var(--color-white);
+  font-size: 1rem;
+  color: var(--color-grey90);
+  cursor: pointer;
+}
+
+.setup-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.back-button, 
+.continue-button {
+  padding: 12px 20px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+  color: white;
+}
+
+.back-button {
+  background-color: var(--color-grey60);
+  flex: 1;
+}
+
+.back-button:hover {
+  background-color: var(--color-grey90);
+}
+
+.continue-button {
+  background-color: var(--color-brand);
+  flex: 2;
+}
+
+.continue-button:hover {
+  background-color: var(--color-brand90); /* Slightly darker Millbrook green */
+}
+
+/* Game Options Styling */
+.game-options {
+  margin-bottom: 16px;
+}
+
+.big-game-toggle-container {
+  margin-bottom: 16px;
+}
+
+.big-game-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.big-game-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-brand);
+}
+
+.toggle-label {
+  color: var(--color-grey90);
+}
+
+.learn-more-button {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--color-brand);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.big-game-explanation {
+  margin-top: 10px;
+  padding: 12px;
+  background-color: var(--color-brand20);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  color: var(--color-grey90);
+  line-height: 1.5;
+}

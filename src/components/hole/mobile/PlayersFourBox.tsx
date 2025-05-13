@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore, JunkFlags, Player as PlayerType, Team } from '../../../store/gameStore';
 import { BottomSheet } from './BottomSheet';
-import { PlayerCard as NewPlayerCard } from '../../PlayerCard';
+import { PlayerCard } from '../../PlayerCard';
 import { colors } from '../../../theme/tokens';
+import { formatPlayerName } from '../../../utils/nameFormatter';
 
 interface InternalPlayerDisplayCardProps {
-  name: string;
+  player: PlayerType;
   team: Team;
   par: number;
   grossScore: number;
@@ -24,8 +25,8 @@ interface PlayersFourBoxProps {
   playerStrokes: number[];
 }
 
-const OldPlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({ 
-  name, 
+const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({ 
+  player, 
   team, 
   par, 
   grossScore,
@@ -38,8 +39,8 @@ const OldPlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
   
   return (
     <div onClick={onEdit} className="cursor-pointer">
-      <NewPlayerCard 
-        playerName={name} 
+      <PlayerCard 
+        player={player} 
         teamColor={teamColor}
       >
         <div className="text-xs text-grey60">Par {par}</div>
@@ -54,7 +55,7 @@ const OldPlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
             Strokes: -{strokes}
           </div>
         )}
-      </NewPlayerCard>
+      </PlayerCard>
     </div>
   );
 };
@@ -122,8 +123,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
             {/* Red team cell (now left) */}
             <div>
               {red[row] ? (
-                <OldPlayerCardDisplay
-                  name={red[row].player.name}
+                <PlayerCardDisplay
+                  player={red[row].player}
                   team={playerTeams[red[row].idx] as Team}
                   par={playerPars[red[row].idx]}
                   grossScore={getPlayerScore(red[row].idx)}
@@ -139,8 +140,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
             {/* Blue team cell (now right) */}
             <div>
               {blue[row] ? (
-                <OldPlayerCardDisplay
-                  name={blue[row].player.name}
+                <PlayerCardDisplay
+                  player={blue[row].player}
                   team={playerTeams[blue[row].idx] as Team}
                   par={playerPars[blue[row].idx]}
                   grossScore={getPlayerScore(blue[row].idx)}
@@ -160,7 +161,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
       {activePlayerIndex !== null && storePlayers[activePlayerIndex] && (
         <BottomSheet 
           onClose={closeSheet}
-          playerName={storePlayers[activePlayerIndex].name}
+          playerName={formatPlayerName(storePlayers[activePlayerIndex])}
           playerIndex={activePlayerIndex}
           team={playerTeams[activePlayerIndex] as Team}
           currentHole={currentHole}

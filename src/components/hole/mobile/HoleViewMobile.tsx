@@ -276,12 +276,30 @@ export const HoleViewMobile: React.FC = () => {
 
         <SectionCard>
           <div className="mobile-hole-info">
-            <div className="flex justify-between text-sm">
-              <span>Championship</span>
-              <span>Par {defaultPar}</span>
-              <span>{playerYardages[0] || 0} yds</span>
-              <span>SI: {playerSIs[0] || currentHole}</span>
-            </div>
+            {match.playerTeeIds ? 
+              // Find unique tee IDs and display hole info once per unique tee
+              [...new Set(match.playerTeeIds)].map(teeId => {
+                const tee = teeOptions[teeId];
+                // Find the first player using this tee
+                const playerIndex = match.playerTeeIds?.findIndex(id => id === teeId) || 0;
+                
+                return (
+                  <div key={teeId} className="flex justify-between text-sm mb-1">
+                    <span>{tee?.name || 'Championship'}</span>
+                    <span>Par {playerPars[playerIndex]}</span>
+                    <span>{playerYardages[playerIndex] || 0} yds</span>
+                    <span>SI: {playerSIs[playerIndex] || currentHole}</span>
+                  </div>
+                );
+              })
+              : 
+              <div className="flex justify-between text-sm">
+                <span>Championship</span>
+                <span>Par {defaultPar}</span>
+                <span>0 yds</span>
+                <span>SI: {currentHole}</span>
+              </div>
+            }
           </div>
         </SectionCard>
         
@@ -319,7 +337,7 @@ export const HoleViewMobile: React.FC = () => {
               className={`btn ${trailingTeam === 'Red' ? 'btn-red' : 'btn-blue'} mr-2`}
               disabled={isSubmitting}
             >
-              CALL DOUBLE
+              {trailingTeam.toUpperCase()} DOUBLES
             </button>
           )}
           {!isDoubleAvailable && match.doubles > 0 && (
