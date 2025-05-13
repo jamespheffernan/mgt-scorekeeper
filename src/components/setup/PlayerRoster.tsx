@@ -23,6 +23,24 @@ interface PlayerPreference {
   defaultTeam?: Team;
 }
 
+// Helper function to sort players by last name
+const sortPlayersByLastName = (players: Player[]): Player[] => {
+  return [...players].sort((a, b) => {
+    // Use last name for primary sort
+    const lastNameA = a.last?.toLowerCase() || '';
+    const lastNameB = b.last?.toLowerCase() || '';
+    
+    if (lastNameA !== lastNameB) {
+      return lastNameA.localeCompare(lastNameB);
+    }
+    
+    // If last names are the same, use first name as secondary sort
+    const firstNameA = a.first?.toLowerCase() || '';
+    const firstNameB = b.first?.toLowerCase() || '';
+    return firstNameA.localeCompare(firstNameB);
+  });
+};
+
 const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // Access database with Firestore and Dexie fallback
   const { 
@@ -288,9 +306,14 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   const displayRecentPlayers = filteredPlayers.filter(player =>
     recentPlayers.some(rp => rp.id === player.id)
   );
-  // Ensure remainingPlayersLogic is used here, or re-filter from 'players' not 'filteredPlayers' if that was the intent
-  const displayRemainingPlayers = filteredPlayers.filter(player => 
-    !displayRecentPlayers.some(rp => rp.id === player.id) // Ensure we use the already filtered recent players
+  // Apply sorting alphabetically by last name to recent players
+  const sortedRecentPlayers = sortPlayersByLastName(displayRecentPlayers);
+  
+  // Get remaining players and sort alphabetically by last name
+  const displayRemainingPlayers = sortPlayersByLastName(
+    filteredPlayers.filter(player => 
+      !displayRecentPlayers.some(rp => rp.id === player.id)
+    )
   );
 
   // Selected Players section (4-box split by team)
@@ -468,10 +491,10 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
 
       {/* Player Lists */}
       <div className="player-lists-container mobile-scrollable-list-container">
-        {displayRecentPlayers.length > 0 && (
+        {sortedRecentPlayers.length > 0 && (
           <div className="player-list-section mobile-list-section">
             <h5>Recent Players</h5>
-            {displayRecentPlayers.map(player => (
+            {sortedRecentPlayers.map(player => (
               <div 
                 key={player.id} 
                 className={`player-item mobile-player-item ${selectedPlayers.some(p => p.id === player.id) ? 'selected' : ''}`}
@@ -498,7 +521,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
 
         {displayRemainingPlayers.length > 0 && (
           <div className="player-list-section mobile-list-section">
-            <h5>{searchQuery ? 'Search Results' : (displayRecentPlayers.length > 0 ? 'Other Players' : 'All Players')}</h5>
+            <h5>{searchQuery ? 'Search Results' : (sortedRecentPlayers.length > 0 ? 'Other Players' : 'All Players')}</h5>
             {displayRemainingPlayers.map(player => (
               <div 
                 key={player.id} 
