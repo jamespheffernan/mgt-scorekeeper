@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { TopPills } from './TopPills';
 import { PlayerRow } from './PlayerRow';
 import { useRosterStore } from '../../store/rosterStore';
@@ -9,6 +9,24 @@ import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import AddPlayerForm from './AddPlayerForm';
 import StartMatchButton from './StartMatchButton';
 
+// Helper function to sort players by last name, then first name
+const sortPlayersByLastName = (players: Player[]): Player[] => {
+  return [...players].sort((a, b) => {
+    // Compare last names (handling empty values)
+    const lastA = (a.last || '').toLowerCase();
+    const lastB = (b.last || '').toLowerCase();
+    
+    if (lastA !== lastB) {
+      return lastA.localeCompare(lastB);
+    }
+    
+    // If last names are the same, compare first names
+    const firstA = (a.first || '').toLowerCase();
+    const firstB = (b.first || '').toLowerCase();
+    return firstA.localeCompare(firstB);
+  });
+};
+
 export const PlayersScreen: React.FC = () => {
   const { players: dbPlayers, isLoading, error, createPlayer } = useFirestorePlayers();
 
@@ -17,6 +35,11 @@ export const PlayersScreen: React.FC = () => {
   const { setTeam, remove } = useRosterStore();
 
   const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
+
+  // Sort players by last name
+  const sortedPlayers = useMemo(() => {
+    return sortPlayersByLastName(dbPlayers);
+  }, [dbPlayers]);
 
   useEffect(() => {
     const initializeRoster = async () => {
@@ -80,14 +103,14 @@ export const PlayersScreen: React.FC = () => {
             <div className="roster-message">Loading players...</div>
           ) : error ? (
             <div className="roster-message error">{error}</div>
-          ) : dbPlayers.length === 0 ? (
+          ) : sortedPlayers.length === 0 ? (
             <div className="roster-message empty-state">
               <div className="empty-icon">🏌️</div>
               <p>No players found in the database.</p>
             </div>
           ) : (
             <ul className="player-list divide-y" aria-label="Player Roster">
-              {dbPlayers.map(player => (
+              {sortedPlayers.map(player => (
                 <li key={player.id}>
                   <PlayerRow
                     player={player}
