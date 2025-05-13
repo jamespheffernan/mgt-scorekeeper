@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useDatabase } from '../hooks/useDatabase';
 import { QuickHandicapEditor } from '../components/setup/QuickHandicapEditor';
-import { Player } from '../store/gameStore';
+import { Player } from '../db/API-GameState';
 
 // Mock the useDatabase hook
 vi.mock('../hooks/useDatabase', () => ({
@@ -14,7 +14,9 @@ describe('Player Preferences', () => {
   describe('QuickHandicapEditor', () => {
     const mockPlayer: Player = {
       id: 'test-123',
-      name: 'Test Player',
+      first: 'Test',
+      last: 'Player',
+      name: 'Test Player', // Keep for backward compatibility
       index: 9.5,
       ghin: '1234567',
       notes: 'Test notes',
@@ -120,9 +122,9 @@ describe('Player Preferences', () => {
   
   describe('Player Persistence', () => {
     const mockPlayers: Player[] = [
-      { id: 'p1', name: 'Alice', index: 8.4 },
-      { id: 'p2', name: 'Bob', index: 6.1 },
-      { id: 'p3', name: 'Carol', index: 10.2 },
+      { id: 'p1', first: 'Alice', last: '', name: 'Alice', index: 8.4 },
+      { id: 'p2', first: 'Bob', last: '', name: 'Bob', index: 6.1 },
+      { id: 'p3', first: 'Carol', last: '', name: 'Carol', index: 10.2 },
     ];
     
     const mockUpdatePlayer = vi.fn();

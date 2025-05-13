@@ -43,8 +43,8 @@ jest.mock('../../context/AuthContext', () => ({
 describe('useFirestorePlayers', () => {
   const mockUser = { uid: 'test-user-123' };
   const mockPlayers: Player[] = [
-    { id: 'player1', name: 'Player 1', index: 10 },
-    { id: 'player2', name: 'Player 2', index: 5 },
+    { id: 'player1', first: 'Player', last: '1', name: 'Player 1', index: 10 },
+    { id: 'player2', first: 'Player', last: '2', name: 'Player 2', index: 5 },
   ];
 
   beforeEach(() => {
@@ -114,7 +114,7 @@ describe('useFirestorePlayers', () => {
     
     await waitFor(() => !result.current.isLoading);
     
-    const newPlayer = { name: 'New Player', index: 7 };
+    const newPlayer = { first: 'New', last: 'Player', name: 'New Player', index: 7 };
     
     await act(async () => {
       await result.current.createPlayer(newPlayer);
@@ -122,6 +122,8 @@ describe('useFirestorePlayers', () => {
     
     expect(collection).toHaveBeenCalledWith(db, `users/${mockUser.uid}/players`);
     expect(addDoc).toHaveBeenCalledWith('players-collection-ref', expect.objectContaining({
+      first: 'New',
+      last: 'Player',
       name: 'New Player',
       index: 7,
     }));
@@ -135,7 +137,7 @@ describe('useFirestorePlayers', () => {
     
     await waitFor(() => !result.current.isLoading);
     
-    const updatedPlayer = { id: 'player1', name: 'Updated Player', index: 8 };
+    const updatedPlayer = { id: 'player1', first: 'Updated', last: 'Player', name: 'Updated Player', index: 8 };
     
     await act(async () => {
       await result.current.updatePlayer(updatedPlayer);
@@ -144,6 +146,8 @@ describe('useFirestorePlayers', () => {
     expect(doc).toHaveBeenCalledWith(db, `users/${mockUser.uid}/players/player1`);
     expect(setDoc).toHaveBeenCalledWith('player-doc-ref', expect.objectContaining({
       id: 'player1',
+      first: 'Updated',
+      last: 'Player',
       name: 'Updated Player',
       index: 8,
     }));

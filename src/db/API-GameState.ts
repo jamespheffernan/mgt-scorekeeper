@@ -9,9 +9,12 @@ export type Team = 'Red' | 'Blue';
 
 export interface Player {
   id: string;          // uuid
-  name: string;        // Keep for backwards compatibility 
-  first: string;       // New field for first name
-  last: string;        // New field for last name
+  
+  // Name fields
+  first: string;       // First name (required)
+  last: string;        // Last name (required)
+  name?: string;       // Legacy field for backward compatibility 
+  
   index: number;       // GHIN / WHS handicap index (e.g. 8.4)
   ghin?: string;
   defaultTeam?: Team;
@@ -102,7 +105,7 @@ export interface GameHistory {
   date: string;                // ISO date when match was played
   courseName: string;          // Name of the course
   
-  // Update to store first/last names
+  // New structure for player information
   playerInfo: Array<{
     id: string;
     first: string;
@@ -110,14 +113,19 @@ export interface GameHistory {
     team: Team;
   }>;
  
-  teamTotals: [number, number];             // Final team totals [Red, Blue]
-  bigGameTotal: number;        // Final Big Game total if applicable
-  startTime: string;           // ISO timestamp when game started
-  endTime: string;             // ISO timestamp when game ended
-  duration: number;            // Game duration in minutes
-  holesPlayed: number;         // Total number of holes completed
-  isComplete: boolean;         // Whether the game was completed or cancelled
-  bigGameEnabled: boolean;     // Whether Big Game was enabled
+  // For backward compatibility
+  playerNames?: string[];             // Legacy: List of player names
+  teamAssignments?: Team[];           // Legacy: List of team assignments
+  finalScores?: number[];             // Legacy: Final scores for each player
+  
+  teamTotals: [number, number];       // Final team totals [Red, Blue]
+  bigGameTotal: number;               // Final Big Game total if applicable
+  startTime: string;                  // ISO timestamp when game started
+  endTime: string;                    // ISO timestamp when game ended
+  duration: number;                   // Game duration in minutes
+  holesPlayed: number;                // Total number of holes completed
+  isComplete: boolean;                // Whether the game was completed or cancelled
+  bigGameEnabled: boolean;            // Whether Big Game was enabled
 }
 
 /* ––––– 4. Dexie Schema ––––– */

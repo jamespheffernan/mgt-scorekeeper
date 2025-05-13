@@ -8,6 +8,8 @@ import { Course, TeeOption } from '../../db/courseModel';
 import { JunkFlags } from '../../calcEngine/junkCalculator';
 import { millbrookDb } from '../../db/millbrookDb';
 import { allocateStrokes, allocateStrokesMultiTee } from '../../calcEngine/strokeAllocator';
+import { PlayerName } from '../../components/PlayerName';
+import { getFullName } from '../../utils/nameUtils';
 
 const toTitleCase = (str: string): string => {
   if (!str) return '';
@@ -415,7 +417,7 @@ export const HoleView = () => {
           <div className="player-standings">
             {players.map((player, index) => (
               <div key={player.id} className={`player-standing team-${playerTeams[index].toLowerCase()}`}>
-                <div className="player-name">{toTitleCase(player.name)}</div>
+                <div className="player-name"><PlayerName player={player} /></div>
                 <div className="player-team-badge">{playerTeams[index]}</div>
                 <div className="player-amount">{formatCurrency(lastLedgerEntry.runningTotals[index])}</div>
                 {getPlayerJunkTotal(player.id) > 0 && (
@@ -516,7 +518,7 @@ export const HoleView = () => {
                   <span className={`player-team-badge ${playerTeams[index].toLowerCase()}`}>
                     {playerTeams[index]}
                   </span>
-                  <span className="player-name-display">{toTitleCase(player.name)}</span>
+                  <span className="player-name-display"><PlayerName player={player} /></span>
                 </div>
                 
                 {teeInfo.name && (
@@ -541,7 +543,7 @@ export const HoleView = () => {
                   value={grossScores[index]}
                   onChange={(e) => updateScore(index, parseInt(e.target.value))}
                   disabled={isSubmitting}
-                  aria-label={`Score for ${player.name}`}
+                  aria-label={`Score for ${getFullName(player)}`}
                 >
                   {scoreOptions(index)}
                 </select>

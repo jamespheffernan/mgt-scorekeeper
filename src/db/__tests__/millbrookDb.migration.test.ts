@@ -1,5 +1,6 @@
 import { millbrookDb } from '../millbrookDb';
 import { Player } from '../API-GameState';
+import { splitNameParts } from '../../utils/nameUtils';
 
 describe('MillbrookDatabase name migration', () => {
   beforeEach(async () => {
@@ -12,24 +13,19 @@ describe('MillbrookDatabase name migration', () => {
     const legacyPlayer: Player = {
       id: 'test-1',
       name: 'John Doe',
-      index: 10.5,
       first: '',
-      last: ''
+      last: '',
+      index: 10.5
     };
     
     await millbrookDb.savePlayer(legacyPlayer);
     
     // Simulate database upgrade by calling the migration function directly
     await millbrookDb.players.toCollection().modify(player => {
-      if (!player.first || !player.last) {
-        const nameParts = player.name.split(' ');
-        if (nameParts.length >= 2) {
-          player.first = nameParts[0];
-          player.last = nameParts.slice(1).join(' ');
-        } else {
-          player.first = player.name;
-          player.last = '';
-        }
+      if (player.name && (!player.first || !player.last)) {
+        const { first, last } = splitNameParts(player.name);
+        player.first = first;
+        player.last = last;
       }
     });
     
@@ -45,24 +41,19 @@ describe('MillbrookDatabase name migration', () => {
     const singleNamePlayer: Player = {
       id: 'test-2',
       name: 'Tiger',
-      index: 8.0,
       first: '',
-      last: ''
+      last: '',
+      index: 8.0
     };
     
     await millbrookDb.savePlayer(singleNamePlayer);
     
     // Simulate database upgrade
     await millbrookDb.players.toCollection().modify(player => {
-      if (!player.first || !player.last) {
-        const nameParts = player.name.split(' ');
-        if (nameParts.length >= 2) {
-          player.first = nameParts[0];
-          player.last = nameParts.slice(1).join(' ');
-        } else {
-          player.first = player.name;
-          player.last = '';
-        }
+      if (player.name && (!player.first || !player.last)) {
+        const { first, last } = splitNameParts(player.name);
+        player.first = first;
+        player.last = last;
       }
     });
     
@@ -87,15 +78,10 @@ describe('MillbrookDatabase name migration', () => {
     
     // Simulate database upgrade
     await millbrookDb.players.toCollection().modify(player => {
-      if (!player.first || !player.last) {
-        const nameParts = player.name.split(' ');
-        if (nameParts.length >= 2) {
-          player.first = nameParts[0];
-          player.last = nameParts.slice(1).join(' ');
-        } else {
-          player.first = player.name;
-          player.last = '';
-        }
+      if (player.name && (!player.first || !player.last)) {
+        const { first, last } = splitNameParts(player.name);
+        player.first = first;
+        player.last = last;
       }
     });
     

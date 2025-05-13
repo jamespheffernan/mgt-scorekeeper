@@ -31,14 +31,20 @@ export function GameStoreTest() {
   
   // Add a player to the test state
   const addPlayer = () => {
-    // Simple validation
     if (!playerName.trim()) {
       alert('Player name is required');
       return;
     }
     
+    // Split the name into first and last name
+    const nameParts = playerName.trim().split(/\s+/);
+    const first = nameParts[0] || '';
+    const last = nameParts.slice(1).join(' ') || '';
+    
     const newPlayer: Player = {
       id: crypto.randomUUID(),
+      first,
+      last,
       name: playerName,
       index: playerIndex,
       defaultTeam: playerTeam

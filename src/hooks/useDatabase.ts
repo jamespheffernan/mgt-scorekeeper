@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { millbrookDb } from '../db/millbrookDb';
 import { Player, Match, GameState } from '../db/API-GameState';
 import { generateUUID } from '../utils/uuid';
+import { splitNameParts } from '../utils/nameUtils';
 
 /**
  * Hook to provide database access and operations for the Millbrook Game app
@@ -43,10 +44,10 @@ export function useDatabase() {
   const initializePlayerDatabase = async () => {
     try {
       const samplePlayers: Omit<Player, 'id'>[] = [
-        { name: 'Jimmy', index: 9.0 },
-        { name: 'Fred', index: 10.0 },
-        { name: 'Neil', index: 4.0 },
-        { name: 'Oliver', index: 12.0 },
+        { first: 'Jimmy', last: '', name: 'Jimmy', index: 9.0 },
+        { first: 'Fred', last: '', name: 'Fred', index: 10.0 },
+        { first: 'Neil', last: '', name: 'Neil', index: 4.0 },
+        { first: 'Oliver', last: '', name: 'Oliver', index: 12.0 },
       ];
 
       const savedPlayers: Player[] = [];
@@ -62,10 +63,31 @@ export function useDatabase() {
     }
   };
 
+  // Ensure a player object has first and last name properties
+  const ensurePlayerNameFields = (playerData: any): Omit<Player, 'id'> => {
+    const result = { ...playerData };
+    
+    // If we have name but missing first/last, populate them
+    if (playerData.name && (!playerData.first || !playerData.last)) {
+      const { first, last } = splitNameParts(playerData.name);
+      result.first = first;
+      result.last = last;
+    }
+    // If we have first/last but missing name, generate it
+    else if (!playerData.name && playerData.first) {
+      result.name = `${playerData.first} ${playerData.last || ''}`.trim();
+    }
+    
+    return result as Omit<Player, 'id'>;
+  };
+
   // Create a new player
   const createPlayer = async (playerData: Omit<Player, 'id'>): Promise<Player> => {
+    // Ensure player has all required fields
+    const processedData = ensurePlayerNameFields(playerData);
+    
     const newPlayer: Player = {
-      ...playerData,
+      ...processedData,
       id: generateUUID()
     };
 
@@ -81,12 +103,20 @@ export function useDatabase() {
 
   // Update an existing player
   const updatePlayer = async (player: Player): Promise<Player> => {
+    // Ensure player has all required fields
+    const processedData = ensurePlayerNameFields(player);
+    
+    const updatedPlayer: Player = {
+      ...player,
+      ...processedData
+    };
+    
     try {
-      await millbrookDb.savePlayer(player);
+      await millbrookDb.savePlayer(updatedPlayer);
       setPlayers(prevPlayers => 
-        prevPlayers.map(p => p.id === player.id ? player : p)
+        prevPlayers.map(p => p.id === updatedPlayer.id ? updatedPlayer : p)
       );
-      return player;
+      return updatedPlayer;
     } catch (err) {
       console.error('Error updating player:', err);
       throw new Error('Failed to update player');

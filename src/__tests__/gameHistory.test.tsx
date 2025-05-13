@@ -16,10 +16,10 @@ vi.mock('../db/millbrookDb', () => ({
 }));
 
 describe('Game History and End Game Features', () => {
-  const mockPlayer1 = { id: 'p1', name: 'Player 1', index: 10 };
-  const mockPlayer2 = { id: 'p2', name: 'Player 2', index: 15 };
-  const mockPlayer3 = { id: 'p3', name: 'Player 3', index: 8 };
-  const mockPlayer4 = { id: 'p4', name: 'Player 4', index: 12 };
+  const mockPlayer1 = { id: 'p1', first: 'Player', last: '1', name: 'Player 1', index: 10 };
+  const mockPlayer2 = { id: 'p2', first: 'Player', last: '2', name: 'Player 2', index: 15 };
+  const mockPlayer3 = { id: 'p3', first: 'Player', last: '3', name: 'Player 3', index: 8 };
+  const mockPlayer4 = { id: 'p4', first: 'Player', last: '4', name: 'Player 4', index: 12 };
   
   const mockPlayers = [mockPlayer1, mockPlayer2, mockPlayer3, mockPlayer4];
   const mockTeams: Team[] = ['Red', 'Red', 'Blue', 'Blue'];
@@ -76,8 +76,18 @@ describe('Game History and End Game Features', () => {
       
       // Verify that game history contains correct data
       const historyCall = vi.mocked(millbrookDb.saveGameHistory).mock.calls[0][0];
+      
+      // Check for playerInfo instead of playerNames/teamAssignments
+      expect(historyCall.playerInfo).toBeDefined();
+      expect(historyCall.playerInfo.length).toBe(4);
+      expect(historyCall.playerInfo[0].first).toBe('Player');
+      expect(historyCall.playerInfo[0].last).toBe('1');
+      expect(historyCall.playerInfo[0].team).toBe('Red');
+      
+      // For backward compatibility, verify these are also set correctly
       expect(historyCall.playerNames).toEqual(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
       expect(historyCall.teamAssignments).toEqual(['Red', 'Red', 'Blue', 'Blue']);
+      
       expect(historyCall.teamTotals).toEqual([1, -1]); // Red team up 1, Blue team down 1
       expect(historyCall.isComplete).toBe(true);
     });
@@ -109,11 +119,18 @@ describe('Game History and End Game Features', () => {
       expect(millbrookDb.saveMatch).toHaveBeenCalledTimes(1);
       expect(millbrookDb.saveGameHistory).toHaveBeenCalledTimes(1);
       
-      // Verify that game history contains correct data
+      // Verify that game history contains correct data 
       const historyCall = vi.mocked(millbrookDb.saveGameHistory).mock.calls[0][0];
+      
+      // Check for playerInfo instead of playerNames/teamAssignments
+      expect(historyCall.playerInfo).toBeDefined();
+      expect(historyCall.playerInfo.length).toBe(4);
+      
+      // For backward compatibility, verify legacy fields
       expect(historyCall.playerNames).toEqual(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
       expect(historyCall.teamAssignments).toEqual(['Red', 'Red', 'Blue', 'Blue']);
       expect(historyCall.finalScores).toEqual([0, 0, 0, 0]); // No scores for cancelled games
+      
       expect(historyCall.isComplete).toBe(false);
     });
   });

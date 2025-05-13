@@ -43,7 +43,14 @@ export function DatabaseTest() {
         return;
       }
 
+      // Split the name into first and last name
+      const nameParts = newPlayerName.trim().split(/\s+/);
+      const first = nameParts[0] || '';
+      const last = nameParts.slice(1).join(' ') || '';
+
       const player: Omit<Player, 'id'> = {
+        first,
+        last,
         name: newPlayerName,
         index
       };
@@ -162,7 +169,7 @@ export function DatabaseTest() {
                 className={selectedPlayerIds.includes(player.id) ? 'selected-player' : ''}
                 onClick={() => togglePlayerSelection(player.id)}
               >
-                <strong>{player.name}</strong> - Index: {player.index}
+                <strong>{player.first} {player.last}</strong> - Index: {player.index}
                 {selectedPlayerIds.includes(player.id) && ' ✓'}
               </li>
             ))}

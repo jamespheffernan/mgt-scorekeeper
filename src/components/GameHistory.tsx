@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { millbrookDb } from '../db/millbrookDb';
 import { GameHistory } from '../db/API-GameState';
+import { getFullName } from '../utils/nameUtils';
 import '../App.css';
 
 const GameHistoryView = () => {
@@ -61,6 +62,41 @@ const GameHistoryView = () => {
     return `${hours}h ${remainingMinutes}m`;
   };
 
+  // Handle both old and new game history formats
+  const getPlayerName = (record: GameHistory, index: number): string => {
+    // If using new format with playerInfo
+    if (record.playerInfo && record.playerInfo[index]) {
+      const player = record.playerInfo[index];
+      return `${player.first} ${player.last}`.trim();
+    }
+    
+    // Fallback to old format if playerNames exists
+    // @ts-ignore - Handling backward compatibility
+    if (record.playerNames && record.playerNames[index]) {
+      // @ts-ignore
+      return record.playerNames[index];
+    }
+    
+    return `Player ${index + 1}`;
+  };
+  
+  // Get team assignment, handling both formats
+  const getPlayerTeam = (record: GameHistory, index: number): string => {
+    // If using new format with playerInfo
+    if (record.playerInfo && record.playerInfo[index]) {
+      return record.playerInfo[index].team;
+    }
+    
+    // Fallback to old format
+    // @ts-ignore - Handling backward compatibility
+    if (record.teamAssignments && record.teamAssignments[index]) {
+      // @ts-ignore
+      return record.teamAssignments[index];
+    }
+    
+    return 'Unknown';
+  };
+
   return (
     <div className="game-history-container">
       <h2>Game History</h2>
@@ -101,9 +137,10 @@ const GameHistoryView = () => {
                   <td>{record.courseName}</td>
                   <td>
                     <div className="players-list">
-                      {record.playerNames.map((name, idx) => (
-                        <div key={idx} className={`player-team-${record.teamAssignments[idx]}`}>
-                          {name}
+                      {/* Show player info for either 4 players or however many are in playerInfo */}
+                      {[0, 1, 2, 3].map((idx) => (
+                        <div key={idx} className={`player-team-${getPlayerTeam(record, idx)}`}>
+                          {getPlayerName(record, idx)}
                         </div>
                       ))}
                     </div>

@@ -5,6 +5,8 @@ import { QuickHandicapEditor } from './QuickHandicapEditor';
 import { Chip } from '../Chip';
 import '../../App.css';
 import './PlayersRoster.css';
+import { getFullName } from '../../utils/nameUtils';
+import PlayerName from '../../components/PlayerName';
 
 // Interface for component props
 interface PlayerRosterProps {
@@ -312,7 +314,10 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
               <div key={`blue-${row}`} className="flex items-center">
                 {blue[row] ? (
                   <>
-                    <Chip name={blue[row].player.name} onRemove={() => togglePlayer(blue[row].player)} />
+                    <Chip 
+                      name={getFullName(blue[row].player)} 
+                      onRemove={() => togglePlayer(blue[row].player)} 
+                    />
                     <select
                       value={teams[blue[row].idx]}
                       onChange={(e) => updateTeam(blue[row].idx, e.target.value as Team)}
@@ -336,7 +341,10 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
               <div key={`red-${row}`} className="flex items-center">
                 {red[row] ? (
                   <>
-                    <Chip name={red[row].player.name} onRemove={() => togglePlayer(red[row].player)} />
+                    <Chip 
+                      name={getFullName(red[row].player)} 
+                      onRemove={() => togglePlayer(red[row].player)} 
+                    />
                     <select
                       value={teams[red[row].idx]}
                       onChange={(e) => updateTeam(red[row].idx, e.target.value as Team)}
@@ -473,11 +481,13 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
                 onKeyPress={(e) => e.key === 'Enter' && togglePlayer(player) }
                 aria-pressed={selectedPlayers.some(p => p.id === player.id)}
               >
-                <span className="player-name-display">{player.name} ({player.index.toFixed(1)})</span>
+                <span className="player-name-display">
+                  <PlayerName player={player} /> ({player.index.toFixed(1)})
+                </span>
                 <button 
                   onClick={(e) => handleEditPlayer(player, e)} 
                   className="edit-player-button mobile-edit-button icon-button"
-                  aria-label={`Edit ${player.name}`}
+                  aria-label={`Edit ${getFullName(player)}`}
                 >
                   ✎
                 </button>
@@ -499,11 +509,13 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
                 onKeyPress={(e) => e.key === 'Enter' && togglePlayer(player) }
                 aria-pressed={selectedPlayers.some(p => p.id === player.id)}
               >
-                <span className="player-name-display">{player.name} ({player.index.toFixed(1)})</span>
+                <span className="player-name-display">
+                  <PlayerName player={player} /> ({player.index.toFixed(1)})
+                </span>
                 <button 
                   onClick={(e) => handleEditPlayer(player, e)} 
                   className="edit-player-button mobile-edit-button icon-button"
-                  aria-label={`Edit ${player.name}`}
+                  aria-label={`Edit ${getFullName(player)}`}
                 >
                   ✎
                 </button>

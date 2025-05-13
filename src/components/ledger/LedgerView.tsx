@@ -4,6 +4,8 @@ import { useGameStore } from '../../store/gameStore';
 import { Team } from '../../db/API-GameState';
 import type { JunkEvent } from '../../store/gameStore';
 import '../../App.css';
+import { getFullName } from '../../utils/nameUtils';
+import PlayerName from '../../components/PlayerName';
 
 export const LedgerView = () => {
   const navigate = useNavigate();
@@ -59,7 +61,7 @@ export const LedgerView = () => {
   // Get player name by ID
   const getPlayerName = (playerId: string): string => {
     const player = players.find(p => p.id === playerId);
-    return player ? player.name : 'Unknown';
+    return player ? getFullName(player) : 'Unknown';
   };
   
   // Get team junk total
@@ -114,13 +116,13 @@ export const LedgerView = () => {
     // Create CSV header
     let csv = 'Hole,Base,Carry,Doubles,Payout';
     players.forEach(player => {
-      csv += `,${player.name} Gross`;
+      csv += `,${getFullName(player)} Gross`;
     });
     players.forEach(player => {
-      csv += `,${player.name} Net`;
+      csv += `,${getFullName(player)} Net`;
     });
     players.forEach(player => {
-      csv += `,${player.name} Money`;
+      csv += `,${getFullName(player)} Money`;
     });
     csv += ',Red Junk,Blue Junk';
     if (match.bigGame) {
@@ -322,7 +324,7 @@ export const LedgerView = () => {
                               key={index} 
                               className={`player-total ${teamColor(playerTeams[index])}`}
                             >
-                              {player.name}: {formatCurrency(ledger.length > 0 ? ledger[ledger.length - 1].runningTotals[index] : 0)}
+                              {getFullName(player)}: {formatCurrency(ledger.length > 0 ? ledger[ledger.length - 1].runningTotals[index] : 0)}
                             </div>
                           ))}
                           <div className="team-junk-totals">
@@ -350,7 +352,7 @@ export const LedgerView = () => {
                       <th>Result</th>
                       {players.map((_, playerIndex) => (
                         <th key={playerIndex} className={teamColor(playerTeams[playerIndex])}>
-                          {players[playerIndex].name}
+                          {getFullName(players[playerIndex])}
                         </th>
                       ))}
                       {match.bigGame && <th className="bg-column">Big Game</th>}

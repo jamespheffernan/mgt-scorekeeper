@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Player } from '../../store/gameStore';
+import { Player } from '../../db/API-GameState';
 import { Course, TeeOption } from '../../db/courseModel';
 import { millbrookDb } from '../../db/millbrookDb';
+import { getFullName } from '../../utils/nameUtils';
+import PlayerName from '../../components/PlayerName';
 import '../../App.css';
 
 interface CourseSetupProps {
@@ -78,7 +80,8 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
   // Find appropriate tees based on player gender
   const determinePlayerGender = (player: Player): 'M' | 'F' => {
     // This is a simplistic approach - in a real app, you would have gender stored
-    return player.name.toLowerCase().endsWith('a') ? 'F' : 'M'; // Assumes names ending with 'a' are female
+    const fullName = getFullName(player);
+    return fullName.toLowerCase().endsWith('a') ? 'F' : 'M'; // Assumes names ending with 'a' are female
   };
   
   // Find appropriate tees for a gender
@@ -147,7 +150,7 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
           
           {selectedPlayers.map((player, index) => (
             <div key={index} className="player-tee-row">
-              <div className="player-name">{player.name}</div>
+              <div className="player-name"><PlayerName player={player} /></div>
               
               <div className="tee-selector">
                 <select
