@@ -11,4 +11,8 @@
   border-top-width: 1px;
   border-color: #e5e7eb; /* Default Tailwind divide color (coolGray-200). Adjust as needed. */
   /* You might want to use a CSS variable from your theme for the border-color */
+}
+
+.players-list--standalone {
+  padding-bottom: 96px; /* or more if needed for floating buttons/safe area */
 } 

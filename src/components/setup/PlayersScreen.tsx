@@ -42,6 +42,14 @@ export const PlayersScreen: React.FC = () => {
     return sortPlayersByLastName(dbPlayers);
   }, [dbPlayers]);
 
+  // Detect iOS standalone mode
+  const isIOSStandalone = useMemo(() => {
+    return (
+      (window.navigator as any).standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+    );
+  }, []);
+
   useEffect(() => {
     const initializeRoster = async () => {
       try {
@@ -110,7 +118,7 @@ export const PlayersScreen: React.FC = () => {
               <p>No players found in the database.</p>
             </div>
           ) : (
-            <ul className="player-list player-list-divided" aria-label="Player Roster">
+            <ul className={`player-list player-list-divided${isIOSStandalone ? ' players-list--standalone' : ''}`} aria-label="Player Roster">
               {sortedPlayers.map(player => (
                 <li key={player.id}>
                   <PlayerRow
