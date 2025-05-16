@@ -235,8 +235,19 @@ export const useGameStore = create(
         });
         
         // Also save the initial game state to IndexedDB
-        const gameState = get();
-        millbrookDb.saveGameState(gameState).catch(err => {
+        const fullGameState = get();
+        const gameStateToSave: GameState = {
+          match: fullGameState.match,
+          players: fullGameState.players,
+          playerTeams: fullGameState.playerTeams,
+          holeScores: fullGameState.holeScores,
+          ledger: fullGameState.ledger,
+          junkEvents: fullGameState.junkEvents,
+          bigGameRows: fullGameState.bigGameRows,
+          isDoubleAvailable: fullGameState.isDoubleAvailable,
+          trailingTeam: fullGameState.trailingTeam,
+        };
+        millbrookDb.saveGameState(gameStateToSave).catch(err => {
           console.error('Error saving initial game state:', err);
         });
         
