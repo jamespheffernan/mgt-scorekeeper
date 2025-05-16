@@ -15,6 +15,8 @@ import { PotRow } from '../../PotRow';
 import { BottomNav } from '../../BottomNav';
 import { NavTabs } from '../../NavTabs';
 import './HoleViewMobile.css';
+import { colors } from '../../../theme/tokens';
+import { Chip } from '../../Chip';
 
 export const HoleViewMobile: React.FC = () => {
   const navigate = useNavigate();
@@ -260,6 +262,25 @@ export const HoleViewMobile: React.FC = () => {
     }
   };
   
+  // Custom style for tee info chips
+  const teeChipStyle = {
+    fontSize: '0.85rem',
+    width: 24,
+    height: 24,
+    minWidth: 24,
+    minHeight: 24,
+    borderRadius: '50%',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: "'Sofia Sans Extra Condensed', sans-serif",
+    fontWeight: 600,
+    marginLeft: 4,
+    marginRight: 2,
+    backgroundColor: undefined, // set below
+    color: '#fff',
+  };
+  
   // Render method
   return (
     <div className="hole-view mobile-hole-view hole-view-root">
@@ -268,7 +289,7 @@ export const HoleViewMobile: React.FC = () => {
       <div className="hole-content-container">
         <PageHeader 
           title="" 
-          subtitle={`Hole ${currentHole}`} 
+          subtitle="" 
         />
 
         <NavTabs 
@@ -283,24 +304,57 @@ export const HoleViewMobile: React.FC = () => {
               // Find unique tee IDs and display hole info once per unique tee
               [...new Set(match.playerTeeIds)].map(teeId => {
                 const tee = teeOptions[teeId];
-                // Find the first player using this tee
-                const playerIndex = match.playerTeeIds?.findIndex(id => id === teeId) || 0;
-                
+                // Find all players using this tee
+                const playerIndexes = (match.playerTeeIds ?? [])
+                  .map((id, idx) => id === teeId ? idx : -1)
+                  .filter(idx => idx !== -1);
+                // Chips for players with strokes
+                const chips = playerIndexes
+                  .filter(idx => playerStrokes[idx] > 0)
+                  .map(idx => {
+                    const player = players[idx];
+                    const team = playerTeams[idx];
+                    // Softer, more pastel team color
+                    const pastelRed = 'rgba(239,68,68,0.5)'; // Tailwind red-500, 50% opacity
+                    const pastelBlue = 'rgba(59,130,246,0.5)'; // Tailwind blue-500, 50% opacity
+                    const bgColor = team === 'Red' ? pastelRed : pastelBlue;
+                    const className = '';
+                    // Get initials (same logic as PlayerRow)
+                    const getInitials = (player: any) => {
+                      if (player.first && player.last) {
+                        return `${player.first.charAt(0)}${player.last.charAt(0)}`;
+                      }
+                      const nameParts = player.name ? player.name.split(' ') : [];
+                      if (nameParts.length >= 2) {
+                        return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`;
+                      }
+                      return player.name ? player.name.substring(0, 2).toUpperCase() : '??';
+                    };
+                    return (
+                      <Chip
+                        key={player.id}
+                        name={getInitials(player)}
+                        className={className}
+                        // @ts-ignore
+                        style={{ ...teeChipStyle, backgroundColor: bgColor }}
+                      />
+                    );
+                  });
                 return (
                   <div key={teeId} className="tee-info-row">
-                    <span>{tee?.name || 'Championship'}</span>
-                    <span>Par {playerPars[playerIndex]}</span>
-                    <span>{playerYardages[playerIndex] || 0} yds</span>
-                    <span>SI: {playerSIs[playerIndex] || currentHole}</span>
+                    <span>Hole {currentHole}</span>
+                    <span>Par {playerPars[playerIndexes[0]]}</span>
+                    <span>SI: {playerSIs[playerIndexes[0]] || currentHole}</span>
+                    <span>{chips.length > 0 && chips}</span>
                   </div>
                 );
               })
               : 
               <div className="tee-info-row tee-info-row-fallback">
-                <span>Championship</span>
+                <span>Hole {currentHole}</span>
                 <span>Par {defaultPar}</span>
-                <span>0 yds</span>
                 <span>SI: {currentHole}</span>
+                {/* No chips in fallback */}
               </div>
             }
           </div>

@@ -43,19 +43,33 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
       <PlayerCard 
         player={player} 
         teamColor={teamColor}
-      >
-        <div className="player-card-detail-text">Par {par}</div>
-        <div className="player-card-detail-text">SI: {strokeIndex}</div>
-        {yardage && yardage > 0 && <div className="player-card-detail-text">{yardage} yds</div>}
-        <div>{/* Empty div for grid balance or future use */}</div>
-        
-        <div className="player-card-score-text">Gross {grossScore}</div>
-        {strokes > 0 && (
-          <div className="player-card-strokes-text"
-               style={{ color: teamColor }}>
-            Strokes: -{strokes}
+        nameRow={
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {strokes > 0 && (
+              <span style={{
+                display: 'inline-block',
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: teamColor,
+                marginRight: 8,
+                verticalAlign: 'middle',
+              }} />
+            )}
+            <span style={{ fontWeight: 600 }}>{player.name}</span>
           </div>
-        )}
+        }
+      >
+        <div>{/* Empty div for grid balance or future use */}</div>
+        <div className="player-card-score-text">
+          Gross {grossScore}
+          {strokes > 0 && (
+            <>
+              {' / '}
+              <span style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span>
+            </>
+          )}
+        </div>
       </PlayerCard>
     </div>
   );
