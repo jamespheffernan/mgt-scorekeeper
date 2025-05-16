@@ -196,20 +196,11 @@ const TeeSelectionScreen: React.FC = () => {
             {allPlayers.map((player, index) => (
               <div key={player.id} className="player-tee-row">
                 <div className="player-name">
-                  <span className={index < redPlayers.length ? 'text-red' : 'text-blue'}>
+                  <span className={`padded-player-name ${index < redPlayers.length ? 'text-red' : 'text-blue'}`}>
                     {player.name}
                   </span>
                 </div>
-                
                 <div className="tee-selector">
-                  <div 
-                    className="tee-color-indicator"
-                    style={{ 
-                      backgroundColor: selectedCourse.teeOptions.find(
-                        t => t.id === playerTeeIds[index]
-                      )?.color?.toLowerCase() || '#ccc'
-                    }}
-                  ></div>
                   <select
                     value={playerTeeIds[index] || ''}
                     onChange={(e) => handleTeeChange(index, e.target.value)}
