@@ -58,6 +58,16 @@ const sortPlayersByLastName = (players: Player[]): Player[] => {
   return sorted;
 };
 
+// Helper to deduplicate players by ID
+const dedupePlayersById = (players: Player[]): Player[] => {
+  const seen = new Set<string>();
+  return players.filter(p => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+};
+
 const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // Access database with Firestore and Dexie fallback
   const { 
@@ -132,8 +142,8 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
 
   // Load players and preferences on component mount
   useEffect(() => {
-    // Set players from database
-    setPlayers(dbPlayers);
+    // Set players from database (deduplicated)
+    setPlayers(dedupePlayersById(dbPlayers));
     
     // Attempt to migrate any players with legacy data format
     migratePlayersWithLegacyData(dbPlayers);

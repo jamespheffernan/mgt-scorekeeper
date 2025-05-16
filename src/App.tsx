@@ -28,6 +28,7 @@ import { useAuth } from './context/AuthContext';
 import { PlayersScreen } from './components/setup/PlayersScreen';
 import TeeSelectionScreen from './components/setup/TeeSelectionScreen';
 import { runAllMigrations } from './utils/migrateFirestorePlayers';
+import AdminDebugPage from './components/admin/AdminDebugPage';
 
 // Uncomment these for testing/development
 /*
@@ -184,6 +185,10 @@ function App() {
                     <CoursePreview />
                   </ProtectedRoute>
                 } 
+              />
+              <Route 
+                path="/admin-debug" 
+                element={<AdminDebugPage />} 
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

@@ -20,7 +20,6 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
   const [lastNameValue, setLastNameValue] = useState(player.last || '');
   const [indexValue, setIndexValue] = useState(player.index.toString());
   const [ghinValue, setGhinValue] = useState(player.ghin || '');
-  const [notes, setNotes] = useState(player.notes || '');
   const [isValid, setIsValid] = useState(true);
   const [error, setError] = useState('');
   
@@ -55,7 +54,6 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
       name: `${firstNameValue} ${lastNameValue}`.trim(),
       index: parseFloat(indexValue),
       ghin: ghinValue || undefined,
-      notes: notes || undefined,
       lastUsed: new Date().toISOString()
     };
     
@@ -133,19 +131,11 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
                 onChange={(e) => setGhinValue(e.target.value)}
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="player-notes">Notes (optional):</label>
-              <textarea
-                id="player-notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-              />
-            </div>
           </div>
           <div className="editor-actions">
             <button
               className="save-button"
+              aria-label="Save"
               onClick={handleSave}
               disabled={!isValid || !firstNameValue}
             >
