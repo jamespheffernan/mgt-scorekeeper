@@ -57,7 +57,7 @@ ul.player-list {
   padding-top: 0;
   padding-right: 0;
   padding-left: 0;
-  padding-bottom: 150px; /* Space for last item to scroll above FABs - ADJUST AS NEEDED */
+  padding-bottom: 72px; /* Space for last item to scroll above FABs/buttons */
 
   /* flex-grow: 1; Removed */
   /* min-height: 0; Removed */
@@ -301,7 +301,7 @@ ul.player-list {
   flex-grow: 1;
   min-height: 0; /* Crucial for nested flex height distribution */
   overflow-y: auto; /* Make this container scrollable */
-  /* padding: 16px; -- User mentioned removing this. Ensure it's not re-added or is appropriate. */
+  padding-bottom: 72px; /* Ensure scroll area above fixed buttons */
   /* The original padding might have been removed by user. If it's still here, consider if it's needed. */
   /* For now, only changing overflow. */
 }

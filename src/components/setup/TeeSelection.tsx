@@ -66,14 +66,8 @@ export const TeeSelection: React.FC<TeeSelectionProps> = ({
       <h3>Select Tees</h3>
       {players.map((playerId, index) => (
         <div key={playerId} className="player-tee-row">
-          <div className="player-name">{`Player ${index + 1}`}</div>
+          <div className="player-name padded-player-name">{`Player ${index + 1}`}</div>
           <div className="tee-selector">
-            {selectedTees[index] && (
-              <div 
-                className="tee-color-indicator" 
-                style={{ backgroundColor: getTeeById(selectedTees[index])?.color || '#ccc' }}
-              />
-            )}
             <select
               value={selectedTees[index]}
               onChange={(e) => handleTeeChange(index, e.target.value)}

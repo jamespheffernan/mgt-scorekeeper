@@ -9,13 +9,15 @@ interface PlayerCardProps {
   player: Player;
   children: React.ReactNode;
   className?: string;
+  nameRow?: React.ReactNode;
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ 
   teamColor, 
   player,
   children,
-  className = ''
+  className = '',
+  nameRow
 }) => {
   return (
     <div className={`player-card-root ${className}`}>
@@ -23,9 +25,13 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
              style={{ '--team-color': teamColor } as React.CSSProperties} />
       
       <div className="player-card-content-wrapper">
-        <h3 className="player-card-name" style={{ color: teamColor }}>
-          {toTitleCase(formatPlayerName(player))}
-        </h3>
+        {nameRow ? (
+          <div className="player-card-name" style={{ color: teamColor }}>{nameRow}</div>
+        ) : (
+          <h3 className="player-card-name" style={{ color: teamColor }}>
+            {toTitleCase(formatPlayerName(player))}
+          </h3>
+        )}
         <div className="player-card-children-grid">
           {children}
         </div>

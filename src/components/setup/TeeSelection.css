@@ -30,6 +30,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-right: 10px;
 }
 
 .tee-selector select {
@@ -40,14 +41,6 @@
   font-size: 0.9rem;
   color: var(--color-grey90);
   cursor: pointer;
-}
-
-.tee-color-indicator {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: inline-block;
-  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .course-selection {
@@ -157,4 +150,9 @@
   font-size: 0.9rem;
   color: var(--color-grey90);
   line-height: 1.5;
+}
+
+/* Add padding to player name for better appearance */
+.player-name {
+  padding-left: 10px;
 }
