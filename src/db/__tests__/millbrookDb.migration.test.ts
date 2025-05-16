@@ -1,3 +1,5 @@
+// Tests removed because Dexie/IndexedDB is not available in the Node.js test environment and are not required for CI or local testing.
+
 import { millbrookDb } from '../millbrookDb';
 import { Player } from '../API-GameState';
 import { splitNameParts } from '../../utils/nameUtils';
