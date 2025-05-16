@@ -1,0 +1,104 @@
+/* Game History Styles */
+.game-history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.game-history-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.records-table th {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.records-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.records-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.complete-game {
+  background-color: rgba(103, 194, 58, 0.1);
+}
+
+.cancelled-game {
+  background-color: rgba(245, 108, 108, 0.1);
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-team-Red { /* Consider changing to .player-team-red for consistency */
+  color: var(--color-red-team);
+  font-weight: 500;
+}
+
+.player-team-Blue { /* Consider changing to .player-team-blue for consistency */
+  color: var(--color-blue-team);
+  font-weight: 500;
+}
+
+.final-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* .team-red and .team-blue are defined in utilities.css, these might be redundant or more specific */
+/* We'll keep them here for now as they are part of Game History context */
+.team-red {
+  color: var(--color-red-team);
+  font-weight: bold;
+}
+
+.team-blue {
+  color: var(--color-blue-team);
+  font-weight: bold;
+}
+
+.big-game-score {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.status-complete {
+  color: #67c23a;
+  font-weight: bold;
+}
+
+.status-cancelled {
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.no-scores {
+  color: #909399;
+  font-style: italic;
+}
+
+.records-count {
+  margin-bottom: 15px;
+  color: #606266;
+  font-size: 0.9rem;
+} 

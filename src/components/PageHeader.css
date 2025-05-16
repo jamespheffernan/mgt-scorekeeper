@@ -1,0 +1,18 @@
+/* src/components/PageHeader.css */
+
+/* Was: mb-4 */
+.page-header-root {
+  margin-bottom: 1rem; /* Tailwind's mb-4 */
+}
+
+/* Was: text-xl font-bold */
+.page-header-title {
+  font-size: 1.25rem; /* Tailwind's text-xl */
+  font-weight: 700;   /* Tailwind's font-bold */
+}
+
+/* Was: text-lg text-grey60 */
+.page-header-subtitle {
+  font-size: 1.125rem; /* Tailwind's text-lg */
+  color: YOUR_GREY_60_COLOR; /* Replace */
+} 

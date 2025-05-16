@@ -3,7 +3,6 @@ import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import { Player, Team } from '../../store/gameStore';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
 import { Chip } from '../Chip';
-import '../../App.css';
 import './PlayersRoster.css';
 import { getFullName, splitNameParts } from '../../utils/nameUtils';
 import PlayerName from '../../components/PlayerName';
@@ -377,102 +376,77 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     )
   );
 
-  // Selected Players section (4-box split by team)
+  // Component to display selected players and team selection
   const SelectedPlayers = () => {
-    // Build arrays of players by team keeping original index for team updates
-    const blue: { player: Player; idx: number }[] = [];
-    const red: { player: Player; idx: number }[] = [];
-    selectedPlayers.forEach((p, i) => {
-      if (teams[i] === 'Blue') blue.push({ player: p, idx: i });
-      else red.push({ player: p, idx: i });
-    });
+    // Ensure we have at most 4 selected players for display
+    const displayPlayers = selectedPlayers.slice(0, 4);
 
     return (
-      <div className="selected-players mb-4">
-        <h4 className="text-base font-medium mb-2">Selected Players ({selectedPlayers.length}/4)</h4>
-        {/* 2x2 grid: Blue (L) | Red (R) */}
-        <div className="selected-grid grid grid-cols-2 gap-2">
-          {[0, 1].map((row) => (
-            <>
-              {/* Blue cell */}
-              <div key={`blue-${row}`} className="flex items-center">
-                {blue[row] ? (
-                  <>
-                    <Chip 
-                      name={getFullName(blue[row].player)} 
-                      onRemove={() => togglePlayer(blue[row].player)} 
-                    />
-                    <select
-                      value={teams[blue[row].idx]}
-                      onChange={(e) => updateTeam(blue[row].idx, e.target.value as Team)}
-                      className="ml-2 h-8 rounded px-2 text-sm border border-grey30"
-                    >
-                      <option value="Red">Red</option>
-                      <option value="Blue">Blue</option>
-                    </select>
-                  </>
-                ) : (
-                  <div
-                    className="h-8 px-3 rounded-full flex items-center text-blue"
-                    style={{ backgroundColor: 'var(--color-blue)', opacity: 0.15 }}
-                  >
-                    Player {row + 1}
-                  </div>
-                )}
-              </div>
+      <div className="selected-players-summary mobile-selected-players-sticky">
+        <h4 className="selected-players-title">Selected Players</h4>
+        <div className="selected-players-grid">
+          {Array.from({ length: 4 }).map((_, index) => {
+            const player = displayPlayers[index];
+            const team = teams[index];
 
-              {/* Red cell */}
-              <div key={`red-${row}`} className="flex items-center">
-                {red[row] ? (
-                  <>
-                    <Chip 
-                      name={getFullName(red[row].player)} 
-                      onRemove={() => togglePlayer(red[row].player)} 
-                    />
-                    <select
-                      value={teams[red[row].idx]}
-                      onChange={(e) => updateTeam(red[row].idx, e.target.value as Team)}
-                      className="ml-2 h-8 rounded px-2 text-sm border border-grey30"
-                    >
-                      <option value="Red">Red</option>
-                      <option value="Blue">Blue</option>
-                    </select>
-                  </>
-                ) : (
-                  <div
-                    className="h-8 px-3 rounded-full flex items-center text-red"
-                    style={{ backgroundColor: 'var(--color-red)', opacity: 0.15 }}
+            if (player) {
+              return (
+                <div key={player.id || index} className="team-selection-cell">
+                  <Chip
+                    name={getFullName(player)}
+                    onRemove={() => togglePlayer(player)}
+                    className={team === 'Blue' ? 'chip-blue' : 'chip-red'}
+                  />
+                  <select
+                    value={team}
+                    onChange={(e) => updateTeam(index, e.target.value as Team)}
+                    className="team-select-dropdown"
                   >
-                    Player {row + 3}
-                  </div>
-                )}
-              </div>
-            </>
-          ))}
+                    <option value="Blue">Blue</option>
+                    <option value="Red">Red</option>
+                  </select>
+                </div>
+              );
+            } else {
+              // Placeholder for empty slot
+              const isBlueTeamSlot = index % 2 === 1; // 0: Red, 1: Blue, 2: Red, 3: Blue
+              return (
+                <div
+                  key={`empty-${index}`}
+                  className={`empty-player-slot ${isBlueTeamSlot ? 'empty-player-slot-blue' : 'empty-player-slot-red'}`}
+                  style={{
+                    backgroundColor: isBlueTeamSlot ? 'rgba(0, 0, 255, 0.1)' : 'rgba(255, 0, 0, 0.1)',
+                  }}
+                >
+                  {isBlueTeamSlot ? 'Select Blue Player' : 'Select Red Player'}
+                </div>
+              );
+            }
+          })}
         </div>
       </div>
     );
   };
 
-  // Search Box section in the component
+  // Component for search box
   const SearchBox = () => (
-    <div className="search-container mb-4">
+    <div className="search-box-wrapper"> {/* Was search-container mb-4 */}
       <input
         type="text"
-        placeholder="Search players..."
+        placeholder="Search Players..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full h-10 px-3 border rounded"
+        className="search-input-field" // Was "w-full h-10 px-3 border rounded"
       />
     </div>
   );
 
-  // Add Player Button section in the component
+  // Component for "Add New Player" button
   const AddPlayerButton = () => (
     <button
       onClick={() => setShowAddForm(true)}
-      className="add-player-button btn-primary w-full h-10 rounded"
-      disabled={selectedPlayers.length >= 4}
+      // Keeping add-player-button and btn-primary, adding general-button-styling
+      className="add-player-button btn-primary general-button-styling" // Was "add-player-button btn-primary w-full h-10 rounded"
     >
       Add New Player
     </button>
@@ -485,7 +459,7 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
 
       {/* Debug Information */}
       {debugMode && (
-        <div style={{ background: '#ffe0e0', padding: '8px', margin: '8px 0', fontSize: '12px', border: '1px solid #ff0000' }}>
+        <div style={{ background: '#ffe0e0', padding: '8px', margin: '8px 0', fontSize: '12px', border: '1px solid #ff0000', flexShrink: 0 }}>
           <h4>Debug Mode</h4>
           <button onClick={() => setDebugMode(false)} style={{ fontSize: '12px', padding: '2px 5px' }}>Hide Debug</button>
           <div>
@@ -510,62 +484,51 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
       {/* Search Bar */}
       <SearchBox />
 
-      {/* Add New Player Button/Form */}
+      {/* Add New Player Button */}
       <AddPlayerButton />
 
       {/* Add Player Form */}
       {showAddForm && (
-        <div className="add-player-form mb-4">
-          <h4 className="text-base font-medium mb-2">Add New Player</h4>
-          <div className="form-group">
-            <label htmlFor="new-player-first">First Name:</label>
-            <input
-              id="new-player-first"
-              type="text"
-              value={newPlayerFirst}
-              onChange={(e) => setNewPlayerFirst(e.target.value)}
-              className="w-full h-10 px-3 border rounded mb-3"
-              placeholder="Enter first name"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="new-player-last">Last Name:</label>
-            <input
-              id="new-player-last"
-              type="text"
-              value={newPlayerLast}
-              onChange={(e) => setNewPlayerLast(e.target.value)}
-              className="w-full h-10 px-3 border rounded mb-3"
-              placeholder="Enter last name"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="new-player-index">Handicap Index:</label>
-            <input
-              id="new-player-index"
-              type="number"
-              step="0.1"
-              min="0"
-              max="54"
-              value={newPlayerIndex}
-              onChange={(e) => setNewPlayerIndex(e.target.value)}
-              className="w-full h-10 px-3 border rounded mb-3"
-              placeholder="Enter handicap index (e.g. 10.4)"
-            />
-          </div>
-          <div className="flex gap-2">
+        <div className="add-player-form-container"> {/* Was add-player-form mb-4 */}
+          <h4 className="add-player-form-title">Add New Player</h4> {/* Was text-base font-medium mb-2 */}
+          <input
+            type="text"
+            placeholder="First Name"
+            value={newPlayerFirst}
+            onChange={(e) => setNewPlayerFirst(e.target.value)}
+            // Using form-input-field and form-input-field-spacing
+            className="form-input-field form-input-field-spacing" // Was "w-full h-10 px-3 border rounded mb-3"
+          />
+          <input
+            type="text"
+            placeholder="Last Name"
+            value={newPlayerLast}
+            onChange={(e) => setNewPlayerLast(e.target.value)}
+            // Using form-input-field and form-input-field-spacing
+            className="form-input-field form-input-field-spacing" // Was "w-full h-10 px-3 border rounded mb-3"
+          />
+          <input
+            type="number"
+            placeholder="Handicap Index"
+            value={newPlayerIndex}
+            onChange={(e) => setNewPlayerIndex(e.target.value)}
+            // Using form-input-field and form-input-field-spacing
+            className="form-input-field form-input-field-spacing" // Was "w-full h-10 px-3 border rounded mb-3"
+          />
+          <div className="form-actions-row"> {/* Was flex gap-2 */}
             <button
-              className="cancel-button flex-1 h-10 rounded"
               onClick={() => setShowAddForm(false)}
+              // Keeping cancel-button, adding form-button and general-button-styling
+              className="cancel-button form-button general-button-styling" // Was "cancel-button flex-1 h-10 rounded"
             >
               Cancel
             </button>
             <button
-              className="save-button flex-1 h-10 rounded"
               onClick={handleAddPlayer}
-              disabled={!newPlayerFirst || !newPlayerLast || !newPlayerIndex}
+              // Keeping save-button, adding form-button and general-button-styling
+              className="save-button btn-primary form-button general-button-styling" // Was "save-button flex-1 h-10 rounded"
             >
-              Save
+              Save Player
             </button>
           </div>
         </div>

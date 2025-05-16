@@ -14,6 +14,7 @@ import { SectionCard } from '../../SectionCard';
 import { PotRow } from '../../PotRow';
 import { BottomNav } from '../../BottomNav';
 import { NavTabs } from '../../NavTabs';
+import './HoleViewMobile.css';
 
 export const HoleViewMobile: React.FC = () => {
   const navigate = useNavigate();
@@ -67,7 +68,9 @@ export const HoleViewMobile: React.FC = () => {
 
   // Handle navigation for NavTabs, specifically for cancel game
   const handleNavTabClick = (itemId: string) => {
+    console.log('[HoleViewMobile] handleNavTabClick received itemId:', itemId);
     if (itemId === 'cancelGame') {
+      console.log("[HoleViewMobile] 'cancelGame' itemId matched, calling setShowCancelDialog(true).");
       setShowCancelDialog(true);
     } else {
       const item = navItems.find(nav => nav.id === itemId);
@@ -259,10 +262,10 @@ export const HoleViewMobile: React.FC = () => {
   
   // Render method
   return (
-    <div className="hole-view mobile-hole-view pb-20">
-      <TopBar title="The Millbrook Game" />
+    <div className="hole-view mobile-hole-view hole-view-root">
+      {/* <TopBar title="The Millbrook Game" /> */}
       
-      <div className="hole-content px-4 pt-16">
+      <div className="hole-content-container">
         <PageHeader 
           title="" 
           subtitle={`Hole ${currentHole}`} 
@@ -284,7 +287,7 @@ export const HoleViewMobile: React.FC = () => {
                 const playerIndex = match.playerTeeIds?.findIndex(id => id === teeId) || 0;
                 
                 return (
-                  <div key={teeId} className="flex justify-between text-sm mb-1">
+                  <div key={teeId} className="tee-info-row">
                     <span>{tee?.name || 'Championship'}</span>
                     <span>Par {playerPars[playerIndex]}</span>
                     <span>{playerYardages[playerIndex] || 0} yds</span>
@@ -293,7 +296,7 @@ export const HoleViewMobile: React.FC = () => {
                 );
               })
               : 
-              <div className="flex justify-between text-sm">
+              <div className="tee-info-row tee-info-row-fallback">
                 <span>Championship</span>
                 <span>Par {defaultPar}</span>
                 <span>0 yds</span>
@@ -304,16 +307,29 @@ export const HoleViewMobile: React.FC = () => {
         </SectionCard>
         
         <SectionCard>
-          <PotRow 
-            red={formatCurrency(getCurrentStandings().redTotal)}
-            holeValue={`Hole Value $${match.base}`}
-            blue={formatCurrency(getCurrentStandings().blueTotal)}
-            carryingAmount={match.carry}
-          />
+          <div className="pot-summary-bar" style={{ minHeight: 40 }}>
+            <div className="pot-summary-item pot-summary-item-left">Hole Value ${match.base}</div>
+            <div className="pot-summary-item pot-summary-item-center">
+              <span
+                style={{
+                  color:
+                    getCurrentStandings().redTotal > getCurrentStandings().blueTotal
+                      ? '#ef4444' // Tailwind red-500
+                      : getCurrentStandings().blueTotal > getCurrentStandings().redTotal
+                      ? '#3b82f6' // Tailwind blue-500
+                      : '#374151', // Tailwind gray-700
+                  fontWeight: 'bold',
+                }}
+              >
+                {formatCurrency(getCurrentStandings().redTotal - getCurrentStandings().blueTotal)}
+              </span>
+            </div>
+            <div className="pot-summary-item pot-summary-item-right">Carrying ${match.carry}</div>
+          </div>
         </SectionCard>
         
-        <SectionCard className="mb-4">
-          <h3 className="text-lg font-semibold mb-3">Enter Scores</h3>
+        <SectionCard className="scores-section-container"> 
+          <h3 className="scores-section-title">Enter Scores</h3>
           <PlayersFourBox
             onScoreChange={updateScore}
             onJunkChange={updateJunk}
@@ -334,20 +350,20 @@ export const HoleViewMobile: React.FC = () => {
           {trailingTeam && isDoubleAvailable && (
             <button
               onClick={handleCallDouble}
-              className={`btn ${trailingTeam === 'Red' ? 'btn-red' : 'btn-blue'} mr-2`}
+              className={`btn ${trailingTeam === 'Red' ? 'btn-red' : 'btn-blue'} doubles-button`}
               disabled={isSubmitting}
             >
               {trailingTeam.toUpperCase()} DOUBLES
             </button>
           )}
           {!isDoubleAvailable && match.doubles > 0 && (
-            <div className="double-used-indicator px-3 py-2 text-sm bg-grey30 text-grey60 rounded">
+            <div className="double-indicator">
               Double already used
             </div>
           )}
           <button
             onClick={submitScores}
-            className="btn btn-primary flex-1"
+            className="btn btn-primary submit-scores-button"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'SUBMITTING...' : 'SUBMIT SCORES'}

@@ -1,0 +1,31 @@
+/* src/components/TopBar.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+/* 
+  Was: fixed top-0 inset-x-0 bg-brand shadow-md z-50 
+  (safe-wrapper is kept on the element directly)
+  Other styles like height, display, justifyContent, alignItems are inline.
+*/
+.top-bar-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-green);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Approximates Tailwind's shadow-md */
+  z-index: 50; /* Was z-50 */
+}
+
+/* 
+  This is for the existing 'topbar-title' class. 
+  The only Tailwind utility to merge here was m-0.
+  Other styles like textAlign are inline.
+*/
+.topbar-title {
+  margin: 0; /* Was m-0 */
+  color: var(--color-white);
+  font-family: 'Pacifico', cursive;
+  /* Add other base styles for topbar-title if it's defined here */
+  /* For example: font-size, color, etc. if not handled by other means */
+} 

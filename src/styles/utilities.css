@@ -1,0 +1,239 @@
+/* Flex utilities */
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+/* Font utilities */
+.text-sm {
+  font-size: 14px;
+}
+
+.text-base {
+  font-size: 16px;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+.text-xl {
+  font-size: 20px;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+/* Layout utilities */
+.fixed {
+  position: fixed;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-x-0 {
+  left: 0;
+  right: 0;
+}
+
+.inset-y-0 {
+  top: 0;
+  bottom: 0;
+}
+
+.top-0 {
+  top: 0;
+}
+
+.bottom-0 {
+  bottom: 0;
+}
+
+.left-0 {
+  left: 0;
+}
+
+.z-40 {
+  z-index: 40;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+/* Grid utilities */
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Shadow utilities */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-inner {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Button styles */
+.btn { 
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+.btn-primary { 
+  background: var(--color-brand); 
+  color: white; 
+}
+.btn-primary:hover {
+  background: var(--color-brand90);
+}
+.btn-danger { 
+  background: var(--color-red); 
+  color: white;
+}
+.btn-danger:hover {
+  opacity: 0.9;
+}
+.btn-disabled { 
+  background: var(--color-grey30); 
+  color: var(--color-grey60); 
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-red { 
+  background: var(--color-red); 
+  color: white; 
+}
+.btn-red:hover {
+  opacity: 0.9;
+}
+.btn-blue { 
+  background: var(--color-blue); 
+  color: white;
+}
+.btn-blue:hover {
+  opacity: 0.9;
+}
+
+/* Global spacing & utility classes */
+.rounded {
+  border-radius: var(--border-radius);
+}
+
+.rounded-sm {
+  border-radius: 4px;
+}
+
+.gap-grid {
+  gap: var(--spacing-unit);
+}
+
+/* Card component styling */
+.card {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: calc(var(--spacing-unit) * 2);
+  margin-bottom: var(--spacing-unit);
+}
+
+/* Bottom safe area */
+.bottom-safe-area {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Team colors */
+.text-red {
+  color: var(--color-red);
+}
+
+.text-blue {
+  color: var(--color-blue);
+}
+
+.bg-brand {
+  background-color: var(--color-brand);
+}
+
+.bg-brand20 {
+  background-color: var(--color-brand20);
+}
+
+.bg-grey30 {
+  background-color: var(--color-grey30);
+}
+
+.text-grey90 {
+  color: var(--color-grey90);
+}
+
+.text-grey60 {
+  color: var(--color-grey60);
+}
+
+/* Added from index.css */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547; /* Light mode text color */
+    background-color: #ffffff; /* Light mode background */
+  }
+  a:hover {
+    color: #747bff; /* Light mode 'a' hover */
+  }
+  /* button {
+    Consider if App.css button styles should also adapt or if this is sufficient
+    For now, using index.css's light mode button background
+    background-color: #f9f9f9; 
+  } */
+} 

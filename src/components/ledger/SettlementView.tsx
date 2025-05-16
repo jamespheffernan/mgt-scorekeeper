@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import html2canvas from 'html2canvas';
-import '../../App.css';
 
 interface SettlementViewProps {
   matchId: string;

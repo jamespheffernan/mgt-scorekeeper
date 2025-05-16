@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../../App.css'; // For modal styles
 import './AddPlayerForm.css'; // For specific form styles
 
 interface AddPlayerFormProps {

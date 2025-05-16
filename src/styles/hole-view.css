@@ -1,0 +1,422 @@
+/* Enhanced Player Tee Info (used in HoleView/ScoreEntry context) */
+.player-tee-info {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.85rem;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Player tee badge (used in HoleView/ScoreEntry context) */
+.player-tee-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin-left: 8px;
+}
+
+/* Player info container (likely HoleView specific) */
+.player-info { /* This is distinct from .player-info in player-roster.css */
+  display: flex;
+  margin-bottom: 8px;
+}
+
+/* Hole details for player (HoleView specific) */
+.hole-details-for-player {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
+.hole-details-for-player .hole-par,
+.hole-details-for-player .hole-si { /* General .hole-par, .hole-si are in hole-info.css, these are specific to this context */
+  margin-right: 12px;
+  padding: 2px 6px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Stroke indicator (HoleView specific) */
+.stroke-indicator {
+  margin-left: 4px;
+  color: #f39c12;
+  font-weight: bold;
+  font-size: 1.1rem;
+  background-color: rgba(243, 156, 18, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Team-specific styling for double button (HoleView context) */
+.double-button.red { /* General .double-button will be defined below or if already defined elsewhere, this adds specificity */
+  background-color: #e74c3c;
+}
+
+.double-button.blue {
+  background-color: #3498db;
+}
+
+/* Hole controls container (HoleView specific) */
+.hole-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+/* Player Score Entry Styling (Part of HoleView) */
+.scores-container { /* This seems to be the main wrapper for score entry in HoleView */
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.scores-container h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #334155;
+  font-size: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+.player-score-row {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.player-score-row:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.player-score-row.Red { /* Note: Consider .player-score-row.team-red for consistency */
+  border-left: 4px solid #ef4444;
+}
+
+.player-score-row.Blue { /* Note: Consider .player-score-row.team-blue for consistency */
+  border-left: 4px solid #3b82f6;
+}
+
+.player-score-row .player-team-indicator { /* This is distinct from the general .team-indicator */
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  .player-score-row .player-team-indicator {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.player-team-indicator .player-team-badge { /* Scoping .player-team-badge if it's specific here */
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.player-team-indicator .player-team-badge.red {
+  background-color: #ef4444;
+}
+
+.player-team-indicator .player-team-badge.blue {
+  background-color: #3b82f6;
+}
+
+.player-name-display { /* Specific to score entry row */
+  font-family: 'Sofia Sans Extra Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #334155;
+}
+
+/* .player-tee-badge is already defined above, ensure it's correctly used or merge if identical */
+
+.score-selector {
+  margin: 8px 0;
+}
+
+.score-selector select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: white;
+  color: #334155;
+  cursor: pointer;
+}
+
+.junk-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.junk-flag-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e2e8f0;
+}
+
+.junk-flag-label:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.junk-flag-label input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.junk-name {
+  font-weight: 500;
+  color: #475569;
+}
+
+/* .hole-controls already defined above */
+
+.double-button { /* General style for double button if not already in base/utilities */
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+/* Specific .double-button.red and .double-button.blue already defined above */
+.double-button.red:hover { /* Adding hover states if not present */
+  background-color: #dc2626;
+  transform: translateY(-2px);
+}
+
+.double-button.blue:hover { /* Adding hover states if not present */
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.double-used-indicator { /* This is specific to hole controls / double button context */
+  padding: 10px 16px;
+  font-style: italic;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  /* margin-right might come from a more general context if this is used with other buttons */
+}
+
+.submit-button { /* This is the submit button within .hole-controls in the original hole-view.css */
+  padding: 12px 24px; /* slightly different from the general animated one */
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+  /* flex-grow might be needed if it was in the original hole-controls context */
+  /* margin-left might be needed if it was in the original hole-controls context */
+}
+
+.submit-button:hover { /* This hover is also slightly different */
+  background-color: #059669;
+  transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  /* No box-shadow for disabled state here, unlike general animated version */
+}
+
+/* HoleView error message - this was the original one in hole-view.css */
+.error-message {
+  background-color: var(--color-error);
+  color: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: var(--border-radius);
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== STYLES FROM App.css TO BE ADDED/MERGED BELOW ====== */
+
+/* Enhanced Player Tee Info from App.css */
+/* Check for duplication with .player-tee-info defined earlier in this file. */
+.player-tee-info {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.85rem;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* .player-score-row .player-team-indicator from App.css */
+/* This was already present above from the original hole-view.css. Review and merge if necessary. */
+.player-score-row .player-team-indicator {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  .player-score-row .player-team-indicator {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* Player tee badge from App.css */
+/* Check for duplication with .player-tee-badge defined earlier. */
+.player-tee-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin-left: 8px;
+}
+
+/* Player info container from App.css */
+/* Check for duplication with .player-info defined earlier. */
+.player-info {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+/* Hole details for player from App.css */
+/* Check for duplication with .hole-details-for-player defined earlier. */
+.hole-details-for-player {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
+.hole-details-for-player .hole-par,
+.hole-details-for-player .hole-si { /* from App.css - check for duplication */
+  margin-right: 12px;
+  padding: 2px 6px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Stroke indicator from App.css */
+/* Check for duplication with .stroke-indicator defined earlier. */
+.stroke-indicator {
+  margin-left: 4px;
+  color: #f39c12;
+  font-weight: bold;
+  font-size: 1.1rem;
+  background-color: rgba(243, 156, 18, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Team-specific styling for double button from App.css */
+/* Check for duplication with .double-button.red and .blue defined earlier. */
+.double-button.red {
+  background-color: #e74c3c;
+}
+
+.double-button.blue {
+  background-color: #3498db;
+}
+
+/* Hole controls container from App.css */
+/* Check for duplication with .hole-controls defined earlier. */
+.hole-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+/* .submit-button from App.css */
+/* The original hole-view.css also has a .submit-button. Carefully review if this one is different and how they should be merged or if one should be preferred. */
+.submit-button {
+  padding: 10px 20px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.submit-button:hover { /* from App.css */
+  background-color: #2ecc71;
+}
+
+.submit-button:disabled { /* from App.css */
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Double used indicator from App.css */
+/* Check for duplication with .double-used-indicator defined earlier. */
+.double-used-indicator {
+  background-color: var(--color-gray);
+  color: white;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  margin-right: 10px;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Responsive adjustments for hole actions from App.css */
+@media (max-width: 768px) {
+  .hole-actions { /* This was from App.css */
+    flex-direction: column;
+    gap: 8px;
+  }
+}

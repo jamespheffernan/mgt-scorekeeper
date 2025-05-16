@@ -1,0 +1,54 @@
+.millbrook-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  margin-top: calc(var(--header-height) + var(--header-safe-area));
+  padding: 8px;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.app-container {
+  width: 100%; 
+  margin: 0 auto;
+  padding: 8px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  background-color: white;
+}
+
+/* General header actions - distinct from course manager toggle */
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  gap: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.app-content {
+  flex: 1;
+}
+
+.app-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-gray);
+} 

@@ -1,0 +1,44 @@
+/* src/components/PotRow.css */
+
+/* Corresponds to original: flex justify-between items-center min-h-10 px-2 */
+.pot-row-root {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 2.5rem; /* Tailwind's min-h-10 */
+  padding-left: 0.5rem; /* Tailwind's px-2 */
+  padding-right: 0.5rem; /* Tailwind's px-2 */
+}
+
+/* General styling for team names */
+.pot-row-team {
+  /* Add any common team name styling here if needed */
+}
+
+/* Corresponds to original: text-red */
+.pot-row-team-red {
+  color: #e53e3e; /* Placeholder red color (Tailwind's red-600) */
+}
+
+/* Corresponds to original: text-blue */
+.pot-row-team-blue {
+  color: #3b82f6; /* Placeholder blue color (Tailwind's blue-500) */
+}
+
+/* Corresponds to original: flex flex-col items-center */
+.pot-row-center-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Corresponds to original: font-medium (on holeValue) */
+.pot-row-hole-value {
+  font-weight: 500; /* Tailwind's font-medium */
+}
+
+/* Corresponds to original: text-sm text-gray-500 */
+.pot-row-carrying-amount {
+  font-size: 0.875rem; /* Tailwind's text-sm */
+  color: #6b7280; /* Placeholder gray color (Tailwind's gray-500) */
+} 

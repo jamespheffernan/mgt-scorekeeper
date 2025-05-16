@@ -4,7 +4,6 @@ import { Course, TeeOption } from '../../db/courseModel';
 import { millbrookDb } from '../../db/millbrookDb';
 import { getFullName } from '../../utils/nameUtils';
 import PlayerName from '../../components/PlayerName';
-import '../../App.css';
 
 interface CourseSetupProps {
   selectedPlayers: Player[];

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { radius } from '../theme/tokens';
+import './NavTabs.css';
 
 interface NavItem {
   id: string;
@@ -18,14 +19,15 @@ export const NavTabs: React.FC<NavTabsProps> = ({ items, current, onTabClick }) 
   const navigate = useNavigate();
   
   return (
-    <nav className="flex gap-2 my-3">
+    <nav className="nav-tabs-root">
       {items.map(i => (
         <button 
           key={i.id}
-          className={`flex-1 h-10 rounded-${radius} text-sm font-medium
-                    ${current === i.id
-                        ? 'bg-brand text-white'
-                        : 'bg-grey30 text-grey90'}`}
+          className={`nav-tab-button ${
+            current === i.id
+                ? 'nav-tab-button-active'
+                : 'nav-tab-button-inactive'}`}
+          style={{ borderRadius: typeof radius === 'string' ? radius : `${radius}px` }}
           onClick={() => {
             if (onTabClick) {
               onTabClick(i.id);

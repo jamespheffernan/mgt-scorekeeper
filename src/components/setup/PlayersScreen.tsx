@@ -5,6 +5,7 @@ import { useRosterStore } from '../../store/rosterStore';
 import { Player } from '../../db/API-GameState';
 import { Team } from '../../types/player';
 import './PlayersRoster.css';
+import './PlayersScreen.css';
 import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import AddPlayerForm from './AddPlayerForm';
 import StartMatchButton from './StartMatchButton';
@@ -109,7 +110,7 @@ export const PlayersScreen: React.FC = () => {
               <p>No players found in the database.</p>
             </div>
           ) : (
-            <ul className="player-list divide-y" aria-label="Player Roster">
+            <ul className="player-list player-list-divided" aria-label="Player Roster">
               {sortedPlayers.map(player => (
                 <li key={player.id}>
                   <PlayerRow
@@ -137,7 +138,7 @@ export const PlayersScreen: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="currentColor" 
-                className="w-6 h-6"
+                className="fab-add-player-icon"
               >
                 <path 
                   fillRule="evenodd" 

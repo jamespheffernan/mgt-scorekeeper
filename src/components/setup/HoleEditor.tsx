@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { TeeOption, HoleInfo } from '../../db/courseModel';
-import '../../App.css';
 
 interface HoleEditorProps {
   tee: TeeOption;

@@ -1,4 +1,5 @@
 import React from 'react';
+import './Stepper.css';
 
 interface StepperProps {
   current: number;
@@ -8,14 +9,14 @@ interface StepperProps {
 
 export const Stepper: React.FC<StepperProps> = ({ current, of, className = '' }) => {
   return (
-    <div className={`mb-4 ${className}`}>
-      <h2 className="text-lg font-medium">Step {current} of {of}</h2>
-      <div className="flex mt-2 gap-2">
+    <div className={`stepper-root ${className}`}>
+      <h2 className="stepper-title">Step {current} of {of}</h2>
+      <div className="stepper-bar-container">
         {Array.from({ length: of }, (_, i) => (
-          <div 
+          <div
             key={i}
-            className={`h-1 flex-1 rounded-full ${
-              i < current ? 'bg-brand' : 'bg-grey30'
+            className={`stepper-bar-item ${
+              i < current ? 'stepper-bar-item-active' : 'stepper-bar-item-inactive'
             }`}
           />
         ))}

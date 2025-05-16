@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import CancelGameDialog from '../CancelGameDialog';
 import EndGameDialog from '../EndGameDialog';
-import '../../App.css';
 import { Course, TeeOption } from '../../db/courseModel';
 import { JunkFlags } from '../../calcEngine/junkCalculator';
 import { millbrookDb } from '../../db/millbrookDb';

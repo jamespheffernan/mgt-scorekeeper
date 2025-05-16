@@ -1,4 +1,5 @@
 import React from 'react';
+import './PotRow.css';
 
 interface PotRowProps {
   red: string;
@@ -9,17 +10,17 @@ interface PotRowProps {
 
 export const PotRow: React.FC<PotRowProps> = ({ red, holeValue, blue, carryingAmount }) => {
   return (
-    <div className="flex justify-between items-center min-h-10 px-2">
-      <span className="text-red">{red}</span>
-      <div className="flex flex-col items-center">
-        <span className="font-medium">{holeValue}</span>
+    <div className="pot-row-root">
+      <span className="pot-row-team pot-row-team-red">{red}</span>
+      <div className="pot-row-center-column">
+        <span className="pot-row-hole-value">{holeValue}</span>
         {(carryingAmount || 0) > 0 && (
-          <span className="text-sm text-gray-500">
+          <span className="pot-row-carrying-amount">
             carrying ${carryingAmount}
           </span>
         )}
       </div>
-      <span className="text-blue">{blue}</span>
+      <span className="pot-row-team pot-row-team-blue">{blue}</span>
     </div>
   );
 }; 

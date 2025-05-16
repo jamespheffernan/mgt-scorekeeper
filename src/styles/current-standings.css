@@ -1,0 +1,210 @@
+/* Current Standings */
+.current-standings {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #edf2f7;
+}
+
+.standings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.standings-header h3 {
+  font-size: 20px;
+  margin: 0;
+  color: #2d3748;
+}
+
+.toggle-standings {
+  background-color: #f8fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-standings:hover {
+  background-color: #f1f5f9;
+  color: #2d3748;
+}
+
+.team-standings-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.versus-indicator {
+  font-size: 18px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.team-standing {
+  flex: 1;
+  max-width: 200px;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.team-standing.team-red {
+  background-color: rgba(245, 108, 108, 0.1);
+  color: #ef4444;
+}
+
+.team-standing.team-blue {
+  background-color: rgba(64, 158, 255, 0.1);
+  color: #3b82f6;
+}
+
+.team-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.team-amount {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* .versus-indicator is defined above, this one has added margin */
+.team-standings-summary .versus-indicator {
+  margin: 0 16px;
+}
+
+.player-standings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.player-standing {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.player-standing.team-red {
+  border-left: 3px solid #ef4444;
+}
+
+.player-standing.team-blue {
+  border-left: 3px solid #3b82f6;
+}
+
+.player-standing .player-name { /* Contextual player name */
+  font-family: 'Sofia Sans Extra Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.player-team-badge {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.player-standing.team-red .player-team-badge {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.player-standing.team-blue .player-team-badge {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.player-amount {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.player-junk {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.hole-info-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.hole-info-item {
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.info-value.available {
+  color: #16a34a;
+}
+
+/* Responsive adjustments for Current Standings */
+@media (max-width: 768px) {
+  .team-standings-summary {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .team-standing {
+    max-width: none;
+  }
+  
+  .team-standings-summary .versus-indicator { /* Using the more specific selector */
+    margin: 0;
+  }
+  
+  .hole-info-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .player-standing {
+    padding: 10px;
+  }
+} 

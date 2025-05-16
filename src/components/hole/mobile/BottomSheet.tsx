@@ -53,8 +53,16 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   
   const teamColor = team === 'Red' ? '#e74c3c' : '#3498db';
   
-  // Generate score options around par
-  const scoreOptions = Array.from({ length: par * 2 }, (_, i) => i + 1);
+  // Ensure par is a sensible value for generating score options
+  // Golf pars are typically 3, 4, or 5. Rarely 6.
+  const isValidPar = par && par >= 3 && par <= 6;
+  const effectivePar = isValidPar ? par : 4; // Default to 4 if par is invalid/unlikely
+
+  // Generate score options: from 1 up to Triple Bogey (effectivePar + 3).
+  const scoreOptionsStart = 1;
+  const scoreOptionsEnd = effectivePar + 3; 
+  
+  const scoreOptions = Array.from({ length: scoreOptionsEnd - scoreOptionsStart + 1 }, (_, i) => scoreOptionsStart + i);
   
   // Get the score text/class based on relation to par
   const getScoreInfo = (score: number) => {

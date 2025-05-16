@@ -1,0 +1,8 @@
+/* src/components/SectionCard.css */
+.section-card-container {
+  background-color: #ffffff; /* Was bg-white */
+  border-radius: 0.5rem;   /* Was rounded-lg (Tailwind's lg is 0.5rem) */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Was shadow-sm */
+  padding: 1rem;           /* Was p-4 (Tailwind's 4 is 1rem) */
+  margin-bottom: 1rem;     /* Was mb-4 (Tailwind's 4 is 1rem) */
+} 

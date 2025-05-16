@@ -1,0 +1,37 @@
+/* src/components/Stepper.css */
+
+/* Corresponds to original mb-4 */
+.stepper-root {
+  margin-bottom: 1rem; /* Example: Tailwind's -4 spacing unit is often 1rem (16px) */
+}
+
+/* Corresponds to original text-lg font-medium */
+.stepper-title {
+  font-size: 1.125rem; /* Example: Tailwind's text-lg */
+  font-weight: 500;     /* Example: Tailwind's font-medium */
+}
+
+/* Corresponds to original flex mt-2 gap-2 */
+.stepper-bar-container {
+  display: flex;
+  margin-top: 0.5rem; /* Example: Tailwind's -2 spacing unit */
+  gap: 0.5rem;        /* Example: Tailwind's -2 spacing unit */
+}
+
+/* Corresponds to original h-1 flex-1 rounded-full */
+.stepper-bar-item {
+  height: 0.25rem; /* Example: Tailwind's h-1 */
+  flex-grow: 1;
+  flex-basis: 0%; /* Or simply flex: 1; */
+  border-radius: 9999px; /* Example: Tailwind's rounded-full */
+}
+
+/* Corresponds to original bg-brand */
+.stepper-bar-item-active {
+  background-color: #007bff; /* Placeholder brand color, e.g., a blue */
+}
+
+/* Corresponds to original bg-grey30 */
+.stepper-bar-item-inactive {
+  background-color: #e0e0e0; /* Placeholder grey30 color, e.g., a light grey */
+} 

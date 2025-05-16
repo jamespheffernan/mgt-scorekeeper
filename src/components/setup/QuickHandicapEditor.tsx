@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Player } from '../../store/gameStore';
-import '../../App.css';
 import { formatPlayerName } from '../../utils/nameFormatter';
 
 interface QuickHandicapEditorProps {
