@@ -400,21 +400,25 @@ export const useGameStore = create(
         
         console.log(`[DEBUG] Initial junk by team: Red=${redJunk}, Blue=${blueJunk}`);
         
-        // Add team junk totals to all team members
-        // When one team earns junk, the other team should lose that amount to keep the game balanced
+        // Distribute net junk value among players
+        const numRedPlayers = playerTeams.filter(t => t === 'Red').length || 1; // Avoid division by zero
+        const numBluePlayers = playerTeams.filter(t => t === 'Blue').length || 1; // Avoid division by zero
+
+        const netJunkWonByRedTeam = redJunk - blueJunk; // If positive, Red wins net junk; if negative, Blue wins net junk.
+        
         players.forEach((_, idx) => {
           const team = playerTeams[idx];
           if (team === 'Red') {
-            // Red team gets their junk earnings and loses Blue's junk earnings
-            finalTotals[idx] += redJunk - blueJunk;
-          } else {
-            // Blue team gets their junk earnings and loses Red's junk earnings
-            finalTotals[idx] += blueJunk - redJunk;
+            // Red players get their share of net junk won by Red team
+            finalTotals[idx] += netJunkWonByRedTeam / numRedPlayers;
+          } else { // Blue team
+            // Blue players effectively pay their share of net junk won by Red team
+            // (or receive their share of net junk won by Blue team)
+            finalTotals[idx] -= netJunkWonByRedTeam / numBluePlayers;
           }
         });
         
         console.log(`[DEBUG] Final totals after junk (zero-sum adjusted): ${JSON.stringify(finalTotals)}`);
-        console.log(`[DEBUG] Balanced junk: Red=${redJunk-blueJunk}, Blue=${blueJunk-redJunk}`);
         
         // Create a modified ledger row with junk included
         const finalLedgerRow = {
@@ -432,6 +436,65 @@ export const useGameStore = create(
             bigGameTotal = calculateBigGameTotal([...bigGameRows, bigGameRow]);
           }
         }
+        
+        // <<< START OF DEBUG LOGGING >>>
+        const calculateTeamScoresForDisplay = (playerTotals: [number, number, number, number], pTeams: Team[]): { redScore: number, blueScore: number } => {
+          let rScore = 0;
+          let bScore = 0;
+          playerTotals.forEach((total, index) => {
+            if (pTeams[index] === 'Red') {
+              rScore += total;
+            } else if (pTeams[index] === 'Blue') {
+              bScore += total;
+            }
+          });
+          return { redScore: rScore, blueScore: bScore };
+        };
+
+        const formatTeamScoreDisplayLine = (scores: { redScore: number, blueScore: number }, prefix: string): string => {
+          let display = `${prefix}: Red $${scores.redScore}, Blue $${scores.blueScore}`;
+          if (scores.redScore > scores.blueScore) {
+            display += ` (Red +$${scores.redScore - scores.blueScore})`;
+          } else if (scores.blueScore > scores.redScore) {
+            display += ` (Blue +$${scores.blueScore - scores.redScore})`;
+          } else {
+            display += ` (Tied)`;
+          }
+          return display;
+        };
+
+        const scoresBeforeHole = calculateTeamScoresForDisplay(previousTotals as [number, number, number, number], playerTeams);
+        const scoresAfterHole = calculateTeamScoresForDisplay(finalLedgerRow.runningTotals, playerTeams);
+
+        const debug_holeEvents = newJunkEvents.filter(event => event.hole === hole);
+        const carryIntoThisHole = match.carry; // Carry from the beginning of this hole's calculation
+        const baseValueForThisHole = ledgerRow.base; // Base value used for this hole's payout calculation
+
+        let debug_logMessage = `\n--- Hole ${hole} Summary ---\n`;
+        debug_logMessage += `${formatTeamScoreDisplayLine(scoresBeforeHole, 'Match Score Before Hole')}\n`;
+        debug_logMessage += `Value carried into hole: $${carryIntoThisHole}\n`;
+        debug_logMessage += `Base value for this hole: $${baseValueForThisHole}\n`;
+
+        if (winner !== 'Push') {
+          debug_logMessage += `Winning Team: ${winner}\n`;
+          debug_logMessage += `Net Payout this hole: $${ledgerRow.payout} (Base: $${baseValueForThisHole}, Carried In: $${carryIntoThisHole})\n`;
+        } else {
+          debug_logMessage += `Hole Pushed. Total value of $${baseValueForThisHole + carryIntoThisHole} carried forward.\n`;
+        }
+
+        if (debug_holeEvents.length > 0) {
+          debug_logMessage += `Events (Junk):\n`;
+          debug_holeEvents.forEach(event => {
+            debug_logMessage += `  - ${event.type} (${players.find(p => p.id === event.playerId)?.name || 'Unknown Player'}, ${event.teamId}): $${event.value}\n`;
+          });
+        } else {
+          debug_logMessage += `No special events (Junk) this hole.\n`;
+        }
+        debug_logMessage += `Total carryover to next hole: $${newCarry}\n`;
+        debug_logMessage += `${formatTeamScoreDisplayLine(scoresAfterHole, 'Match Score After Hole')}\n`;
+        debug_logMessage += `--- End of Hole ${hole} Summary ---\n`;
+        console.log(debug_logMessage);
+        // <<< END OF DEBUG LOGGING >>>
         
         // 10. Update match state
         const updatedMatchState = {
