@@ -477,7 +477,28 @@ export const useGameStore = create(
 
         if (winner !== 'Push') {
           debug_logMessage += `Winning Team: ${winner}\n`;
-          debug_logMessage += `Net Payout this hole: $${ledgerRow.payout} (Base: $${baseValueForThisHole}, Carried In: $${carryIntoThisHole})\n`;
+          
+          const winBonus = baseValueForThisHole; // Win bonus is equal to the base for the hole
+          const junkForWinningTeam = debug_holeEvents.filter(event => event.teamId === winner);
+          const sumOfJunkValueForWinningTeam = junkForWinningTeam.reduce((sum, event) => sum + event.value, 0);
+          
+          // totalValueToWinningTeam is the gross value related to the winning team's efforts (hole win + their junk)
+          const totalValueToWinningTeam = ledgerRow.payout + sumOfJunkValueForWinningTeam;
+          
+          let breakdown = `(Carry: $${carryIntoThisHole}, Base: $${baseValueForThisHole}, Win Bonus: $${winBonus}`;
+          junkForWinningTeam.forEach(event => {
+            const playerName = players.find(p => p.id === event.playerId)?.name || 'Unknown Player';
+            breakdown += `, ${event.type} by ${playerName}: $${event.value}`;
+          });
+          breakdown += ')';
+
+          const losingTeamName = winner === 'Red' ? 'Blue' : 'Red';
+          const junkForLosingTeam = debug_holeEvents.filter(event => event.teamId === losingTeamName);
+          const sumOfJunkValueForLosingTeam = junkForLosingTeam.reduce((sum, event) => sum + event.value, 0);
+
+          const netValueToWinnerForHoleEvents = totalValueToWinningTeam - sumOfJunkValueForLosingTeam;
+          
+          debug_logMessage += `Value flow for ${winner} team: $${totalValueToWinningTeam} ${breakdown}, less ${losingTeamName} junk $${sumOfJunkValueForLosingTeam} = Net to ${winner}: $${netValueToWinnerForHoleEvents}\n`;
         } else {
           debug_logMessage += `Hole Pushed. Total value of $${baseValueForThisHole + carryIntoThisHole} carried forward.\n`;
         }

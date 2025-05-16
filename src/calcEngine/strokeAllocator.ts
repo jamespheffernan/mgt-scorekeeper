@@ -23,6 +23,14 @@ export function allocateStrokes(
   // Calculate number of strokes for each player (difference from lowest)
   const strokes = indexes.map(index => Math.floor(index - lowestIndex));
   
+  // <<< STROKE ALLOCATION LOGGING START >>>
+  console.log('[STROKE DEBUG] allocateStrokes called with:');
+  console.log('[STROKE DEBUG] Player Handicap Indexes:', indexes);
+  console.log('[STROKE DEBUG] Course Hole SIs:', holeSI);
+  console.log('[STROKE DEBUG] Lowest Index:', lowestIndex);
+  console.log('[STROKE DEBUG] Strokes to allocate per player:', strokes);
+  // <<< STROKE ALLOCATION LOGGING END >>>
+  
   // Create result matrix - [players][holes]
   const strokesPerHole: number[][] = Array(indexes.length)
     .fill(null)
@@ -35,6 +43,10 @@ export function allocateStrokes(
   for (let playerIdx = 0; playerIdx < indexes.length; playerIdx++) {
     let playerStrokes = strokes[playerIdx];
     
+    // <<< STROKE ALLOCATION LOGGING START >>>
+    console.log(`[STROKE DEBUG] Processing player ${playerIdx} (Index: ${indexes[playerIdx]}). Total strokes: ${playerStrokes}`);
+    // <<< STROKE ALLOCATION LOGGING END >>>
+
     if (playerStrokes === 0) continue; // No strokes for lowest-index player
     
     // For each stroke, find the next hole by SI
@@ -43,6 +55,10 @@ export function allocateStrokes(
       const holeInRound = (stroke - 1) % 18;
       const holeIdx = sortedHoleIndexes[holeInRound];
       
+      // <<< STROKE ALLOCATION LOGGING START >>>
+      console.log(`[STROKE DEBUG] Player ${playerIdx}: Stroke ${stroke} allocated to hole index ${holeIdx} (SI: ${holeSI[holeIdx]})`);
+      // <<< STROKE ALLOCATION LOGGING END >>>
+
       // Increment the stroke count for this hole
       strokesPerHole[playerIdx][holeIdx]++;
     }
@@ -70,6 +86,14 @@ export function allocateStrokesMultiTee(
   // Calculate number of strokes for each player (difference from lowest)
   const strokes = indexes.map(index => Math.floor(index - lowestIndex));
   
+  // <<< STROKE ALLOCATION LOGGING START >>>
+  console.log('[STROKE DEBUG] allocateStrokesMultiTee called with:');
+  console.log('[STROKE DEBUG] Player Handicap Indexes:', indexes);
+  console.log('[STROKE DEBUG] Player Specific SIs:', playerSI);
+  console.log('[STROKE DEBUG] Lowest Index:', lowestIndex);
+  console.log('[STROKE DEBUG] Strokes to allocate per player:', strokes);
+  // <<< STROKE ALLOCATION LOGGING END >>>
+  
   // Create result matrix - [players][holes]
   const strokesPerHole: number[][] = Array(indexes.length)
     .fill(null)
@@ -79,6 +103,10 @@ export function allocateStrokesMultiTee(
   for (let playerIdx = 0; playerIdx < indexes.length; playerIdx++) {
     let playerStrokes = strokes[playerIdx];
     
+    // <<< STROKE ALLOCATION LOGGING START >>>
+    console.log(`[STROKE DEBUG] Processing player ${playerIdx} (Index: ${indexes[playerIdx]}). Total strokes: ${playerStrokes}`);
+    // <<< STROKE ALLOCATION LOGGING END >>>
+
     if (playerStrokes === 0) continue; // No strokes for lowest-index player
     
     // Get sorted hole indexes by this player's SI
@@ -90,12 +118,21 @@ export function allocateStrokesMultiTee(
     
     const sortedHoleIndexes = findHolesBySI(playerHoleSI, 18);
     
+    // <<< STROKE ALLOCATION LOGGING START >>>
+    console.log(`[STROKE DEBUG] Player ${playerIdx} using SIs:`, playerHoleSI);
+    console.log(`[STROKE DEBUG] Player ${playerIdx} sorted hole indexes by their SI:`, sortedHoleIndexes.map(hIdx => ({ hole: hIdx + 1, si: playerHoleSI[hIdx] })));
+    // <<< STROKE ALLOCATION LOGGING END >>>
+    
     // For each stroke, find the next hole by SI
     for (let stroke = 1; stroke <= playerStrokes; stroke++) {
       // Calculate which hole gets this stroke (mod 18)
       const holeInRound = (stroke - 1) % 18;
       const holeIdx = sortedHoleIndexes[holeInRound];
       
+      // <<< STROKE ALLOCATION LOGGING START >>>
+      console.log(`[STROKE DEBUG] Player ${playerIdx}: Stroke ${stroke} allocated to their hole index ${holeIdx} (Actual SI for player: ${playerHoleSI[holeIdx]})`);
+      // <<< STROKE ALLOCATION LOGGING END >>>
+
       // Increment the stroke count for this hole
       strokesPerHole[playerIdx][holeIdx]++;
     }

@@ -6,7 +6,6 @@
 
 main {
   margin-top: calc(var(--header-height) + var(--header-safe-area));
-  padding: 8px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;

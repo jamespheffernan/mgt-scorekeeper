@@ -364,19 +364,33 @@ export const HoleViewMobile: React.FC = () => {
           <div className="pot-summary-bar" style={{ minHeight: 40 }}>
             <div className="pot-summary-item pot-summary-item-left">Hole Value ${match.base}</div>
             <div className="pot-summary-item pot-summary-item-center">
-              <span
-                style={{
-                  color:
-                    getCurrentStandings().redTotal > getCurrentStandings().blueTotal
-                      ? '#ef4444' // Tailwind red-500
-                      : getCurrentStandings().blueTotal > getCurrentStandings().redTotal
-                      ? '#3b82f6' // Tailwind blue-500
-                      : '#374151', // Tailwind gray-700
-                  fontWeight: 'bold',
-                }}
-              >
-                {formatCurrency(getCurrentStandings().redTotal - getCurrentStandings().blueTotal)}
-              </span>
+              {(() => {
+                const standings = getCurrentStandings();
+                const redTotal = standings.redTotal;
+                const blueTotal = standings.blueTotal;
+                let displayColor = '#374151'; // Tailwind gray-700 for tied
+                let scoreText = '$0';
+
+                if (redTotal > blueTotal) {
+                  displayColor = '#ef4444'; // Tailwind red-500
+                  scoreText = `+$${redTotal - blueTotal}`;
+                } else if (blueTotal > redTotal) {
+                  displayColor = '#3b82f6'; // Tailwind blue-500
+                  scoreText = `+$${blueTotal - redTotal}`;
+                }
+
+                return (
+                  <span
+                    style={{
+                      color: displayColor,
+                      fontWeight: 'bold',
+                      fontSize: '2rem',
+                    }}
+                  >
+                    {scoreText}
+                  </span>
+                );
+              })()}
             </div>
             <div className="pot-summary-item pot-summary-item-right">Carrying ${match.carry}</div>
           </div>

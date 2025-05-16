@@ -46,12 +46,27 @@ const TeeSelectionScreen: React.FC = () => {
         setCourses(allCourses);
         
         if (allCourses.length > 0 && !selectedCourseId) {
-          setCourseId(allCourses[0].id);
-          
-          // Initialize tee selections with defaults
+          const firstCourse = allCourses[0];
+          setCourseId(firstCourse.id);
           const allPlayerIds = [...redTeamIds, ...blueTeamIds];
-          const defaultTeeId = allCourses[0].teeOptions[0]?.id || '';
-          setAllTees(allPlayerIds.map(() => defaultTeeId));
+
+          // Check if the first course has valid tee options and a valid ID for the first tee
+          if (firstCourse.teeOptions && firstCourse.teeOptions.length > 0 && firstCourse.teeOptions[0]?.id) {
+            const defaultTeeId = firstCourse.teeOptions[0].id;
+            if (allPlayerIds.length > 0) {
+                setAllTees(allPlayerIds.map(() => defaultTeeId));
+            } else {
+                setAllTees([]); // No players, so empty tee array
+            }
+          } else {
+            // First course has no valid default tee. Initialize with empty strings if there are players.
+            if (allPlayerIds.length > 0) {
+                setAllTees(allPlayerIds.map(() => ''));
+                console.warn(`Initial course ${firstCourse.name} has no valid default tee. Player tees initialized empty.`);
+            } else {
+                setAllTees([]); // No players, so empty tee array
+            }
+          }
         }
         
         setIsLoading(false);
@@ -83,14 +98,39 @@ const TeeSelectionScreen: React.FC = () => {
   
   // Handle course selection change
   const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const courseId = e.target.value;
-    setCourseId(courseId);
+    const newCourseId = e.target.value;
+    setCourseId(newCourseId);
     
-    const course = courses.find(c => c.id === courseId);
-    if (course && course.teeOptions.length > 0) {
-      const defaultTeeId = course.teeOptions[0].id;
-      const allPlayerIds = [...redTeamIds, ...blueTeamIds];
-      setAllTees(allPlayerIds.map(() => defaultTeeId));
+    const course = courses.find(c => c.id === newCourseId);
+    const allPlayerIds = [...redTeamIds, ...blueTeamIds];
+
+    if (course) {
+      // Check if the selected course has valid tee options and a valid ID for the first tee
+      if (course.teeOptions && course.teeOptions.length > 0 && course.teeOptions[0]?.id) {
+        const defaultTeeId = course.teeOptions[0].id;
+        if (allPlayerIds.length > 0) {
+          setAllTees(allPlayerIds.map(() => defaultTeeId));
+        } else {
+          setAllTees([]); // No players, so empty tee array
+        }
+      } else {
+        // Selected course has no valid default tee. Reset/clear tees for players.
+        if (allPlayerIds.length > 0) {
+          setAllTees(allPlayerIds.map(() => ''));
+          console.warn(`Selected course ${course.name} has no valid default tee. Player tees reset.`);
+        } else {
+          setAllTees([]); // No players, so empty tee array
+        }
+      }
+    } else {
+      // Course not found (e.g., if courses list is somehow outdated or ID is bad)
+      // Reset/clear tees for players.
+      if (allPlayerIds.length > 0) {
+        setAllTees(allPlayerIds.map(() => ''));
+        console.warn(`Course with ID ${newCourseId} not found. Player tees reset.`);
+      } else {
+        setAllTees([]); // No players, so empty tee array
+      }
     }
   };
   
@@ -102,8 +142,25 @@ const TeeSelectionScreen: React.FC = () => {
   // Create the match and start
   const handleCreateMatch = () => {
     // Validation
-    if (!selectedCourseId || playerTeeIds.some(id => !id)) {
-      alert('Please select a course and tees for all players');
+    if (!selectedCourseId || !selectedCourse) {
+      alert('Please select a course.');
+      return;
+    }
+
+    if (playerTeeIds.some(id => !id)) {
+      alert('Please select tees for all players. One or more players are missing a tee selection.');
+      return;
+    }
+
+    // New validation: ensure all selected tee IDs are valid for the selected course
+    // Ensure selectedCourse.teeOptions exists and is an array before mapping
+    const courseTeeIds = selectedCourse.teeOptions?.map(opt => opt.id) || [];
+    const allTeesValid = playerTeeIds.every(playerTeeId => courseTeeIds.includes(playerTeeId));
+
+    if (!allTeesValid) {
+      alert('One or more selected tees are invalid for the chosen course. Please check your selections.');
+      console.error('Invalid tee IDs found:', playerTeeIds, 'Valid course tees for selected course:', courseTeeIds);
+      // You could add logic here to find and highlight the specific invalid tee selections if desired.
       return;
     }
     
