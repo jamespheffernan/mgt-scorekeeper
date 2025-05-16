@@ -29,8 +29,18 @@ const sortPlayersByLastName = (players: Player[]): Player[] => {
   });
 };
 
+// Helper to deduplicate players by ID
+const dedupePlayersById = (players: Player[]): Player[] => {
+  const seen = new Set<string>();
+  return players.filter(p => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+};
+
 export const PlayersScreen: React.FC = () => {
-  const { players: dbPlayers, isLoading, error, createPlayer } = useFirestorePlayers();
+  const { players: dbPlayers, isLoading, error, createPlayer, updatePlayer } = useFirestorePlayers();
 
   const initialize = useRosterStore(state => state.initialize);
   const roster = useRosterStore(state => state.roster);
@@ -40,9 +50,9 @@ export const PlayersScreen: React.FC = () => {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showHandicapEditor, setShowHandicapEditor] = useState(false);
 
-  // Sort players by last name
+  // Sort and dedupe players by last name
   const sortedPlayers = useMemo(() => {
-    return sortPlayersByLastName(dbPlayers);
+    return sortPlayersByLastName(dedupePlayersById(dbPlayers));
   }, [dbPlayers]);
 
   // Detect iOS standalone mode
@@ -110,11 +120,9 @@ export const PlayersScreen: React.FC = () => {
   // Handler to save player changes (should update Firestore)
   const handleSavePlayerEdit = async (updatedPlayer: Player) => {
     try {
-      // You may need to update this to useFirestorePlayers().updatePlayer if not available in this scope
-      // For now, just close modal
+      await updatePlayer(updatedPlayer);
       setShowHandicapEditor(false);
       setEditingPlayer(null);
-      // TODO: Actually update player in DB if needed
     } catch (error) {
       alert('Failed to update player. See console for details.');
       setShowHandicapEditor(false);
