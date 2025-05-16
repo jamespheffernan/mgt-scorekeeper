@@ -85,190 +85,112 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const footerHeight = 64; // px
   
   return (
-    <div
-      data-testid="bottom-sheet"
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        width: '100%',
-        maxHeight: '75vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: '#fff',
-        boxShadow: '0 -2px 10px rgba(0,0,0,0.2)',
-        borderTopLeftRadius: '12px',
-        borderTopRightRadius: '12px',
-        zIndex: 1000,
-        paddingBottom: `calc(${footerHeight}px + env(safe-area-inset-bottom, 0px))`, // Add safe area inset
-      }}
-    >
-      {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: '16px',
-        borderBottom: '1px solid #eee',
-        position: 'sticky',
-        top: 0,
-        backgroundColor: '#fff',
-        zIndex: 1,
-        borderTopLeftRadius: '12px',
-        borderTopRightRadius: '12px'
-      }}>
-        <h3 style={{ margin: 0, color: teamColor }}>
-          {playerName} - Hole {currentHole}
-        </h3>
-        <button 
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            padding: '4px 8px',
-          }}
-        >
-          ×
-        </button>
-      </div>
-      
-      {/* Scrollable Content Area */}
-      <div style={{ 
-        overflowY: 'auto',
-        padding: '16px',
-        flex: '1 1 auto',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontSize: '15px' }}>
-            <span style={{ fontWeight: 'bold', marginRight: 12 }}>Par: {par}</span>
+    <div className="bottom-sheet-modal-overlay" onClick={onClose}>
+      <div
+        className="bottom-sheet polished-bottom-sheet"
+        data-testid="bottom-sheet"
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+      >
+        {/* Drag Handle */}
+        <div className="bottom-sheet-drag-handle" />
+        {/* Header */}
+        <div className="bottom-sheet-header">
+          <h3 style={{ margin: 0, color: teamColor }}>
+            {playerName} - Hole {currentHole}
+          </h3>
+          <button 
+            className="bottom-sheet-close-btn"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        {/* Scrollable Content Area */}
+        <div className="bottom-sheet-content-area">
+          <div className="bottom-sheet-score-row">
+            <span className="bottom-sheet-par">Par: {par}</span>
             {strokes > 0 && (
-              <span style={{
-                backgroundColor: teamColor,
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                borderRadius: '4px',
-                padding: '2px 8px',
-              }}>
+              <span className="bottom-sheet-strokes" style={{ backgroundColor: teamColor }}>
                 -{strokes} handicap {strokes === 1 ? 'stroke' : 'strokes'}
               </span>
             )}
           </div>
-        </div>
-        
-        <div style={{ marginBottom: 20 }}>
-          <h4 style={{ marginBottom: 12 }}>Score</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {scoreOptions.map(score => {
-              const { text, class: scoreClass } = getScoreInfo(score);
-              return (
-                <button
-                  key={score}
-                  onClick={() => handleScoreChange(score)}
-                  style={{
-                    border: grossScore === score ? `2px solid ${teamColor}` : '1px solid #ccc',
-                    borderRadius: 4,
-                    padding: '8px 12px',
-                    background: grossScore === score ? `${teamColor}22` : '#fff',
-                    cursor: 'pointer',
-                    minWidth: 40,
-                    textAlign: 'center',
-                  }}
-                  className={scoreClass}
-                >
-                  {text}
-                </button>
-              );
-            })}
+          <div className="bottom-sheet-section">
+            <h4>Score</h4>
+            <div className="bottom-sheet-score-options">
+              {scoreOptions.map(score => {
+                const { text, class: scoreClass } = getScoreInfo(score);
+                return (
+                  <button
+                    key={score}
+                    onClick={() => handleScoreChange(score)}
+                    className={`bottom-sheet-score-btn ${scoreClass} ${grossScore === score ? 'selected' : ''}`}
+                    style={grossScore === score ? { borderColor: teamColor, background: `${teamColor}22` } : {}}
+                  >
+                    {text}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="bottom-sheet-section">
+            <h4>Junk</h4>
+            <div className="bottom-sheet-junk-options">
+              <label>
+                <input 
+                  type="checkbox" 
+                  checked={junkFlags.hadBunkerShot} 
+                  onChange={() => handleJunkChange('hadBunkerShot')}
+                />
+                Sandy
+              </label>
+              {canHaveGreenie && (
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={junkFlags.isOnGreenFromTee} 
+                    onChange={() => handleJunkChange('isOnGreenFromTee')}
+                  />
+                  Greenie
+                </label>
+              )}
+              {canHaveLongDrive && (
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={junkFlags.isLongDrive} 
+                    onChange={() => handleJunkChange('isLongDrive')}
+                  />
+                  Long Drive
+                </label>
+              )}
+              {canHaveThreePutts && (
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={junkFlags.hadThreePutts} 
+                    onChange={() => handleJunkChange('hadThreePutts')}
+                  />
+                  Three Putts
+                </label>
+              )}
+            </div>
           </div>
         </div>
-        
-        <div>
-          <h4 style={{ marginBottom: 12 }}>Junk</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={{ display: 'flex', alignItems: 'center' }}>
-              <input 
-                type="checkbox" 
-                checked={junkFlags.hadBunkerShot} 
-                onChange={() => handleJunkChange('hadBunkerShot')}
-                style={{ marginRight: 8 }}
-              />
-              Sandy
-            </label>
-            
-            {canHaveGreenie && (
-              <label style={{ display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type="checkbox" 
-                  checked={junkFlags.isOnGreenFromTee} 
-                  onChange={() => handleJunkChange('isOnGreenFromTee')}
-                  style={{ marginRight: 8 }}
-                />
-                Greenie
-              </label>
-            )}
-            
-            {canHaveLongDrive && (
-              <label style={{ display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type="checkbox" 
-                  checked={junkFlags.isLongDrive} 
-                  onChange={() => handleJunkChange('isLongDrive')}
-                  style={{ marginRight: 8 }}
-                />
-                Long Drive
-              </label>
-            )}
-            
-            {canHaveThreePutts && (
-              <label style={{ display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type="checkbox" 
-                  checked={junkFlags.hadThreePutts} 
-                  onChange={() => handleJunkChange('hadThreePutts')}
-                  style={{ marginRight: 8 }}
-                />
-                Three Putts
-              </label>
-            )}
-          </div>
+        {/* Fixed Footer with Done Button */}
+        <div className="bottom-sheet-footer">
+          <button
+            className="bottom-sheet-done-btn"
+            onClick={onClose}
+            style={{ background: teamColor }}
+          >
+            Done
+          </button>
         </div>
-      </div>
-      
-      {/* Fixed Footer with Done Button */}
-      <div style={{ 
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: footerHeight,
-        padding: '12px 16px',
-        borderTop: '1px solid #eee',
-        backgroundColor: '#fff',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        paddingBottom: `calc(12px + env(safe-area-inset-bottom, 0px))`,
-        zIndex: 2,
-      }}>
-        <button
-          onClick={onClose}
-          style={{
-            background: teamColor,
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            padding: '10px 24px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            fontSize: '16px',
-          }}
-        >
-          Done
-        </button>
       </div>
     </div>
   );
