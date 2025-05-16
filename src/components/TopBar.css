@@ -28,4 +28,8 @@
   font-family: 'Pacifico', cursive;
   /* Add other base styles for topbar-title if it's defined here */
   /* For example: font-size, color, etc. if not handled by other means */
+}
+
+.top-bar-standalone {
+  height: 72px !important;
 } 
