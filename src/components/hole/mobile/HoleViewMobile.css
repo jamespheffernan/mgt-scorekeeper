@@ -44,7 +44,11 @@
 
 /* Was: text-left */
 .pot-summary-item-left {
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
 }
 
 /* Was: text-center */
@@ -54,7 +58,11 @@
 
 /* Was: text-right */
 .pot-summary-item-right {
-  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
 }
 
 /* Wrapper for scores section, incorporating the mb-4 from SectionCard prop */

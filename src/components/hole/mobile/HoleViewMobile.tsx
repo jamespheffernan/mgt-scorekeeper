@@ -362,7 +362,10 @@ export const HoleViewMobile: React.FC = () => {
         
         <SectionCard>
           <div className="pot-summary-bar" style={{ minHeight: 40 }}>
-            <div className="pot-summary-item pot-summary-item-left">Hole Value ${match.base}</div>
+            <div className="pot-summary-item pot-summary-item-left" data-testid="pot-summary-item-left">
+              <span>Hole Value</span>
+              <span>${match.base}</span>
+            </div>
             <div className="pot-summary-item pot-summary-item-center">
               {(() => {
                 const standings = getCurrentStandings();
@@ -392,7 +395,10 @@ export const HoleViewMobile: React.FC = () => {
                 );
               })()}
             </div>
-            <div className="pot-summary-item pot-summary-item-right">Carrying ${match.carry}</div>
+            <div className="pot-summary-item pot-summary-item-right" data-testid="pot-summary-item-right">
+              <span>Carrying</span>
+              <span>${match.carry}</span>
+            </div>
           </div>
         </SectionCard>
         
