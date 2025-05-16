@@ -90,6 +90,7 @@
 .back-button {
   background-color: var(--color-grey60);
   flex: 1;
+  margin-left: 10px;
 }
 
 .back-button:hover {
@@ -99,6 +100,7 @@
 .continue-button {
   background-color: var(--color-brand);
   flex: 2;
+  margin-right: 10px;
 }
 
 .continue-button:hover {

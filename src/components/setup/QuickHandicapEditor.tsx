@@ -70,92 +70,105 @@ export const QuickHandicapEditor: React.FC<QuickHandicapEditorProps> = ({
   };
   
   return (
-    <div className="quick-handicap-editor">
-      <div className="editor-container">
-        <div className="editor-form">
-          <h2>Edit Player</h2>
-          
-          <div className="form-group">
-            <label htmlFor="player-first-name">First Name:</label>
-            <input
-              id="player-first-name"
-              type="text"
-              value={firstNameValue}
-              onChange={(e) => setFirstNameValue(e.target.value)}
-            />
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-content quick-handicap-editor" onClick={e => e.stopPropagation()} style={{ position: 'relative', maxWidth: 400, width: '100%' }}>
+        <button
+          onClick={onCancel}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            background: 'none',
+            border: 'none',
+            fontSize: 24,
+            cursor: 'pointer',
+            color: '#888',
+            zIndex: 2
+          }}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div className="editor-container">
+          <div className="editor-form">
+            <h2>Edit Player</h2>
+            <div className="form-group">
+              <label htmlFor="player-first-name">First Name:</label>
+              <input
+                id="player-first-name"
+                type="text"
+                value={firstNameValue}
+                onChange={(e) => setFirstNameValue(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="player-last-name">Last Name:</label>
+              <input
+                id="player-last-name"
+                type="text"
+                value={lastNameValue}
+                onChange={(e) => setLastNameValue(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="handicap-index">Handicap Index:</label>
+              <input
+                id="handicap-index"
+                type="number"
+                step="0.1"
+                min="0"
+                max="36"
+                value={indexValue}
+                onChange={handleIndexChange}
+                className={!isValid ? 'invalid' : ''}
+              />
+              {error && <div className="error-message">{error}</div>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="ghin-number">GHIN Number (optional):</label>
+              <input
+                id="ghin-number"
+                type="text"
+                value={ghinValue}
+                onChange={(e) => setGhinValue(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="player-notes">Notes (optional):</label>
+              <textarea
+                id="player-notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
           </div>
-          
-          <div className="form-group">
-            <label htmlFor="player-last-name">Last Name:</label>
-            <input
-              id="player-last-name"
-              type="text"
-              value={lastNameValue}
-              onChange={(e) => setLastNameValue(e.target.value)}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="handicap-index">Handicap Index:</label>
-            <input
-              id="handicap-index"
-              type="number"
-              step="0.1"
-              min="0"
-              max="36"
-              value={indexValue}
-              onChange={handleIndexChange}
-              className={!isValid ? 'invalid' : ''}
-            />
-            {error && <div className="error-message">{error}</div>}
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="ghin-number">GHIN Number (optional):</label>
-            <input
-              id="ghin-number"
-              type="text"
-              value={ghinValue}
-              onChange={(e) => setGhinValue(e.target.value)}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="player-notes">Notes (optional):</label>
-            <textarea
-              id="player-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-            />
-          </div>
-        </div>
-      
-        <div className="editor-actions">
-          <button
-            className="save-button"
-            onClick={handleSave}
-            disabled={!isValid || !firstNameValue}
-          >
-            Save Changes
-          </button>
-          <div className="secondary-actions">
+          <div className="editor-actions">
             <button
-              type="button"
-              className="cancel-button"
-              onClick={onCancel}
+              className="save-button"
+              onClick={handleSave}
+              disabled={!isValid || !firstNameValue}
             >
-              Cancel
+              Save Changes
             </button>
-            {typeof onDelete === 'function' && (
+            <div className="secondary-actions">
               <button
                 type="button"
-                className="delete-button"
-                onClick={handleDelete}
+                className="cancel-button"
+                onClick={onCancel}
               >
-                Delete Player
+                Cancel
               </button>
-            )}
+              {typeof onDelete === 'function' && (
+                <button
+                  type="button"
+                  className="delete-button"
+                  onClick={handleDelete}
+                >
+                  Delete Player
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@
 /* Was: text-base font-medium mb-1 */
 .player-card-name {
   font-family: 'Sofia Sans Extra Condensed', sans-serif;
-  font-size: 1rem; /* Tailwind's text-base */
+  font-size: 1.2rem; /* Tailwind's text-base */
   font-weight: 500; /* Tailwind's font-medium */
   margin-bottom: 0.25rem; /* Tailwind's mb-1 */
   /* color is applied via inline style prop in TSX */

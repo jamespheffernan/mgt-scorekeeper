@@ -31,6 +31,7 @@ export const HoleViewMobile: React.FC = () => {
   const callDouble = useGameStore(state => state.callDouble);
   const cancelMatch = useGameStore(state => state.cancelMatch);
   const ledger = useGameStore(state => state.ledger);
+  const bigGameRows = useGameStore(state => state.bigGameRows);
   
   // Current hole
   const currentHole = match.currentHole;
@@ -383,15 +384,64 @@ export const HoleViewMobile: React.FC = () => {
                 }
 
                 return (
-                  <span
-                    style={{
-                      color: displayColor,
-                      fontWeight: 'bold',
-                      fontSize: '2rem',
-                    }}
-                  >
-                    {scoreText}
-                  </span>
+                  <>
+                    <span
+                      style={{
+                        color: displayColor,
+                        fontWeight: 'bold',
+                        fontSize: '2rem',
+                      }}
+                    >
+                      {scoreText}
+                    </span>
+                    {/* Big Game pill below score */}
+                    {match.bigGame && Array.isArray(bigGameRows) && (() => {
+                      // Get all rows up to and including current hole
+                      const rowsUpToCurrent = bigGameRows.filter(r => r.hole <= currentHole);
+                      if (rowsUpToCurrent.length === 0) {
+                        return (
+                          <div
+                            style={{
+                              marginTop: 8,
+                              display: 'inline-block',
+                              backgroundColor: '#166534',
+                              color: '#fff',
+                              borderRadius: 20,
+                              padding: '2px 12px',
+                              fontWeight: 600,
+                              fontSize: '1rem',
+                              letterSpacing: 1,
+                            }}
+                          >
+                            BG: -- (--)
+                          </div>
+                        );
+                      }
+                      const runningTotal = rowsUpToCurrent.reduce((sum, row) => sum + row.subtotal, 0);
+                      // Sum par for all holes up to current (use match.holePar)
+                      const holesCounted = rowsUpToCurrent.length;
+                      const parSum = rowsUpToCurrent.reduce((sum, row) => sum + (match.holePar[row.hole - 1] || 4), 0);
+                      const toPar = runningTotal - (parSum * 2);
+                      const toParStr = toPar > 0 ? `+${toPar}` : toPar.toString();
+                      return (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            display: 'inline-block',
+                            backgroundColor: '#166534',
+                            color: '#fff',
+                            borderRadius: 20,
+                            padding: '2px 12px',
+                            fontWeight: 600,
+                            fontSize: '1rem',
+                            letterSpacing: 1,
+                          }}
+                        >
+                          {`BG: ${runningTotal} (${toParStr})`}
+                        </div>
+                      );
+                    })()}
+                  </>
                 );
               })()}
             </div>

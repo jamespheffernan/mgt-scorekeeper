@@ -9,6 +9,7 @@ import './PlayersScreen.css';
 import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import AddPlayerForm from './AddPlayerForm';
 import StartMatchButton from './StartMatchButton';
+import { QuickHandicapEditor } from './QuickHandicapEditor';
 
 // Helper function to sort players by last name, then first name
 const sortPlayersByLastName = (players: Player[]): Player[] => {
@@ -36,6 +37,8 @@ export const PlayersScreen: React.FC = () => {
   const { setTeam, remove } = useRosterStore();
 
   const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [showHandicapEditor, setShowHandicapEditor] = useState(false);
 
   // Sort players by last name
   const sortedPlayers = useMemo(() => {
@@ -62,8 +65,8 @@ export const PlayersScreen: React.FC = () => {
   }, [initialize]);
 
   const getPlayerTeam = (playerId: string): Team | null => {
-    if (roster.red.includes(playerId)) return 'red';
-    if (roster.blue.includes(playerId)) return 'blue';
+    if (Array.isArray(roster.red) && roster.red.includes(playerId)) return 'red';
+    if (Array.isArray(roster.blue) && roster.blue.includes(playerId)) return 'blue';
     return null;
   };
 
@@ -98,6 +101,46 @@ export const PlayersScreen: React.FC = () => {
     setShowAddPlayerForm(false);
   };
 
+  // Handler to open edit modal
+  const handleEditPlayer = (player: Player) => {
+    setEditingPlayer(player);
+    setShowHandicapEditor(true);
+  };
+
+  // Handler to save player changes (should update Firestore)
+  const handleSavePlayerEdit = async (updatedPlayer: Player) => {
+    try {
+      // You may need to update this to useFirestorePlayers().updatePlayer if not available in this scope
+      // For now, just close modal
+      setShowHandicapEditor(false);
+      setEditingPlayer(null);
+      // TODO: Actually update player in DB if needed
+    } catch (error) {
+      alert('Failed to update player. See console for details.');
+      setShowHandicapEditor(false);
+      setEditingPlayer(null);
+    }
+  };
+
+  // Handler to delete player (should update Firestore)
+  const handleDeletePlayer = async (playerId: string) => {
+    try {
+      // TODO: Actually delete player in DB if needed
+      setShowHandicapEditor(false);
+      setEditingPlayer(null);
+    } catch (error) {
+      alert('Failed to delete player. See console for details.');
+      setShowHandicapEditor(false);
+      setEditingPlayer(null);
+    }
+  };
+
+  // Handler to cancel edit
+  const handleCancelEdit = () => {
+    setShowHandicapEditor(false);
+    setEditingPlayer(null);
+  };
+
   return (
     <div className="players-screen">
       <div className="sticky-pills-wrapper">
@@ -126,6 +169,7 @@ export const PlayersScreen: React.FC = () => {
                     team={getPlayerTeam(player.id)}
                     onTeamSelect={handleTeamSelect}
                     onRemove={handleRemovePlayer}
+                    onEdit={handleEditPlayer}
                   />
                 </li>
               ))}
@@ -166,6 +210,15 @@ export const PlayersScreen: React.FC = () => {
           show={showAddPlayerForm}
           onSave={handleSaveNewPlayer}
           onCancel={handleCancelAddPlayer}
+        />
+      )}
+
+      {showHandicapEditor && editingPlayer && (
+        <QuickHandicapEditor
+          player={editingPlayer}
+          onSave={handleSavePlayerEdit}
+          onCancel={handleCancelEdit}
+          onDelete={handleDeletePlayer}
         />
       )}
     </div>

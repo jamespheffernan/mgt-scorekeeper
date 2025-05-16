@@ -8,6 +8,7 @@ interface PlayerRowProps {
   team: Team | null;
   onTeamSelect: (id: string, team: Team) => void;
   onRemove: (id: string) => void;
+  onEdit?: (player: Player) => void;
 }
 
 // Get initials as fallback for avatar
@@ -25,7 +26,7 @@ const getInitials = (player: Player): string => {
   return player.name ? player.name.substring(0, 2).toUpperCase() : '??';
 };
 
-export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect, onRemove }) => {
+export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect, onRemove, onEdit }) => {
 
   const handleRemoveClick = () => {
     onRemove(player.id);
@@ -40,7 +41,17 @@ export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect
           {getInitials(player)}
         </div>
         <div>
-          <span className="player-name">{player.name}</span>
+          <span
+            className="player-name"
+            style={onEdit ? { cursor: 'pointer' } : {}}
+            onClick={onEdit ? () => onEdit(player) : undefined}
+            tabIndex={onEdit ? 0 : undefined}
+            role={onEdit ? 'button' : undefined}
+            aria-label={onEdit ? `Edit ${player.name}` : undefined}
+            onKeyPress={onEdit ? (e) => { if (e.key === 'Enter') onEdit(player); } : undefined}
+          >
+            {player.name}
+          </span>
           {/* Display handicap index if available */}
           {player.index !== undefined && player.index !== null && (
              <span className="player-index"> ({player.index})</span>

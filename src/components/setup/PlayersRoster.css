@@ -46,7 +46,8 @@ html, body {
   /* padding-bottom is on ul.player-list */
 }
 .players-title {
-  margin-bottom: 16px; /* Space below title */
+  margin-bottom: 16px;
+  margin-left: 10px; /* Space below title */
   /* flex-shrink: 0; Removed to allow scrolling */
 }
 
@@ -557,4 +558,170 @@ ul.player-list {
 .chip-red {
   background-color: red; /* Placeholder red */
   color: white;
+}
+
+/* Modal Overlay and Content (for QuickHandicapEditor and others) */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 6px rgba(0,0,0,0.08);
+  padding: 32px 24px 24px 24px;
+  max-width: 420px;
+  width: 95vw;
+  position: relative;
+  animation: modalPopIn 0.22s cubic-bezier(.23,1.01,.32,1);
+}
+
+@keyframes modalPopIn {
+  from { transform: scale(0.96) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Close (X) button */
+.modal-content > button[aria-label="Close"] {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.15s;
+  z-index: 2;
+}
+.modal-content > button[aria-label="Close"]:hover {
+  color: #e74c3c;
+}
+
+.quick-handicap-editor .editor-container {
+  padding-top: 8px;
+}
+
+.quick-handicap-editor .editor-form {
+  margin-bottom: 18px;
+}
+
+.quick-handicap-editor .form-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.quick-handicap-editor .form-group input,
+.quick-handicap-editor .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-top: 4px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  background: #fafbfc;
+  transition: border 0.15s;
+}
+.quick-handicap-editor .form-group input:focus,
+.quick-handicap-editor .form-group textarea:focus {
+  border: 1.5px solid #1A5E46;
+  outline: none;
+}
+
+.quick-handicap-editor .form-group .invalid {
+  border-color: #e74c3c;
+  background: #fff6f6;
+}
+
+.quick-handicap-editor .error-message {
+  color: #e74c3c;
+  font-size: 0.95rem;
+  margin-top: -6px;
+  margin-bottom: 8px;
+}
+
+.quick-handicap-editor .editor-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quick-handicap-editor .save-button {
+  background: #1A5E46;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.quick-handicap-editor .save-button:disabled {
+  background: #b7c7bc;
+  cursor: not-allowed;
+}
+.quick-handicap-editor .save-button:not(:disabled):hover {
+  background: #27ae60;
+}
+
+.quick-handicap-editor .secondary-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quick-handicap-editor .cancel-button {
+  background: #f3f3f3;
+  color: #444;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  flex: 1;
+  transition: background 0.15s;
+}
+.quick-handicap-editor .cancel-button:hover {
+  background: #e0e0e0;
+}
+
+.quick-handicap-editor .delete-button {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  flex: 1;
+  transition: background 0.15s;
+}
+.quick-handicap-editor .delete-button:hover {
+  background: #c0392b;
 } 

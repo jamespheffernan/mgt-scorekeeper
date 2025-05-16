@@ -15,7 +15,7 @@
 .tee-info-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.875rem; /* Tailwind's text-sm */
+  font-size: 1rem; /* Tailwind's text-sm */
   margin-bottom: 0.25rem; /* Tailwind's mb-1 */
 }
 
