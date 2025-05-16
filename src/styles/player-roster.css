@@ -167,7 +167,7 @@
   align-items: center;
 }
 
-.player-name { /* This .player-name is specific to player-item context */
+.player-name {
   font-family: 'Sofia Sans Extra Condensed', sans-serif;
   font-weight: 500;
   flex: 1;

@@ -117,7 +117,7 @@
   border-left: 3px solid #3b82f6;
 }
 
-.player-standing .player-name { /* Contextual player name */
+.player-standing .player-name {
   font-family: 'Sofia Sans Extra Condensed', sans-serif;
   font-weight: 600;
   font-size: 16px;

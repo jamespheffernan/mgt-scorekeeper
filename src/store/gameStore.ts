@@ -471,7 +471,8 @@ export const useGameStore = create(
         const baseValueForThisHole = ledgerRow.base; // Base value used for this hole's payout calculation
 
         let debug_logMessage = `\n--- Hole ${hole} Summary ---\n`;
-        debug_logMessage += `${formatTeamScoreDisplayLine(scoresBeforeHole, 'Match Score Before Hole')}\n`;
+        debug_logMessage += `${formatTeamScoreDisplayLine(scoresBeforeHole, 'Match Score Before Hole')}
+`;
         debug_logMessage += `Value carried into hole: $${carryIntoThisHole}\n`;
         debug_logMessage += `Base value for this hole: $${baseValueForThisHole}\n`;
 
