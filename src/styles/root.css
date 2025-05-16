@@ -1,0 +1,48 @@
+/* 
+ * Root styling to establish basic defaults
+ */
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: scroll; /* Always show vertical scrollbar to prevent layout shifts */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  color: #1A202C;
+  background-color: #f5f7fa;
+  position: relative; /* Create a stacking context */
+}
+
+#root {
+  min-height: 100%;
+  position: relative; /* Create a stacking context */
+  width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Ensure proper viewport height on mobile browsers */
+@supports (-webkit-touch-callout: none) {
+  /* iOS devices */
+  html, body, #root {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Fix for mobile browsers with address bar that can resize viewport */
+@media (max-width: 768px) {
+  :root {
+    --vh: 1vh;
+  }
+  
+  html, body, #root {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+} 

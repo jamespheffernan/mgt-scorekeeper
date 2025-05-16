@@ -1,0 +1,676 @@
+/* Import variables */
+@import './settlement-variables.css';
+
+/* ------ CORE LAYOUT ------ */
+body {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.settlement-view {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: var(--spacing-lg);
+  background-color: var(--settlement-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow);
+}
+
+/* ------ HEADER ------ */
+.settlement-header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.settlement-header h2 {
+  font-size: 28px;
+  margin-bottom: var(--spacing-sm);
+  color: var(--settlement-header-color);
+}
+
+.settlement-date {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* ------ TABS ------ */
+.settlement-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-lg);
+  overflow-x: auto; /* Allow horizontal scrolling on small screens */
+  overflow-y: visible; /* Ensure vertical content isn't affected */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  scroll-snap-type: x mandatory; /* Improve tab scrolling experience */
+  position: relative; /* Create stacking context for tab indicators */
+  z-index: 1; /* Ensure tabs stay above content */
+}
+
+.tab-button {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-normal);
+  position: relative;
+  white-space: nowrap;
+  scroll-snap-align: start; /* Improve scrolling experience */
+  flex-shrink: 0; /* Prevent tabs from shrinking */
+}
+
+.tab-button:hover {
+  color: var(--settlement-header-color);
+}
+
+.tab-button.active {
+  color: var(--settlement-header-color);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--settlement-header-color);
+}
+
+/* ------ CONTENT ------ */
+.settlement-content {
+  padding: var(--spacing-lg) 0;
+  position: relative; /* Create stacking context */
+  z-index: 0; /* Keep content below tabs */
+  width: 100%; /* Ensure content takes full width */
+}
+
+/* ------ SUMMARY TAB ------ */
+.settlement-summary-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.game-result-banner {
+  text-align: center;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+  background-color: var(--border-color-light);
+}
+
+.game-result-banner h3 {
+  font-size: 24px;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* Team Summary */
+.team-summary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.team-total {
+  flex: 1;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  max-width: 280px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease;
+}
+
+.team-total:hover {
+  transform: translateY(-2px);
+}
+
+.team-red {
+  background-color: var(--team-red-bg);
+  color: var(--team-red);
+}
+
+.team-blue {
+  background-color: var(--team-blue-bg);
+  color: var(--team-blue);
+}
+
+.winning-team {
+  border: 2px solid var(--highlight-gold);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+}
+
+.team-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: var(--spacing-sm);
+}
+
+.team-amount {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: var(--spacing-sm);
+}
+
+.team-holes-won {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.team-summary-separator {
+  margin: 0 var(--spacing-lg);
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-muted);
+}
+
+/* Player Results */
+.player-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.player-result {
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  box-shadow: var(--card-shadow);
+  background-color: var(--settlement-card-bg);
+  transition: transform 0.2s ease;
+}
+
+.player-result:hover {
+  transform: translateY(-2px);
+}
+
+.player-result.team-red {
+  border-left: 3px solid var(--team-red);
+  background-color: var(--team-red-bg);
+}
+
+.player-result.team-blue {
+  border-left: 3px solid var(--team-blue);
+  background-color: var(--team-blue-bg);
+}
+
+.player-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.player-name {
+  font-family: 'Sofia Sans Extra Condensed', sans-serif;
+  font-weight: bold;
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.player-team {
+  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+}
+
+.player-trend {
+  flex: 1;
+}
+
+.player-total-container {
+  text-align: right;
+}
+
+.player-total {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.player-junk-total {
+  font-size: 14px;
+  margin-top: 4px;
+  opacity: 0.7;
+  color: var(--text-secondary);
+}
+
+/* Game Stats */
+.game-stats {
+  background-color: var(--settlement-card-bg);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--card-shadow);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0 var(--spacing-md);
+  flex: 1;
+  min-width: 100px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+/* ------ DETAILS TAB ------ */
+.settlement-details-tab {
+  margin-bottom: var(--spacing-xl);
+}
+
+.hole-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.hole-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--settlement-card-bg);
+  padding: var(--spacing-md);
+  box-shadow: var(--card-shadow);
+}
+
+.hole-card.winner-red-border {
+  border-left: 4px solid var(--team-red);
+}
+
+.hole-card.winner-blue-border {
+  border-left: 4px solid var(--team-blue);
+}
+
+.hole-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color-light);
+}
+
+.hole-number-card {
+  font-size: 1.1em;
+  color: var(--text-primary);
+}
+
+.hole-winner-card {
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+}
+
+.winner-badge-card {
+  padding: 3px 8px;
+  border-radius: var(--border-radius-sm);
+  color: white;
+  font-size: 0.85em;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.winner-badge-card.red {
+  background-color: var(--team-red);
+}
+
+.winner-badge-card.blue {
+  background-color: var(--team-blue);
+}
+
+.winner-badge-card.push {
+  background-color: var(--text-muted);
+}
+
+.hole-card-main-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) 0;
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.hole-card-main-info span {
+  padding: var(--spacing-sm);
+  background-color: var(--settlement-bg);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color-light);
+}
+
+.player-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 500px) {
+  .player-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.player-details-card {
+  background-color: var(--settlement-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md);
+  font-size: 0.9em;
+}
+
+.team-text-red .player-name-card {
+  color: var(--team-red);
+}
+
+.team-text-blue .player-name-card {
+  color: var(--team-blue);
+}
+
+.player-name-card {
+  font-family: 'Sofia Sans Extra Condensed', sans-serif;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 1.05em;
+}
+
+.player-score-card,
+.player-change-card,
+.player-junk-card {
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.gross-score-card {
+  font-weight: 500;
+}
+
+.net-score-card {
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.player-junk-card {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px dashed var(--border-color);
+}
+
+.junk-item-card {
+  display: inline-block;
+  font-size: 0.9em;
+  background-color: var(--border-color-light);
+  padding: 3px 6px;
+  border-radius: 12px;
+  margin: 0 3px 4px 0;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* ------ BIG GAME TAB ------ */
+.settlement-big-game-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.big-game-disabled {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-secondary);
+  font-style: italic;
+  background-color: var(--settlement-bg);
+  border-radius: var(--border-radius-md);
+  border: 1px dashed var(--border-color);
+}
+
+.big-game-overall-total {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--settlement-bg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--card-shadow);
+}
+
+.big-game-overall-total h3 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.2em;
+  color: var(--text-primary);
+}
+
+.big-game-total-value {
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--settlement-header-color);
+}
+
+.big-game-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.big-game-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--settlement-card-bg);
+  padding: var(--spacing-md);
+  box-shadow: var(--card-shadow);
+}
+
+.big-game-card-header {
+  font-weight: bold;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color-light);
+  color: var(--text-primary);
+}
+
+.big-game-card-scores,
+.big-game-card-subtotal,
+.big-game-card-running-total {
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.95em;
+  padding: 6px 0;
+  color: var(--text-primary);
+}
+
+.best-net-score {
+  font-weight: 600;
+  background-color: var(--border-color-light);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  margin: 0 2px;
+}
+
+.subtotal-value,
+.running-total-value {
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.best-net-score-player {
+  font-weight: 600;
+  background-color: var(--border-color-light);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  margin: 0 2px;
+  display: inline-block;
+}
+
+/* ------ ACTION BUTTONS ------ */
+.settlement-actions {
+  margin-top: var(--spacing-xl);
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-lg);
+}
+
+.export-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.export-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--settlement-card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.export-button:hover {
+  border-color: var(--settlement-header-color);
+  color: var(--settlement-header-color);
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.rematch-button {
+  background-color: var(--settlement-header-color);
+  color: white;
+}
+
+.rematch-button:hover {
+  background-color: #397963; /* Slightly darker */
+}
+
+.new-game-button {
+  background-color: var(--highlight-green);
+  color: white;
+}
+
+.new-game-button:hover {
+  background-color: #0ca678; /* Slightly darker */
+}
+
+.menu-button {
+  background-color: var(--text-secondary);
+  color: white;
+}
+
+.menu-button:hover {
+  background-color: #3a424c; /* Slightly darker */
+}
+
+/* ------ SCREENSHOT MODE ------ */
+.screenshot-mode {
+  background-color: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  box-shadow: none;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ------ RESPONSIVE ADJUSTMENTS ------ */
+@media (max-width: 768px) {
+  .settlement-view {
+    margin: 1rem;
+    padding: var(--spacing-md);
+  }
+  
+  .team-summary {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .team-total {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .team-summary-separator {
+    margin: var(--spacing-sm) 0;
+  }
+  
+  .stats-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-item {
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color-light);
+  }
+  
+  .game-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+  .settlement-header h2 {
+    font-size: 24px;
+  }
+  
+  .tab-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 14px;
+  }
+  
+  .player-results {
+    grid-template-columns: 1fr;
+  }
+} 

@@ -2,6 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import html2canvas from 'html2canvas';
+import useSettlementCalculations from '../../hooks/useSettlementCalculations';
+import TabContainer, { TabPanel } from './TabContainer';
+
+// Import the newer CSS styles
+import '../../styles/settlement-variables.css';
+import '../../styles/settlement-new.css';
 
 interface SettlementViewProps {
   matchId: string;
@@ -39,90 +45,26 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     }
   }, [matchId, match.id]);
   
-  // Calculate final ledger values
-  const finalLedger = ledger.length > 0 ? ledger[ledger.length - 1] : null;
-  
-  // Game statistics
-  const gameStats = {
-    holesPlayed: ledger.length,
-    duration: match.startTime && match.endTime 
-      ? getTimeDuration(match.startTime, match.endTime)
-      : '00:00',
-    totalDoublesPlayed: ledger.length > 0 ? 
-      // Count instances where the doubles value increases between consecutive rows
-      ledger.reduce((count, row, index) => {
-        // For the first row, check if doubles is already > 0
-        if (index === 0) {
-          return row.doubles > 0 ? 1 : 0;
-        }
-        // For subsequent rows, check if doubles increased from previous row
-        return count + (row.doubles > ledger[index - 1].doubles ? 1 : 0);
-      }, 0) : 0,
-    totalJunkEvents: junkEvents.length,
-    totalJunkValue: junkEvents.reduce((sum, event) => sum + event.value, 0),
-    bigGamePoints: match.bigGameTotal
-  };
-  
-  // Calculate hole wins
-  const holeWins = holeScores.reduce((wins, score) => {
-    if (score.teamNet[0] < score.teamNet[1]) wins.red++;
-    else if (score.teamNet[1] < score.teamNet[0]) wins.blue++;
-    else wins.push++;
-    return wins;
-  }, { red: 0, blue: 0, push: 0 });
-  
-  // Get player junk total
-  const getPlayerJunkTotal = (playerId: string): number => {
-    return junkEvents
-      .filter(event => event.playerId === playerId)
-      .reduce((sum, event) => sum + event.value, 0);
-  };
-  
-  // Get team junk total
-  const getTeamJunkTotal = (team: 'Red' | 'Blue'): number => {
-    return junkEvents
-      .filter(event => event.teamId === team)
-      .reduce((sum, event) => sum + event.value, 0);
-  };
-  
-  // Calculate team totals from running totals
-  const getTeamTotals = () => {
-    if (!finalLedger) return { red: 0, blue: 0 };
-    
-    // Count the number of players on each team
-    const redCount = playerTeams.filter(team => team === 'Red').length;
-    const blueCount = playerTeams.filter(team => team === 'Blue').length;
-    
-    // Log the runningTotals and team counts for debugging
-    console.log('[DEBUG] finalLedger.runningTotals:', finalLedger.runningTotals);
-    console.log('[DEBUG] playerTeams:', playerTeams);
-    console.log('[DEBUG] redCount:', redCount, 'blueCount:', blueCount);
-    
-    // Calculate team totals and divide by the number of players on each team
-    const redTotal = players.reduce((sum, _player, index) => 
-      playerTeams[index] === 'Red' ? sum + finalLedger.runningTotals[index] : sum, 0) / redCount;
-    
-    const blueTotal = players.reduce((sum, _player, index) => 
-      playerTeams[index] === 'Blue' ? sum + finalLedger.runningTotals[index] : sum, 0) / blueCount;
-    
-    console.log('[DEBUG] redTotal:', redTotal, 'blueTotal:', blueTotal);
-    return { red: redTotal, blue: blueTotal };
-  };
-  
-  const teamTotals = getTeamTotals();
-  const winningTeam = teamTotals.red > teamTotals.blue ? 'Red' : teamTotals.blue > teamTotals.red ? 'Blue' : 'Tie';
-  
-  // Get time duration in hours:minutes format
-  function getTimeDuration(startTime: string, endTime: string): string {
-    const start = new Date(startTime).getTime();
-    const end = new Date(endTime).getTime();
-    const diffMs = end - start;
-    
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  }
+  // Use the custom hook to handle calculations
+  const {
+    finalLedger,
+    gameStats,
+    holeWins,
+    teamTotals,
+    winningTeam,
+    getPlayerJunkTotal,
+    getTeamJunkTotal,
+    formatCurrency,
+    generateCsvDataForExport
+  } = useSettlementCalculations({
+    match,
+    players,
+    playerTeams,
+    ledger,
+    junkEvents,
+    bigGameRows,
+    holeScores
+  });
   
   // Start a new match with the same players
   const handleRematch = () => {
@@ -139,65 +81,7 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   
   // Export results as CSV
   const handleExportCSV = () => {
-    // Create CSV header
-    let csv = 'Millbrook Game Summary\n';
-    csv += `Date,${new Date(match.date).toLocaleDateString()}\n\n`;
-    
-    // Add team totals
-    csv += 'Team Totals\n';
-    csv += `Red Team,$${teamTotals.red}\n`;
-    csv += `Blue Team,$${teamTotals.blue}\n\n`;
-    
-    // Add team junk totals
-    csv += 'Team Junk Totals\n';
-    csv += `Red Team Junk,$${getTeamJunkTotal('Red')}\n`;
-    csv += `Blue Team Junk,$${getTeamJunkTotal('Blue')}\n\n`;
-    
-    // Add player results
-    csv += 'Player,Team,Final Total,Junk Total\n';
-    players.forEach((player, index) => {
-      const finalTotal = finalLedger ? finalLedger.runningTotals[index] : 0;
-      const junkTotal = getPlayerJunkTotal(player.id);
-      
-      csv += `${player.name},${playerTeams[index]},${finalTotal},${junkTotal}\n`;
-    });
-    
-    // Add hole statistics
-    csv += `\nHole Wins,Red:${holeWins.red},Blue:${holeWins.blue},Push:${holeWins.push}\n`;
-    
-    // Add game stats
-    csv += `\nGame Stats\n`;
-    csv += `Holes Played,${gameStats.holesPlayed}\n`;
-    csv += `Duration,${gameStats.duration}\n`;
-    csv += `Doubles Played,${gameStats.totalDoublesPlayed}\n`;
-    csv += `Junk Events,${gameStats.totalJunkEvents}\n`;
-    
-    // Add Big Game total if enabled
-    if (match.bigGame) {
-      csv += `\nBig Game Total,${match.bigGameTotal}\n`;
-      
-      // Add hole-by-hole Big Game breakdown
-      csv += '\nHole,Best Net Scores,Subtotal,Running Total\n';
-      let runningTotal = 0;
-      bigGameRows.forEach(row => {
-        runningTotal += row.subtotal;
-        csv += `${row.hole},"${row.bestNet[0]} + ${row.bestNet[1]}",${row.subtotal},${runningTotal}\n`;
-      });
-    }
-    
-    // Add hole-by-hole details
-    csv += '\nHole-by-Hole Details\n';
-    csv += 'Hole,Base,Carry,Doubles,Result,Payout\n';
-    ledger.forEach((row, index) => {
-      // Determine winner
-      let holeResult = 'Push';
-      if (holeScores[index]) {
-        if (holeScores[index].teamNet[0] < holeScores[index].teamNet[1]) holeResult = 'Red';
-        else if (holeScores[index].teamNet[1] < holeScores[index].teamNet[0]) holeResult = 'Blue';
-      }
-      
-      csv += `${row.hole},${row.base},${row.carryAfter},${row.doubles},${holeResult},${row.payout}\n`;
-    });
+    const csv = generateCsvDataForExport();
     
     // Trigger download
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -239,6 +123,11 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     } catch (error) {
       console.error('Error generating PNG:', error);
       alert('Failed to generate PNG. Please try again.');
+      
+      // Make sure to remove the screenshot mode class if there's an error
+      if (screenshotRef.current) {
+        screenshotRef.current.classList.remove('screenshot-mode');
+      }
     }
   };
   
@@ -314,9 +203,9 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   const renderSummaryTab = () => (
     <div className="settlement-summary-tab">
       <div className="game-result-banner" 
-           style={{ backgroundColor: winningTeam === 'Red' ? 'rgba(245, 108, 108, 0.2)' : 
-                                    winningTeam === 'Blue' ? 'rgba(64, 158, 255, 0.2)' : 
-                                    'rgba(144, 147, 153, 0.2)' }}>
+           style={{ backgroundColor: winningTeam === 'Red' ? 'var(--team-red-bg)' : 
+                                    winningTeam === 'Blue' ? 'var(--team-blue-bg)' : 
+                                    'var(--border-color-light)' }}>
         {winningTeam !== 'Tie' ? (
           <h3>{winningTeam} Team Wins!</h3>
         ) : (
@@ -593,20 +482,7 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
     );
   };
   
-  // Render the active tab
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case 'summary':
-        return renderSummaryTab();
-      case 'details':
-        return renderDetailsTab();
-      case 'bigGame':
-        return renderBigGameTab();
-      default:
-        return null;
-    }
-  };
-  
+  // Render the component
   return (
     <div className="settlement-view" ref={screenshotRef}>
       <div className="settlement-header">
@@ -620,31 +496,29 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
           })}
         </div>
       </div>
-      <div className="settlement-tabs">
-        <button
-          className={`tab-button ${activeTab === 'summary' ? 'active' : ''}`}
-          onClick={() => setActiveTab('summary')}
-        >
-          Summary
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-          onClick={() => setActiveTab('details')}
-        >
-          Hole-by-Hole
-        </button>
+      
+      <TabContainer 
+        tabs={[
+          { id: 'summary', label: 'Summary' },
+          { id: 'details', label: 'Hole-by-Hole' },
+          ...(match.bigGame ? [{ id: 'bigGame', label: 'Big Game' }] : [])
+        ]}
+        defaultActiveTab={activeTab}
+        onTabChange={(tabId) => setActiveTab(tabId as 'summary' | 'details' | 'bigGame')}
+      >
+        <TabPanel id="summary">
+          {renderSummaryTab()}
+        </TabPanel>
+        <TabPanel id="details">
+          {renderDetailsTab()}
+        </TabPanel>
         {match.bigGame && (
-          <button
-            className={`tab-button ${activeTab === 'bigGame' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bigGame')}
-          >
-            Big Game
-          </button>
+          <TabPanel id="bigGame">
+            {renderBigGameTab()}
+          </TabPanel>
         )}
-      </div>
-      <div className="settlement-content">
-        {renderActiveTab()}
-      </div>
+      </TabContainer>
+      
       <div className="settlement-actions">
         <div className="export-actions">
           <button className="export-button" onClick={handleExportCSV}>

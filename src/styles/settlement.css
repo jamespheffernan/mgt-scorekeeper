@@ -72,6 +72,11 @@
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  /* display: flex; */ /* Ensure this is commented out or removed */
+  /* flex-direction: column; */ /* Ensure this is commented out or removed */
+  /* height: 100vh; */ /* Ensure this is commented out or removed */
+  /* overflow-y: visible; */ /* Or simply remove any overflow-y rule */
+  /* min-height: 2000px; */ /* TEMPORARY: Forcing a large height for diagnostics - REMOVED */
 }
 
 .settlement-header {
@@ -129,7 +134,9 @@
 
 .settlement-content {
   padding: 20px 0;
-  min-height: 400px;
+  /* flex-grow: 0; */ /* Or remove the line if it was flex-grow: 1 */
+  /* overflow-y: visible; */ /* Or simply remove any overflow-y rule */
+  /* min-height: auto; */ /* Or remove any min-height rule */
 }
 
 /* Summary tab */
@@ -874,8 +881,8 @@
   flex-direction: column;
   gap: 16px; /* Space between hole cards */
   padding: 8px; /* Padding around the container of cards */
-  max-height: calc(100vh - 250px); /* Example: Adjust 250px based on header/footer/tabs height */
-  overflow-y: auto; /* Enable vertical scrolling for cards if they overflow */
+  /* max-height: none; */ /* Or remove any max-height rule */
+  /* overflow-y: visible; */ /* Or remove any overflow-y rule */
 }
 
 .hole-card { /* This is also in Course Details Preview, may need namespacing if different */
@@ -1063,9 +1070,8 @@
   flex-direction: column;
   gap: 16px;
   padding: 8px;
-   /* Consistent with hole-cards-container if sharing same scroll context */
-  max-height: calc(100vh - 350px); /* Adjust based on overall total + headers/footers/tabs */
-  overflow-y: auto;
+  /* max-height: none; */ /* Or remove any max-height rule */
+  /* overflow-y: visible; */ /* Or remove any overflow-y rule */
 }
 
 .big-game-card { /* This is very generic, should be .settlement-big-game-tab .big-game-card */
@@ -1112,4 +1118,33 @@
   border-radius: 4px;
   margin: 0 2px;
   display: inline-block; /* To allow a little spacing if names are long */
+}
+
+/* Ensure tab panes and their scrollable list children also do not have conflicting properties */
+.settlement-summary-tab,
+.settlement-details-tab,
+.settlement-big-game-tab {
+  /* इंश्योर नो height, display:flex, flex-direction:column, min-height:0 that would make them scroll containers */
+}
+
+.hole-cards-container {
+  display: flex; /* This is for card layout, not page scroll */
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px;
+  /* REMOVE overflow-y: auto; */
+  /* REMOVE max-height: ...; */
+  /* REMOVE flex-grow: 1; if parent was fixed height */
+  /* REMOVE min-height: 0; */
+}
+
+.big-game-cards-container {
+  display: flex; /* This is for card layout, not page scroll */
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px;
+  /* REMOVE overflow-y: auto; */
+  /* REMOVE max-height: ...; */
+  /* REMOVE flex-grow: 1; if parent was fixed height */
+  /* REMOVE min-height: 0; */
 } 

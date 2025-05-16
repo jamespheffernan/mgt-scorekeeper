@@ -1,0 +1,69 @@
+/* 
+ * Settlement View CSS Variables
+ * Building on top of the app's design system
+ */
+
+:root {
+  /* Color palette based on the app's theme */
+  --settlement-bg: #f9fafb;
+  --settlement-card-bg: #ffffff;
+  --settlement-header-color: var(--color-primary, #1A5E46);
+  
+  /* Team colors (from tokens) */
+  --team-red: var(--color-red, #D64533);
+  --team-blue: var(--color-blue, #2F80ED);
+  --team-red-bg: rgba(214, 69, 51, 0.08);
+  --team-blue-bg: rgba(47, 128, 237, 0.08);
+  --team-red-bg-hover: rgba(214, 69, 51, 0.12);
+  --team-blue-bg-hover: rgba(47, 128, 237, 0.12);
+  
+  /* Text colors */
+  --text-primary: var(--grey90, #1A202C);
+  --text-secondary: var(--grey60, #4A5568);
+  --text-muted: #707686;
+  
+  /* Borders, shadows, and backgrounds */
+  --border-color: #e2e8f0;
+  --border-color-light: #edf2f7;
+  --divider-color: #ebeef5;
+  
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.08);
+  --elevated-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  
+  /* Highlight colors */
+  --highlight-green: #10b981;
+  --highlight-red: #ef4444;
+  --highlight-gold: #fbbf24;
+  
+  /* Spacing system based on 8pt grid */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  
+  /* Borders */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  
+  /* Card structure */
+  --card-padding: var(--spacing-md);
+  --card-header-padding: var(--spacing-md);
+  --card-content-padding: var(--spacing-md);
+  
+  /* Transitions */
+  --transition-fast: 100ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* Dark mode overrides (if needed in the future) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* These would be implemented when dark mode is supported */
+  }
+} 
