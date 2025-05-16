@@ -57,4 +57,10 @@
 /* Specific for Blue team placeholder. Was: bg-blue-100 */
 .team-placeholder-blue {
   background-color: YOUR_BLUE_100_COLOR; /* e.g., a light blue like #dbeafe */
+}
+
+.oooh-baby-regular {
+  font-family: "Oooh Baby", cursive;
+  font-weight: 400;
+  font-style: normal;
 } 

@@ -62,11 +62,11 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
       >
         <div>{/* Empty div for grid balance or future use */}</div>
         <div className="player-card-score-text">
-          Gross {grossScore}
+          <span className="oooh-baby-regular">Gross {grossScore}</span>
           {strokes > 0 && (
             <>
               {' / '}
-              <span style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span>
+              <span className="oooh-baby-regular" style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span>
             </>
           )}
         </div>
