@@ -58,28 +58,8 @@ export function calculatePlayerPayouts(
     return playerTeams.map(() => 0);
   }
 
-  const numPlayers = playerTeams.length;
-  if (numPlayers === 0) return [];
-
-  const winningTeamPlayers = playerTeams.filter(team => team === winner).length;
-  const losingTeamPlayers = numPlayers - winningTeamPlayers;
-
-  // Avoid division by zero if a team has no players (should not happen in a typical game)
-  if (winningTeamPlayers === 0 || losingTeamPlayers === 0) {
-    console.error('[PAYOUT-DEBUG] Team has zero players, cannot distribute payout fairly.');
-    return playerTeams.map(() => 0); // Or handle error appropriately
-  }
-
-  const payoutPerWinningPlayer = payout / winningTeamPlayers;
-  const payoutPerLosingPlayer = -payout / losingTeamPlayers;
-
-  return playerTeams.map(team => {
-    if (team === winner) {
-      return payoutPerWinningPlayer;
-    } else {
-      return payoutPerLosingPlayer;
-    }
-  });
+  // Each player on the winning team gets full payout, each on losing team gets full negative payout
+  return playerTeams.map(team => (team === winner ? payout : -payout));
 }
 
 /**
