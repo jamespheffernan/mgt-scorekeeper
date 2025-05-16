@@ -1,7 +1,8 @@
 import React from 'react';
-import { grid } from '../theme/tokens';
+// import { grid } from '../theme/tokens'; // Assuming 'grid' token isn't directly used for class names now
 import { formatPlayerName, toTitleCase } from '../utils/nameFormatter';
 import { Player } from '../db/API-GameState';
+import './PlayerCard.css';
 
 interface PlayerCardProps {
   teamColor: string;
@@ -17,15 +18,15 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`relative bg-white rounded-lg shadow-sm p-3 mb-3 ${className}`}>
-      <aside className="absolute inset-y-0 left-0 w-1 rounded-l bg-[var(--team-color)]" 
+    <div className={`player-card-root ${className}`}>
+      <aside className="player-card-team-indicator" 
              style={{ '--team-color': teamColor } as React.CSSProperties} />
       
-      <div className="pl-2">
-        <h3 className="text-base font-medium mb-1" style={{ color: teamColor }}>
+      <div className="player-card-content-wrapper">
+        <h3 className="player-card-name" style={{ color: teamColor }}>
           {toTitleCase(formatPlayerName(player))}
         </h3>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="player-card-children-grid">
           {children}
         </div>
       </div>

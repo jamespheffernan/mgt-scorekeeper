@@ -6,7 +6,6 @@ import PlayerRoster from './PlayerRoster';
 import { Stepper } from '../Stepper';
 import TopBar from '../TopBar';
 import { SectionCard } from '../SectionCard';
-import '../../App.css';
 
 interface MatchSetupProps {
   // No props needed for now, fetches from store or uses internal state

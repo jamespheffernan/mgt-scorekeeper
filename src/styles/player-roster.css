@@ -1,0 +1,392 @@
+/* PlayerRoster Component Styles */
+.player-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.player-roster h3 {
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.player-search {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: white;
+}
+
+.selected-players {
+  background-color: white;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  width: 100%;
+  box-shadow: var(--box-shadow);
+  box-sizing: border-box;
+}
+
+.selected-players h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--color-dark);
+}
+
+.selected-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .selected-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    width: 100%;
+    max-width: 100%;
+    gap: 6px;
+  }
+}
+
+.selected-player {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.selected-player.empty {
+  border: 2px dashed #ddd;
+  color: #999;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 10px;
+}
+
+.player-info { /* This .player-info is specific to selected-player context */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 50%;
+}
+
+.remove-btn:hover {
+  background-color: #f0f0f0;
+  color: var(--color-error);
+}
+
+.team-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-selector select {
+  flex: 1;
+  padding: 6px;
+  border-radius: var(--border-radius);
+}
+
+.player-list-section {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 12px;
+  box-shadow: var(--box-shadow);
+}
+
+.player-list-section h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--color-dark);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.player-item:hover {
+  background-color: #f5f5f5;
+}
+
+.player-item.selected {
+  background-color: #e3f2fd;
+}
+
+.player-checkbox {
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+}
+
+.player-name { /* This .player-name is specific to player-item context */
+  font-family: 'Sofia Sans Extra Condensed', sans-serif;
+  font-weight: 500;
+  flex: 1;
+}
+
+.player-index {
+  font-weight: normal;
+  color: #666;
+}
+
+.team-indicator {
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.team-indicator.team-red {
+  background-color: #ffebee;
+  color: var(--color-red);
+}
+
+.team-indicator.team-blue {
+  background-color: #e3f2fd;
+  color: var(--color-blue);
+}
+
+.add-player-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-secondary);
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.add-player-button:hover {
+  background-color: #27ae60;
+}
+
+.add-player-form {
+  background-color: white;
+  padding: 16px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.add-player-form h4 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.add-player-form .form-group { /* form-group specific to add-player-form */
+  margin-bottom: 16px;
+}
+
+.add-player-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #444;
+}
+
+.add-player-form .form-group input {
+  width: 100%;
+  height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.add-player-form .save-button { /* save-button specific to add-player-form */
+  background-color: var(--color-brand);
+  color: white;
+  border: none;
+}
+
+.add-player-form .save-button:disabled {
+  background-color: rgba(26, 94, 70, 0.6);
+  cursor: not-allowed;
+}
+
+.add-player-form .cancel-button { /* cancel-button specific to add-player-form */
+  background-color: white;
+  border: 2px solid var(--color-brand);
+  color: var(--color-brand);
+}
+
+.confirm-button { /* This is the confirm-button for PlayerRoster */
+  width: 100%;
+  padding: 14px;
+  background-color: var(--color-primary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.confirm-button:disabled {
+  background-color: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.confirm-button:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+/* Media queries for responsive design (PlayerRoster specific) */
+@media (max-width: 768px) {
+  .selected-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Styles for elements between sticky header and scrollable list */
+.search-box-wrapper {
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+}
+
+/* Add or update these styles for team assignment buttons */
+.team-button.red {
+  background-color: var(--color-red);
+  color: #fff;
+  border: none;
+}
+.team-button.red.active {
+  background-color: #b71c1c;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.15);
+}
+.team-button.blue {
+  background-color: var(--color-blue);
+  color: #fff;
+  border: none;
+}
+.team-button.blue.active {
+  background-color: #1565c0;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+}
+.team-button.full-width {
+  width: 100%;
+  margin-bottom: 4px;
+}
+.current-team-indicator.red {
+  color: var(--color-red);
+  font-weight: bold;
+  margin-top: 2px;
+}
+.current-team-indicator.blue {
+  color: var(--color-blue);
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+/* === Main Layout for PlayerRoster Screen === */
+
+/* Root container for the PlayerRoster component/screen */
+.player-roster-container.mobile-player-roster {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: var(--color-brand20);
+}
+
+/* Sticky Header for Selected Players Summary */
+.selected-players-summary.mobile-selected-players-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Container for the scrollable lists */
+.player-lists-container.mobile-scrollable-list-container {
+  flex: 1 1 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 10px;
+  box-shadow: var(--box-shadow);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Sticky Footer for Confirmation Button */
+.confirm-selection-section.mobile-confirm-button-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: white;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
+  padding: 16px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Styles for the container of the add player form */
+.add-player-form-container {
+  background-color: white; /* Copied from .add-player-form */
+  padding: 16px; /* Copied from .add-player-form */
+  border-radius: var(--border-radius); /* Copied from .add-player-form */
+  box-shadow: var(--box-shadow); /* Copied from .add-player-form */
+  margin-bottom: 16px; /* Copied from .add-player-form */
+  flex-shrink: 0; /* Crucial for flex layout */
+} 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Course, TeeOption } from '../../db/courseModel';
 import { millbrookDb } from '../../db/millbrookDb';
-import '../../App.css';
 
 interface CourseDetailsPanelProps {
   courseId?: string;

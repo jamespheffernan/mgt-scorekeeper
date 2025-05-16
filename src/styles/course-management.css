@@ -1,0 +1,355 @@
+/* Course Setup */
+.course-selection {
+  margin-bottom: 24px;
+}
+
+.course-select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.tee-selection {
+  margin-bottom: 24px;
+}
+
+.player-tee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: var(--color-light);
+  border-radius: var(--border-radius);
+}
+
+.player-name {
+  font-weight: bold;
+  flex: 1;
+}
+
+.tee-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tee-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gray);
+}
+
+.setup-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.back-button {
+  flex: 1;
+  background-color: var(--color-gray);
+}
+
+.continue-button {
+  flex: 2;
+  background-color: var(--color-secondary);
+  font-weight: bold;
+}
+
+/* Course Manager Styles */
+.course-manager {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.course-manager-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .course-manager-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.course-list-panel,
+.course-details-panel,
+.tee-details-panel {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.course-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.course-item {
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.course-item:hover {
+  background-color: #e9ecef;
+}
+
+.course-item.selected {
+  background-color: #007bff;
+  color: white;
+  font-weight: 500;
+}
+
+.tee-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tee-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: #e9ecef;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tee-item:hover {
+  background-color: #dee2e6;
+}
+
+.tee-item.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.tee-color-indicator { /* This is a duplicate selector, but likely for a different context */
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.tee-name {
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.add-button,
+.edit-button,
+.save-button,
+.cancel-button,
+.delete-button,
+.edit-holes-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.edit-button {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.save-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;}
+
+.edit-holes-button {
+  background-color: #17a2b8;
+  color: white;
+  margin-top: 0.5rem;
+}
+
+/* Hole Editor Styles */
+.hole-editor {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.hole-editor h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.hole-editor-table {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+
+.hole-editor table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hole-editor th,
+.hole-editor td {
+  border: 1px solid #dee2e6;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.hole-editor th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.hole-editor tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.hole-editor input,
+.hole-editor select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.stroke-index-explanation {
+  background-color: #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stroke-index-explanation h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stroke-index-explanation p {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.hole-editor-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Course Manager Styles */
+.course-manager-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.import-button, .export-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.import-button {
+  background-color: #28a745;
+}
+
+.import-button:hover {
+  background-color: #218838;
+}
+
+.export-button {
+  background-color: #17a2b8;
+}
+
+.export-button:hover {
+  background-color: #138496;
+}
+
+.export-button:disabled {
+  background-color: #6c757d;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+} 

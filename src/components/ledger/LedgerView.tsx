@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import { Team } from '../../db/API-GameState';
 import type { JunkEvent } from '../../store/gameStore';
-import '../../App.css';
+import './LedgerView.css';
 import { getFullName } from '../../utils/nameUtils';
 import PlayerName from '../../components/PlayerName';
 
@@ -355,7 +355,7 @@ export const LedgerView = () => {
                           {getFullName(players[playerIndex])}
                         </th>
                       ))}
-                      {match.bigGame && <th className="bg-column">Big Game</th>}
+                      {match.bigGame && <th className="ledger-big-game-header-cell">Big Game</th>}
                     </tr>
                   </thead>
                   <tbody>

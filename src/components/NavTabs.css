@@ -1,0 +1,33 @@
+/* src/components/NavTabs.css */
+
+/* Was: flex gap-2 my-3 */
+.nav-tabs-root {
+  display: flex;
+  gap: 0.5rem; /* Tailwind's gap-2 */
+  margin-top: 0.75rem; /* Tailwind's my-3 */
+  margin-bottom: 0.75rem; /* Tailwind's my-3 */
+}
+
+/* Common for buttons. Was: flex-1 h-10 text-sm font-medium */
+.nav-tab-button {
+  flex: 1 1 0%;
+  height: 2.5rem; /* Tailwind's h-10 */
+  font-size: 0.875rem; /* Tailwind's text-sm */
+  font-weight: 500; /* Tailwind's font-medium */
+  border: none; /* Reset button border */
+  cursor: pointer;
+  padding: 0 0.75rem; /* Add some padding for text, adjust as needed */
+  /* borderRadius is applied inline via style prop based on 'radius' token */
+}
+
+/* Active state. Was: bg-brand text-white */
+.nav-tab-button-active {
+  background-color: YOUR_BRAND_COLOR; /* Replace */
+  color: YOUR_WHITE_COLOR; /* Replace */
+}
+
+/* Inactive state. Was: bg-grey30 text-grey90 */
+.nav-tab-button-inactive {
+  background-color: YOUR_GREY_30_COLOR; /* Replace */
+  color: YOUR_GREY_90_COLOR; /* Replace */
+} 

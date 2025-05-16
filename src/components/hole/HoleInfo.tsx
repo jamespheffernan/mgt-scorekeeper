@@ -2,7 +2,6 @@ import React from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption } from '../../db/courseModel';
-import '../../App.css';
 
 interface HoleInfoProps {
   holeNumber: number;

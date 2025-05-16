@@ -1,0 +1,92 @@
+/* src/components/hole/mobile/HoleViewMobile.css */
+
+/* Was: pb-20 on the root div (plus existing mobile-hole-view) */
+.hole-view-root {
+  padding-bottom: 5rem; /* Tailwind's pb-20 */
+}
+
+/* Was: px-4 pt-16 */
+.hole-content-container {
+  padding-left: 1rem;   /* Tailwind's px-4 */
+  padding-right: 1rem;  /* Tailwind's px-4 */
+}
+
+/* Was: flex justify-between text-sm mb-1 */
+.tee-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem; /* Tailwind's text-sm */
+  margin-bottom: 0.25rem; /* Tailwind's mb-1 */
+}
+
+/* Fallback specific: flex justify-between text-sm */
+.tee-info-row-fallback {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem; /* Tailwind's text-sm */
+  /* No margin-bottom from original */
+}
+
+/* Was: flex w-full items-center text-base font-medium */
+.pot-summary-bar {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  font-size: 1rem; /* Tailwind's text-base */
+  font-weight: 500; /* Tailwind's font-medium */
+  /* min-height: 40px is applied inline */
+}
+
+/* Common for items within pot-summary-bar, was: flex-1 */
+.pot-summary-item {
+  flex: 1 1 0%;
+}
+
+/* Was: text-left */
+.pot-summary-item-left {
+  text-align: left;
+}
+
+/* Was: text-center */
+.pot-summary-item-center {
+  text-align: center;
+}
+
+/* Was: text-right */
+.pot-summary-item-right {
+  text-align: right;
+}
+
+/* Wrapper for scores section, incorporating the mb-4 from SectionCard prop */
+.scores-section-container {
+  margin-bottom: 1rem; /* Tailwind's mb-4 */
+}
+
+/* Was: text-lg font-semibold mb-3 */
+.scores-section-title {
+  font-size: 1.125rem; /* Tailwind's text-lg */
+  font-weight: 600;    /* Tailwind's font-semibold */
+  margin-bottom: 0.75rem; /* Tailwind's mb-3 */
+}
+
+/* For the doubles button, was: mr-2 (btn, btn-red/blue are existing) */
+.doubles-button {
+  margin-right: 0.5rem; /* Tailwind's mr-2 */
+}
+
+/* Was: px-3 py-2 text-sm bg-grey30 text-grey60 rounded */
+.double-indicator {
+  padding-left: 0.75rem;  /* Tailwind's px-3 */
+  padding-right: 0.75rem; /* Tailwind's px-3 */
+  padding-top: 0.5rem;    /* Tailwind's py-2 */
+  padding-bottom: 0.5rem; /* Tailwind's py-2 */
+  font-size: 0.875rem;    /* Tailwind's text-sm */
+  background-color: YOUR_GREY_30_COLOR; /* Replace */
+  color: YOUR_GREY_60_COLOR;            /* Replace */
+  border-radius: 0.25rem; /* Tailwind's rounded (default) */
+}
+
+/* For the submit scores button, was: flex-1 (btn, btn-primary are existing) */
+.submit-scores-button {
+  flex: 1 1 0%;
+} 

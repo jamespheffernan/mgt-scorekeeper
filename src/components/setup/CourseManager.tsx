@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
-import '../../App.css';
 
 // CourseForm component
 interface CourseFormProps {

@@ -1,0 +1,52 @@
+/* Header actions for course manager toggle */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.course-manager-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  background-color: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.course-manager-button:hover {
+  background-color: rgba(26, 94, 70, 0.1);
+}
+
+/* General .nav-button is in base.css, specific ones were moved there too */
+/* This seems like a duplicate or alternative .nav-button, keeping it here for now */
+/* to be reviewed later if it's truly specific to header or can be merged/removed */
+.nav-button { 
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.nav-button:hover { /* This hover is different from base.css .nav-button:hover */
+  background-color: #16513d;
+  text-decoration: none;
+} 

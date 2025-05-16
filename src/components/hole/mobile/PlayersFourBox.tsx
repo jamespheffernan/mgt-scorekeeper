@@ -4,6 +4,7 @@ import { BottomSheet } from './BottomSheet';
 import { PlayerCard } from '../../PlayerCard';
 import { colors } from '../../../theme/tokens';
 import { formatPlayerName } from '../../../utils/nameFormatter';
+import './PlayersFourBox.css';
 
 interface InternalPlayerDisplayCardProps {
   player: PlayerType;
@@ -38,19 +39,19 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
   const teamColor = team === 'Red' ? colors.red : colors.blue;
   
   return (
-    <div onClick={onEdit} className="cursor-pointer">
+    <div onClick={onEdit} className="player-card-clickable-wrapper">
       <PlayerCard 
         player={player} 
         teamColor={teamColor}
       >
-        <div className="text-xs text-grey60">Par {par}</div>
-        <div className="text-xs text-grey60">SI: {strokeIndex}</div>
-        {yardage && yardage > 0 && <div className="text-xs text-grey60">{yardage} yds</div>}
+        <div className="player-card-detail-text">Par {par}</div>
+        <div className="player-card-detail-text">SI: {strokeIndex}</div>
+        {yardage && yardage > 0 && <div className="player-card-detail-text">{yardage} yds</div>}
         <div>{/* Empty div for grid balance or future use */}</div>
         
-        <div className="text-sm font-semibold col-span-2 mt-1">Gross {grossScore}</div>
+        <div className="player-card-score-text">Gross {grossScore}</div>
         {strokes > 0 && (
-          <div className="text-xs font-semibold col-span-2"
+          <div className="player-card-strokes-text"
                style={{ color: teamColor }}>
             Strokes: -{strokes}
           </div>
@@ -116,8 +117,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   });
 
   return (
-    <div className="mb-2">
-      <div className="grid grid-cols-2 gap-3">
+    <div className="players-four-box-root">
+      <div className="players-grid">
         {[0, 1].map(row => (
           <React.Fragment key={row}>
             {/* Red team cell (now left) */}
@@ -134,7 +135,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
                   onEdit={() => handleCardClick(red[row].idx)}
                 />
               ) : (
-                <div className="h-20 rounded bg-red-100 flex items-center justify-center opacity-50">Red</div>
+                <div className="team-placeholder-box team-placeholder-red">Red</div>
               )}
             </div>
             {/* Blue team cell (now right) */}
@@ -151,7 +152,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
                   onEdit={() => handleCardClick(blue[row].idx)}
                 />
               ) : (
-                <div className="h-20 rounded bg-blue-100 flex items-center justify-center opacity-50">Blue</div>
+                <div className="team-placeholder-box team-placeholder-blue">Blue</div>
               )}
             </div>
           </React.Fragment>

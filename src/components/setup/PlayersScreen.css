@@ -1,0 +1,14 @@
+/* src/components/setup/PlayersScreen.css */
+
+/* Was: w-6 h-6 on the SVG icon inside the FAB button */
+.fab-add-player-icon {
+  width: 1.5rem;  /* Tailwind's w-6 */
+  height: 1.5rem; /* Tailwind's h-6 */
+}
+
+/* Was: divide-y on the player list ul */
+.player-list-divided > li:not(:first-child) {
+  border-top-width: 1px;
+  border-color: #e5e7eb; /* Default Tailwind divide color (coolGray-200). Adjust as needed. */
+  /* You might want to use a CSS variable from your theme for the border-color */
+} 

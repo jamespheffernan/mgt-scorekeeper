@@ -1,20 +1,28 @@
 /* Player Roster Styles */
 
-/* Ensure parent elements allow height */
-html, body, #root /* Adjust #root if your root id is different */ {
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent body scroll if #root is full height */
+  overflow: hidden; /* Keep body from scrolling */
+}
+
+#root {
+  height: 100%;
+  display: flex; /* Make #root a flex container */
+  flex-direction: column;
+  /* overflow: hidden; /* Usually not needed if body/html is, but can be added if #root has direct non-flex children */
 }
 
 /* --- PlayersScreen IS the scroll container --- */
-.players-screen {
+.players-screen { /* This should be a direct child of #root or part of its flex layout */
   display: flex;
   flex-direction: column;
-  height: 100%; /* Takes height from html/body/#root */
-  max-height: 100vh; /* Explicitly limit height */
-  overflow: hidden; /* Crucial: Prevent .players-screen itself from scrolling its direct children */
+  flex-grow: 1; /* Make it take all available space in #root */
+  /* height: 100%; REMOVED - flex-grow will handle height */
+  min-height: 0; /* Important for flex children */
+  max-height: 100vh; /* Still a good safeguard */
+  /* overflow: hidden; REMOVED previously - correct */
   background-color: #f8f9fa; /* Example background */
 }
 
@@ -23,53 +31,40 @@ html, body, #root /* Adjust #root if your root id is different */ {
   position: sticky; /* Sticks relative to players-screen */
   top: 0; /* Sticks to the top of .players-screen */
   z-index: 10;
-  background-color: #ffffff; /* Ensure background */
-  padding: 12px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: transparent; /* Ensure background is transparent */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* This shadow might still be desired or could be removed if it looks odd with transparency */
   flex-shrink: 0; /* Prevent this part from shrinking */
-}
-
-/* --- Scrollable Content Area --- */
-.players-content-scrollable { 
-  /* Let flexbox determine the base size and allow growth */
-  flex: 1 1 auto; /* Short for flex-grow: 1, flex-shrink: 1, flex-basis: auto */
-
-  /* The crucial part: Make this element scroll */
-  overflow-y: scroll; /* Force scrollbar */
-  overflow-x: hidden;
-
-  /* Add significant padding to ensure overflow is obvious */
-  padding: 16px;
-  padding-top: 70px; /* Increased top padding to account for fixed header */
-  padding-bottom: 100px; /* Add significant bottom padding for any buttons/UI elements */
-  min-height: 0; /* Helps in flex contexts */
-
-  /* Remove redundant/potentially conflicting fixed height styles */
-  /* height: auto; */
-  /* max-height: none; */
 }
 
 /* --- Inline Roster Container --- */
 .player-roster-inline {
-  padding-bottom: 135px;
-  /* Must NOT scroll */
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
+  display: flex;
+  flex-direction: column;
+  /* flex-grow: 1; Removed */
+  /* min-height: 0; Removed */
+  /* overflow: hidden; Removed */
+  /* padding-bottom is on ul.player-list */
 }
 .players-title {
   margin-bottom: 16px; /* Space below title */
+  /* flex-shrink: 0; Removed to allow scrolling */
 }
 
 /* --- Player List --- */
 ul.player-list {
   list-style: none;
-  padding-bottom: 135px;
   margin: 0;
-  /* Must NOT scroll */
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
+  padding-top: 0;
+  padding-right: 0;
+  padding-left: 0;
+  padding-bottom: 150px; /* Space for last item to scroll above FABs - ADJUST AS NEEDED */
+
+  /* flex-grow: 1; Removed */
+  /* min-height: 0; Removed */
+  /* overflow-y: auto; Removed, parent will scroll */
+  overflow-x: hidden; /* Prevents horizontal scroll */
+
+  /* height: auto !important; REMOVED */
 }
 
 /* Individual Player Row Styling (example) */
@@ -112,6 +107,7 @@ ul.player-list {
 }
 
 .player-name {
+  font-family: 'Sofia Sans Extra Condensed', sans-serif;
   font-weight: 500;
   /* word-break: break-word; Or break-all, if very long single names are an issue */
 }
@@ -291,13 +287,23 @@ ul.player-list {
 }
 
 /* PlayerScreen */
+/*
 .players-screen {
   background-color: #f9f9f9;
   min-height: 100vh;
 }
+*/
 
-.players-content {
-  padding: 16px;
+/* Styles for the container that wraps PlayerRoster, ensuring it passes height and doesn't scroll */
+.players-content-scrollable {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0; /* Crucial for nested flex height distribution */
+  overflow-y: auto; /* Make this container scrollable */
+  /* padding: 16px; -- User mentioned removing this. Ensure it's not re-added or is appropriate. */
+  /* The original padding might have been removed by user. If it's still here, consider if it's needed. */
+  /* For now, only changing overflow. */
 }
 
 .players-description {
@@ -363,9 +369,9 @@ ul.player-list {
   right: 24px;     /* Distance from right */
   z-index: 20;     /* Ensure it\'s above most content */
 
-  width: 56px;     /* Standard FAB size */
+  width: 80px;     /* Standard FAB size */
   height: 56px;    /* Standard FAB size */
-  border-radius: 50%; /* Make it circular */
+  border-radius: 28px; 
 
   background-color: #1A5E46; /* Your theme color */
   color: white;             /* Icon color */
@@ -396,7 +402,7 @@ ul.player-list {
 .start-match-button {
   position: fixed; /* Position relative to viewport like the FAB */
   bottom: 24px;    /* Same distance from bottom as FAB */
-  right: 92px;     /* Position to the left of the FAB (24px + 56px + 12px) */
+  left: 24px;     /* Position to the left of the FAB (24px + 56px + 12px) */
   z-index: 20;     /* Same z-index as FAB */
   
   height: 56px;    /* Same height as FAB */
@@ -421,4 +427,134 @@ ul.player-list {
 .start-match-button:hover {
   background-color: #27ae60; /* Hover color, matching FAB */
   transform: scale(1.05); /* Slight scale effect on hover */
+}
+
+/* PlayerRoster.css */
+
+/* 1. SelectedPlayers Sub-Component */
+.selected-players-container {
+  margin-bottom: 1rem; /* Was mb-4 */
+}
+
+.selected-players-title {
+  font-size: 1rem;      /* Was text-base */
+  font-weight: 500;   /* Was font-medium */
+  margin-bottom: 0.5rem; /* Was mb-2 */
+}
+
+.selected-players-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* Was grid-cols-2 */
+  gap: 0.5rem; /* Was gap-2 */
+}
+
+.team-selection-cell {
+  display: flex;
+  align-items: center;
+}
+
+.team-select-dropdown {
+  margin-left: 0.5rem; /* Was ml-2 */
+  height: 2rem;         /* Was h-8 */
+  border-radius: 0.25rem; /* Was rounded */
+  padding-left: 0.5rem; /* Was px-2 */
+  padding-right: 0.5rem;/* Was px-2 */
+  font-size: 0.875rem;  /* Was text-sm */
+  border: 1px solid #D1D5DB; /* Was border border-grey30, using light grey placeholder */
+}
+
+.empty-player-slot {
+  height: 2rem;         /* Was h-8 */
+  padding-left: 0.75rem; /* Was px-3 */
+  padding-right: 0.75rem;/* Was px-3 */
+  border-radius: 9999px;/* Was rounded-full */
+  display: flex;
+  align-items: center;
+}
+
+.empty-player-slot-blue {
+  color: blue; /* Was text-blue, assumes --color-blue is defined */
+}
+
+.empty-player-slot-red {
+  color: red; /* Was text-red, assumes --color-red is defined */
+}
+
+/* 2. SearchBox Sub-Component */
+.search-box-wrapper {
+  margin-bottom: 1rem; /* Was mb-4 */
+}
+
+.search-input-field {
+  width: 100%;
+  height: 2.5rem;       /* Was h-10 */
+  padding-left: 0.75rem; /* Was px-3 */
+  padding-right: 0.75rem;/* Was px-3 */
+  border: 1px solid #ccc; /* Standard border */
+  border-radius: 0.25rem; /* Was rounded */
+}
+
+/* 3. AddPlayerButton Sub-Component */
+.general-button-styling { /* Or merge into .add-player-button or .btn-primary */
+  width: 100%;
+  height: 2.5rem;       /* Was h-10 */
+  border-radius: 0.25rem; /* Was rounded */
+  /* display: inline-flex; align-items: center; justify-content: center; */
+  /* padding: 0.5rem 1rem; text-align: center; */
+}
+
+/* 4. Add Player Form (Inline JSX) */
+.add-player-form-container {
+  margin-bottom: 1rem; /* Was mb-4 */
+}
+
+.add-player-form-title {
+  font-size: 1rem;      /* Was text-base */
+  font-weight: 500;   /* Was font-medium */
+  margin-bottom: 0.5rem; /* Was mb-2 */
+}
+
+.form-input-field { /* Common input styles */
+  width: 100%;
+  height: 2.5rem;       /* Was h-10 */
+  padding-left: 0.75rem; /* Was px-3 */
+  padding-right: 0.75rem;/* Was px-3 */
+  border: 1px solid #ccc; /* Standard border */
+  border-radius: 0.25rem; /* Was rounded */
+}
+
+.form-input-field-spacing { /* Specific for those with margin */
+  margin-bottom: 0.75rem; /* Was mb-3 */
+}
+
+.form-actions-row {
+  display: flex;
+  gap: 0.5rem; /* Was gap-2 */
+}
+
+.form-button { /* Could be merged with general-button-styling if appropriate */
+  flex: 1 1 0%;      /* Was flex-1 */
+  /* If general-button-styling doesn't cover these: */
+  /* height: 2.5rem; */      /* Was h-10 */
+  /* border-radius: 0.25rem; */ /* Was rounded */
+}
+
+/* Assuming these classes might have existing styles, 
+   otherwise, define them or ensure they are covered by the new classes. */
+/* .search-container { ... } */
+/* .add-player-form { ... } */
+/* .btn-primary { ... } */
+/* .cancel-button { ... } */
+/* .save-button { ... } */
+/* .add-player-button { ... } */
+
+/* Custom Chip Colors for PlayerRoster */
+.chip-blue {
+  background-color: blue; /* Placeholder blue */
+  color: white;
+}
+
+.chip-red {
+  background-color: red; /* Placeholder red */
+  color: white;
 } 

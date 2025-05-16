@@ -1,6 +1,14 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import './App.css';
+import './styles/base.css';
+import './styles/utilities.css';
+import './styles/ledger.css';
+import './styles/settlement.css';
+import './styles/course-management.css';
+import './styles/app-layout.css';
+import './styles/components.css';
+import './styles/modals.css';
 import { useGameStore } from './store/gameStore';
 // import MatchSetup from './components/setup/MatchSetup';
 import SettlementView from './components/ledger/SettlementView';

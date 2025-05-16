@@ -1,0 +1,11 @@
+/* src/components/ledger/LedgerView.css */
+
+/* 
+  Renamed from 'bg-column' on the 'Big Game' table header cell 
+  in the detailed view.
+  Add desired styles here, for example, a background color.
+*/
+.ledger-big-game-header-cell {
+  /* Example: background-color: #f3f4f6; /* A light grey, adjust as needed */
+  /* Add other styling like text-align, padding, etc. if necessary */
+} 

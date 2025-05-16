@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course } from '../../db/courseModel';
 import { CourseDetailsPanel } from './CourseDetailsPanel';
-import '../../App.css';
 
 export const CoursePreview = () => {
   const navigate = useNavigate();

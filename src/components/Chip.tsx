@@ -1,4 +1,5 @@
 import React from 'react';
+import './Chip.css';
 
 interface ChipProps {
   name: string;
@@ -8,12 +9,12 @@ interface ChipProps {
 
 export const Chip: React.FC<ChipProps> = ({ name, onRemove, className = '' }) => {
   return (
-    <span className={`inline-flex items-center h-8 px-3 bg-brand20 rounded-full ${className}`}>
+    <span className={`chip-root ${className}`}>
       {name}
       {onRemove && (
         <button 
           onClick={onRemove}
-          className="ml-2 text-grey60 hover:text-grey90"
+          className="chip-remove-button"
           aria-label="Remove"
         >
           &times;

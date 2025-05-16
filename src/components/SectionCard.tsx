@@ -1,4 +1,5 @@
 import React from 'react';
+import './SectionCard.css'; // Import the new CSS file
 
 interface SectionCardProps {
   children: React.ReactNode;
@@ -7,7 +8,7 @@ interface SectionCardProps {
 
 export const SectionCard: React.FC<SectionCardProps> = ({ children, className = '' }) => {
   return (
-    <div className={`bg-white rounded-lg shadow-sm p-4 mb-4 ${className}`}>
+    <div className={`section-card-container ${className.trim()}`.trim()}>
       {children}
     </div>
   );

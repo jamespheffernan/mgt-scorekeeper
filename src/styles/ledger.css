@@ -1,0 +1,496 @@
+/* Enhanced Ledger View */
+.ledger-container {
+  margin: 16px 0;
+}
+
+.back-button-container {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ledger-header:hover {
+  background-color: #f5f5f5;
+}
+
+.team-totals {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* team-red and team-blue are already in utilities.css if they are generic enough,
+   otherwise, they might need to be here or have more specific selectors if
+   their application within Ledger is unique. For now, assuming they might be
+   covered or will be reviewed. */
+/*
+.team-red {
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+.team-blue {
+  color: var(--color-blue);
+  font-weight: bold;
+}
+*/
+
+.big-game-total { /* This class name is also used in Settlement View, consider namespacing if behavior differs */
+  padding: 3px 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.drawer-toggle {
+  font-size: 1.2rem;
+  transition: transform 0.3s;
+}
+
+.ledger-details {
+  background-color: white;
+  padding: 16px;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-top: -4px;
+  /* transition properties for drawer will be added from the T-13 section */
+}
+
+.ledger-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.view-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.back-to-hole-button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.back-to-hole-button:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+}
+
+.back-to-hole-button::before {
+  content: "↩";
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.view-toggle-button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.export-button { /* This class name is also used elsewhere, consider namespacing for ledger if needed */
+  background-color: var(--color-gray);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.ledger-table th,
+.ledger-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.ledger-table th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ledger-table.compact-view td {
+  text-align: center;
+}
+
+.ledger-table.detailed-view th,
+.ledger-table.detailed-view td {
+  padding: 10px 8px;
+}
+
+.result-red {
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+.result-blue {
+  color: var(--color-blue);
+  font-weight: bold;
+}
+
+.result-push {
+  color: var(--color-gray);
+  font-style: italic;
+}
+
+.player-totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.player-total { /* Also used in Settlement, check for conflicts or move if specific */
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.player-ledger-cell {
+  padding: 8px;
+  border-radius: var(--border-radius);
+  background-color: #f9f9f9;
+}
+
+.player-hole-change {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  /* Extended in T-13 */
+}
+
+.player-junk-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+  /* Also in T-13, ensure consistency */
+}
+
+.junk-pill {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  color: #333;
+  /* Extended for specific types in T-13 */
+}
+
+.junk-birdie {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #0050b3;
+}
+
+.junk-birdie::before {
+  content: "🐦 ";
+  margin-right: 4px;
+}
+
+.junk-sandie {
+  background-color: #fffbe6;
+  border: 1px solid #ffd666;
+  color: #ad6800;
+}
+
+.junk-sandie::before {
+  content: "🏖️ ";
+  margin-right: 4px;
+}
+
+.junk-greenie {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #135200;
+}
+
+.junk-greenie::before {
+  content: "🥬 ";
+  margin-right: 4px;
+}
+
+.junk-penalty {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #a8071a;
+}
+
+.junk-penalty::before {
+  content: "❌ ";
+  margin-right: 4px;
+}
+
+.junk-ld10 {
+  background-color: #f9f0ff;
+  border: 1px solid #d3adf7;
+  color: #531dab;
+}
+
+.junk-ld10::before {
+  content: "🚀 ";
+  margin-right: 4px;
+}
+
+.player-running-total {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.player-final-cell {
+  padding: 12px 8px !important; /* Consider removing !important if possible */
+  background-color: #f5f5f5;
+  /* Extended in T-13 with team colors */
+}
+
+.player-final-total {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+  /* Extended in T-13 */
+}
+
+.player-junk-total { /* Also used in Settlement, check for conflicts */
+  font-size: 0.85rem;
+  color: #666;
+  /* Extended in T-13 */
+}
+
+.big-game-cell {
+  font-size: 0.85rem;
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+.big-game-final-cell {
+  font-size: 1.1rem;
+  text-align: center;
+  background-color: #f0f0f0;
+  /* Also in T-13 */
+}
+
+.big-game-final { /* Also used in Settlement, check for conflicts */
+  margin-top: 8px;
+  text-align: center;
+  font-weight: bold;
+  padding: 6px;
+  background-color: #f0f0f0;
+  border-radius: var(--border-radius);
+  /* Also in T-13 */
+}
+
+.ledger-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-gray);
+  font-style: italic;
+}
+
+/* Responsive adjustments for ledger */
+@media (max-width: 768px) {
+  .ledger-table.detailed-view {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .team-totals {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .ledger-controls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .view-controls {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .back-to-hole-button {
+    width: 100%;
+    justify-content: center;
+  }
+  /* Further responsive from T-13 will be merged below */
+}
+
+/* Enhanced Ledger View Styles (T-13) */
+.current-hole-row {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.win-amount, .junk-amount {
+  font-weight: bold;
+}
+
+.player-hole-change { /* Base already defined, this adds states */
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.player-hole-change.positive {
+  background-color: rgba(0, 180, 0, 0.1);
+  color: #006600;
+}
+
+.player-hole-change.negative {
+  background-color: rgba(180, 0, 0, 0.1);
+  color: #660000;
+}
+
+/* .player-junk-events and .junk-pill already defined, T-13 adds specific types if not already covered */
+/* Specific junk pill styles from T-13 that might extend or override previous ones */
+/* .junk-birdie, .junk-sandie, .junk-greenie, .junk-penalty, .junk-ld10 are already defined above.
+   If T-13 versions are different, they would override. Assuming they are consistent for now. */
+
+.player-junk-total { /* Base already defined, this might be an extension */
+  font-size: 0.85rem; /* Consistent with above */
+  opacity: 0.8;
+  margin-left: 5px;
+}
+
+.player-winnings-breakdown {
+  font-size: 0.85rem;
+  margin-top: 2px;
+  color: #666;
+}
+
+.big-game-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.big-game-scores {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.best-net {
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background-color: #f6f6f6;
+}
+
+.best-net-plus {
+  color: #999;
+}
+
+.big-game-subtotal {
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.big-game-running {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: #666;
+}
+
+/* .big-game-final and .big-game-final-cell already defined. Assuming consistency. */
+
+.big-game-detail-link {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.bg-column {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.player-final-cell { /* Base already defined, T-13 adds team-specific backgrounds */
+  padding: 8px; /* Note: base had 12px 8px !important. Reviewing which takes precedence. Keeping 8px from T-13 for now. */
+  border-radius: 4px;
+}
+
+.team-red.player-final-cell {
+  background-color: rgba(var(--color-red-rgb), 0.1);
+}
+
+.team-blue.player-final-cell {
+  background-color: rgba(var(--color-blue-rgb), 0.1);
+}
+
+.player-final-total { /* Base already defined. Ensure consistency. */
+  font-weight: bold;
+  font-size: 1.1rem; /* Consistent */
+}
+
+/* Responsive adjustments for ledger from T-13 */
+@media (max-width: 768px) {
+  .ledger-table.detailed-view { /* Already defined, T-13 adds font-size */
+    font-size: 0.8rem;
+  }
+  
+  .player-junk-events { /* Base defined, T-13 changes flex-direction */
+    flex-direction: column;
+  }
+  
+  .big-game-detail { /* Base defined, T-13 adds font-size */
+    font-size: 0.9rem;
+  }
+}
+
+/* Enhance the drawer toggle animation */
+.ledger-header { /* Already defined, T-13 adds position: relative */
+  position: relative;
+}
+
+.drawer-toggle { /* Already defined, T-13 adds hover transition */
+  /* transition: transform 0.3s ease; -- already defined */
+}
+
+.ledger-header:hover .drawer-toggle {
+  transform: translateY(3px);
+}
+
+.ledger-details { /* Base defined, T-13 adds transitions */
+  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+  overflow: hidden;
+} 

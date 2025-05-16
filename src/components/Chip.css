@@ -1,0 +1,32 @@
+/* src/components/Chip.css */
+
+/* 
+  Was: inline-flex items-center h-8 px-3 bg-brand20 rounded-full 
+  Any additional className passed via props will be appended.
+*/
+.chip-root {
+  display: inline-flex;
+  align-items: center;
+  height: 2rem; /* Tailwind's h-8 */
+  padding-left: 0.75rem; /* Tailwind's px-3 */
+  padding-right: 0.75rem; /* Tailwind's px-3 */
+  background-color: YOUR_BRAND_20_COLOR; /* Replace with your brand20 color */
+  border-radius: 9999px; /* Tailwind's rounded-full */
+  /* Note: The original also had ${className} so other classes might be passed in */
+}
+
+/* Was: ml-2 text-grey60 hover:text-grey90 */
+.chip-remove-button {
+  margin-left: 0.5rem; /* Tailwind's ml-2 */
+  color: YOUR_GREY_60_COLOR; /* Replace with your grey60 color */
+  background-color: transparent; /* Buttons usually need a background reset */
+  border: none; /* Reset button border */
+  padding: 0; /* Reset button padding if needed */
+  cursor: pointer;
+  font-size: 1.5em; /* To make the &times; more visible, adjust as needed */
+  line-height: 1; /* Adjust for vertical alignment of &times; */
+}
+
+.chip-remove-button:hover {
+  color: YOUR_GREY_90_COLOR; /* Replace with your grey90 color */
+} 

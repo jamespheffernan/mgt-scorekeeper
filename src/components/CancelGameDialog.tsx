@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
-import '../App.css';
 
+// Keep props interface for HoleViewMobile.tsx compatibility, though onClose won't be used by this temp version
 interface CancelGameDialogProps {
   onClose: () => void;
 }
@@ -20,13 +20,13 @@ const CancelGameDialog: React.FC<CancelGameDialogProps> = ({ onClose }) => {
       // Reset game state
       resetGame();
       
-      // Close the dialog
-      onClose();
-      
-      // Navigate back to the main menu
-      navigate('/');
     } catch (error) {
       console.error('Error cancelling game:', error);
+      // Optionally, display an error message to the user here
+    } finally {
+      // Close the dialog and navigate regardless of success/failure of backend operations
+      onClose();
+      navigate('/');
     }
   };
   

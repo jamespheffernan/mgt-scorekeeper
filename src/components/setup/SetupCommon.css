@@ -1,0 +1,90 @@
+/* Common styles for the setup process, extracted from App.css */
+
+/* Setup component generic container */
+.setup-container {
+  background-color: white;
+  padding: 24px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile-specific rule for setup container */
+.mobile-setup-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 10px !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+
+/* General player list styling within setup */
+.player-list {
+  margin-bottom: 24px;
+}
+
+.player-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* General player row styling within setup */
+.player-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+/* General team selector styling within setup */
+/* Consider if this needs to be more specific to avoid conflicts */
+.team-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-options {
+  margin-bottom: 24px;
+}
+
+/* Enhanced Big Game Toggle */
+.big-game-toggle-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.big-game-toggle {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.toggle-label {
+  margin-left: 8px;
+}
+
+.big-game-explanation {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+  margin-left: 28px;
+  padding-top: 5px;
+}
+
+.start-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-secondary);
+  font-weight: bold;
+}
+
+.start-button:hover {
+  background-color: #27ae60;
+} 

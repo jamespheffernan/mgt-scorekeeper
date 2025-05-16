@@ -1,0 +1,60 @@
+/* src/components/hole/mobile/PlayersFourBox.css */
+
+/* For the div wrapping PlayerCard, was: cursor-pointer */
+.player-card-clickable-wrapper {
+  cursor: pointer;
+}
+
+/* For Par, SI, Yardage. Was: text-xs text-grey60 */
+.player-card-detail-text {
+  font-size: 0.75rem; /* Tailwind's text-xs */
+  color: YOUR_GREY_60_COLOR; /* Replace with your grey60 color */
+}
+
+/* For Gross Score. Was: text-sm font-semibold col-span-2 mt-1 */
+.player-card-score-text {
+  font-size: 0.875rem; /* Tailwind's text-sm */
+  font-weight: 600;   /* Tailwind's font-semibold */
+  grid-column: span 2 / span 2; /* For col-span-2, assuming parent is a grid */
+  margin-top: 0.25rem; /* Tailwind's mt-1 */
+}
+
+/* For Strokes. Was: text-xs font-semibold col-span-2 */
+.player-card-strokes-text {
+  font-size: 0.75rem; /* Tailwind's text-xs */
+  font-weight: 600;   /* Tailwind's font-semibold */
+  grid-column: span 2 / span 2; /* For col-span-2, assuming parent is a grid */
+  /* Color is applied inline via style prop in TSX */
+}
+
+/* For the root div of PlayersFourBox. Was: mb-2 */
+.players-four-box-root {
+  margin-bottom: 0.5rem; /* Tailwind's mb-2 */
+}
+
+/* For the grid container. Was: grid grid-cols-2 gap-3 */
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* Tailwind's grid-cols-2 */
+  gap: 0.75rem; /* Tailwind's gap-3 */
+}
+
+/* Common styles for team placeholder boxes. Was: h-20 rounded flex items-center justify-center opacity-50 */
+.team-placeholder-box {
+  height: 5rem; /* Tailwind's h-20 */
+  border-radius: 0.25rem; /* Tailwind's rounded (default) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+}
+
+/* Specific for Red team placeholder. Was: bg-red-100 */
+.team-placeholder-red {
+  background-color: YOUR_RED_100_COLOR; /* e.g., a light red like #fee2e2 */
+}
+
+/* Specific for Blue team placeholder. Was: bg-blue-100 */
+.team-placeholder-blue {
+  background-color: YOUR_BLUE_100_COLOR; /* e.g., a light blue like #dbeafe */
+} 

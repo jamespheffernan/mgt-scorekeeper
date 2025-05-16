@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { millbrookDb } from '../db/millbrookDb';
 import { GameHistory } from '../db/API-GameState';
 import { getFullName } from '../utils/nameUtils';
-import '../App.css';
 
 const GameHistoryView = () => {
   const [gameRecords, setGameRecords] = useState<GameHistory[]>([]);
