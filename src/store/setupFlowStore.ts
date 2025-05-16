@@ -34,7 +34,7 @@ const initialState = {
   blueTeamIds: [],
   selectedCourseId: '',
   playerTeeIds: [],
-  bigGame: false,
+  bigGame: true,
 };
 
 // Create the store
