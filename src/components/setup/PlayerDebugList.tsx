@@ -8,7 +8,13 @@ const PlayerDebugList: React.FC = () => {
   useEffect(() => {
     (async () => {
       const allPlayers = await millbrookDb.getAllPlayers();
-      setPlayers(allPlayers);
+      // Ensure index is always a number for TS
+      setPlayers(
+        allPlayers.map(p => ({
+          ...p,
+          index: typeof p.index === 'string' ? parseFloat(p.index) : p.index,
+        }))
+      );
     })();
   }, []);
 
