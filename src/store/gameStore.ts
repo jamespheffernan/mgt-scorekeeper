@@ -416,16 +416,25 @@ export const useGameStore = create(
         const numBluePlayers = playerTeams.filter(t => t === 'Blue').length || 1; // Avoid division by zero
 
         const netJunkWonByRedTeam = redJunk - blueJunk; // If positive, Red wins net junk; if negative, Blue wins net junk.
+        console.log(`[JUNK-DEBUG] Net junk won by Red team: ${netJunkWonByRedTeam}`);
+        console.log(`[JUNK-DEBUG] Red players: ${numRedPlayers}, Blue players: ${numBluePlayers}`);
+        console.log(`[JUNK-DEBUG] Initial finalTotals before junk adjustment: ${JSON.stringify(finalTotals)}`);
         
-        players.forEach((_, idx) => {
+        players.forEach((player, idx) => {
           const team = playerTeams[idx];
+          const initialTotal = finalTotals[idx];
+          
           if (team === 'Red') {
             // Red players get their share of net junk won by Red team
-            finalTotals[idx] += netJunkWonByRedTeam / numRedPlayers;
+            const junkShare = netJunkWonByRedTeam / numRedPlayers;
+            finalTotals[idx] += junkShare;
+            console.log(`[JUNK-DEBUG] Player ${player.name} (Red): ${initialTotal} + ${junkShare} = ${finalTotals[idx]}`);
           } else { // Blue team
             // Blue players effectively pay their share of net junk won by Red team
             // (or receive their share of net junk won by Blue team)
-            finalTotals[idx] -= netJunkWonByRedTeam / numBluePlayers;
+            const junkShare = netJunkWonByRedTeam / numBluePlayers;
+            finalTotals[idx] -= junkShare;
+            console.log(`[JUNK-DEBUG] Player ${player.name} (Blue): ${initialTotal} - ${junkShare} = ${finalTotals[idx]}`);
           }
         });
         
@@ -452,13 +461,21 @@ export const useGameStore = create(
         const calculateTeamScoresForDisplay = (playerTotals: [number, number, number, number], pTeams: Team[]): { redScore: number, blueScore: number } => {
           let rScore = 0;
           let bScore = 0;
+          
+          console.log(`[SCORE-DISPLAY-DEBUG] Calculating team scores from player totals: ${JSON.stringify(playerTotals)}`);
+          console.log(`[SCORE-DISPLAY-DEBUG] Player teams: ${JSON.stringify(pTeams)}`);
+                    
           playerTotals.forEach((total, index) => {
             if (pTeams[index] === 'Red') {
+              console.log(`[SCORE-DISPLAY-DEBUG] Player ${index} (Red): Adding ${total} to Red total`);
               rScore += total;
             } else if (pTeams[index] === 'Blue') {
+              console.log(`[SCORE-DISPLAY-DEBUG] Player ${index} (Blue): Adding ${total} to Blue total`);
               bScore += total;
             }
           });
+          
+          console.log(`[SCORE-DISPLAY-DEBUG] Final team scores: Red=${rScore}, Blue=${bScore}`);
           return { redScore: rScore, blueScore: bScore };
         };
 

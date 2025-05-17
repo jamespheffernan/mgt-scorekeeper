@@ -462,18 +462,6 @@ export const HoleViewMobile: React.FC = () => {
           </div>
         </SectionCard>
         
-        <SectionCard className="scores-section-container"> 
-          <h3 className="scores-section-title">Enter Scores</h3>
-          <PlayersFourBox
-            onScoreChange={updateScore}
-            onJunkChange={updateJunk}
-            playerPars={playerPars}
-            playerYardages={playerYardages}
-            playerStrokeIndexes={currentHolePlayerSIs}
-            playerStrokes={playerStrokes}
-          />
-        </SectionCard>
-        
         {errorMessage && (
           <div className="error-message">
             {errorMessage}

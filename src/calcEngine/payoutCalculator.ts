@@ -44,13 +44,13 @@ export function calculateHolePayout(
  * Calculate individual player payouts from a hole result
  * 
  * @param winner The winning team ('Red', 'Blue') or 'Push'
- * @param payout The total payout amount for the hole
+ * @param teamPayout The total payout amount for the hole
  * @param playerTeams Array of team assignments for each player ['Red', 'Blue', 'Red', 'Blue']
  * @returns Array of payouts per player (positive for winners, negative for losers)
  */
 export function calculatePlayerPayouts(
   winner: 'Red' | 'Blue' | 'Push',
-  payout: number,
+  teamPayout: number,
   playerTeams: ('Red' | 'Blue')[]
 ): number[] {
   // For a push, everyone gets 0
@@ -58,8 +58,17 @@ export function calculatePlayerPayouts(
     return playerTeams.map(() => 0);
   }
 
-  // Each player on the winning team gets full payout, each on losing team gets full negative payout
-  return playerTeams.map(team => (team === winner ? payout : -payout));
+  const numWinningPlayers = playerTeams.filter(t => t === winner).length || 1;
+  const numLosingPlayers = playerTeams.filter(t => t !== winner && t !== undefined).length || 1; // Ensure t is defined
+
+  return playerTeams.map(playerTeam => {
+    if (playerTeam === winner) {
+      return teamPayout / numWinningPlayers;
+    } else {
+      // Ensure losing players only get negative payout if they are on a defined team
+      return playerTeam !== undefined ? -teamPayout / numLosingPlayers : 0;
+    }
+  });
 }
 
 /**
@@ -77,5 +86,16 @@ export function updateRunningTotals(
     throw new Error('Number of players in totals and payouts must match');
   }
   
-  return currentTotals.map((total, idx) => total + holePayouts[idx]);
+  console.log(`[RUNNING-TOTALS-DEBUG] Updating running totals:`);
+  console.log(`[RUNNING-TOTALS-DEBUG] Current totals: ${JSON.stringify(currentTotals)}`);
+  console.log(`[RUNNING-TOTALS-DEBUG] Hole payouts: ${JSON.stringify(holePayouts)}`);
+  
+  const newTotals = currentTotals.map((total, idx) => {
+    const newTotal = total + holePayouts[idx];
+    console.log(`[RUNNING-TOTALS-DEBUG] Player ${idx}: ${total} + ${holePayouts[idx]} = ${newTotal}`);
+    return newTotal;
+  });
+  
+  console.log(`[RUNNING-TOTALS-DEBUG] New totals: ${JSON.stringify(newTotals)}`);
+  return newTotals;
 } 
