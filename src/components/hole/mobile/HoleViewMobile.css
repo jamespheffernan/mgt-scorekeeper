@@ -97,4 +97,125 @@
 /* For the submit scores button, was: flex-1 (btn, btn-primary are existing) */
 .submit-scores-button {
   flex: 1 1 0%;
-} 
+}
+
+/* Styles for Big Game stroke display */
+.big-game-stroke-indicator {
+  color: darkgreen;
+  /* Optionally, add other distinct styling, e.g.: */
+  /* font-weight: bold; */
+}
+
+.hole-info-summary { /* Assuming a similar structure exists or is needed */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Adjust gap as needed for mobile */
+  padding: 8px 0; /* Example padding */
+}
+
+.big-game-status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 0; /* Adjust padding */
+}
+
+.big-game-pill {
+  background-color: darkgreen;
+  color: white;
+  padding: 3px 7px;
+  border-radius: 10px;
+  font-size: 0.75em; /* Adjusted for mobile */
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+.big-game-stroke-chips-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.stroke-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8em; /* Adjusted for mobile */
+  font-weight: 500;
+  line-height: 1;
+  min-width: 24px;
+  text-align: center;
+}
+
+.stroke-chip.big-game-stroke-chip {
+  background-color: #e6ffee;
+  color: darkgreen;
+  border: 1px solid darkgreen;
+}
+
+/* Placeholder for team colors on Millbrook stroke indicators if needed */
+.stroke-indicator.red {
+  /* color: var(--color-red); */
+}
+.stroke-indicator.blue {
+  /* color: var(--color-blue); */
+}
+
+/* Potentially existing styles for .big-game-pill might be here or in another global file */
+.big-game-pill-pot-summary {
+  margin-top: 8px;
+  display: inline-block;
+  background-color: #166534; /* dark green */
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-weight: 600;
+  font-size: 1rem; /* Consider making this smaller if needed: 0.8rem */
+  letter-spacing: 1px;
+}
+
+/* Styles for the container of Big Game player stroke chips */
+.big-game-stroke-chips-summary {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping if too many chips */
+  justify-content: center; /* Center the chips horizontally */
+  align-items: center; /* Align items vertically */
+  /* gap: 2px; /* Remove gap if using negative margin for overlap */
+  padding-top: 4px; /* Add a little space from the pill above it if a general marginTop on the container isn't enough */
+}
+
+/* Styles for individual Big Game player stroke chips */
+.stroke-chip.big-game-stroke-chip {
+  color: white;                 /* Text color */
+  background-color: darkgreen;   /* Background color */
+  padding: 1px 5px;            /* Reduced padding: top/bottom, left/right */
+  font-size: 0.7rem;           /* Smaller font size */
+  border-radius: 8px;          /* Pill shape / slightly rounded antd Chip typically is already */
+  height: auto;                  /* Auto height based on content */
+  line-height: 1.1;              /* Tighter line height */
+  margin-left: -5px;           /* Negative margin for overlap - adjust as needed */
+  /* box-shadow: 0 0 0 1px rgba(0,0,0,0.1); /* Optional: slight border to distinguish overlapping chips */
+  z-index: 1; /* Ensure chips can overlap properly */
+  position: relative; /* Needed for z-index to work on non-positioned elements */
+}
+
+.stroke-chip.big-game-stroke-chip:first-child {
+  margin-left: 0; /* No negative margin for the first chip in a line */
+  z-index: 2; /* Ensure first chip is on top in case of overlap direction */
+}
+
+/* Ensure subsequent chips overlap previous ones correctly */
+.stroke-chip.big-game-stroke-chip + .stroke-chip.big-game-stroke-chip {
+  /* This could be used to ensure stacking order if z-index on individual items is tricky */
+}
+
+/* It's often better to manage z-index based on interaction or a fixed order if items are not dynamically reordered.
+   For simple left-to-right overlap, the default source order usually works if backgrounds are opaque.
+   If a more complex stacking is needed, assigning incremental z-index might be required, 
+   but for simple overlap, the :first-child override is a good start. 
+*/
+
+/* Other styles for HoleViewMobile.css */ 

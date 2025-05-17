@@ -21,10 +21,12 @@ const TeeSelectionScreen: React.FC = () => {
     selectedCourseId,
     playerTeeIds,
     bigGame,
+    bigGameSpecificIndex,
     setTeamPlayers,
     setCourseId,
     setAllTees,
     setBigGame,
+    setBigGameSpecificIndex,
     convertToGamePlayers,
     reset
   } = useSetupFlowStore();
@@ -34,6 +36,9 @@ const TeeSelectionScreen: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showBigGameExplanation, setShowBigGameExplanation] = useState(false);
+  const [localBigGameIndexInput, setLocalBigGameIndexInput] = useState<string>(
+    bigGameSpecificIndex !== undefined ? String(bigGameSpecificIndex) : ''
+  );
   
   // Check if we have the required team data
   const hasTeamData = redTeamIds.length > 0 || blueTeamIds.length > 0;
@@ -174,7 +179,10 @@ const TeeSelectionScreen: React.FC = () => {
     createMatch(players, teams, {
       bigGame,
       courseId: selectedCourseId,
-      playerTeeIds: playerTeeIds as [string, string, string, string]
+      playerTeeIds: playerTeeIds as [string, string, string, string],
+      bigGameSpecificIndex: bigGame && localBigGameIndexInput !== '' && !isNaN(parseFloat(localBigGameIndexInput)) 
+                            ? parseFloat(localBigGameIndexInput) 
+                            : undefined 
     });
     
     // Navigate to first hole
@@ -183,6 +191,11 @@ const TeeSelectionScreen: React.FC = () => {
     // Reset setup flow state
     reset();
   };
+  
+  // Effect to update local state if store changes (e.g. on reset or initial load)
+  useEffect(() => {
+    setLocalBigGameIndexInput(bigGameSpecificIndex !== undefined ? String(bigGameSpecificIndex) : '');
+  }, [bigGameSpecificIndex]);
   
   if (isLoading || playersLoading) {
     return <div className="loading-indicator">Loading...</div>;
@@ -207,7 +220,14 @@ const TeeSelectionScreen: React.FC = () => {
                 <input 
                   type="checkbox"
                   checked={bigGame}
-                  onChange={(e) => setBigGame(e.target.checked)}
+                  onChange={(e) => {
+                    setBigGame(e.target.checked);
+                    // If disabling big game, also clear the specific index
+                    if (!e.target.checked) {
+                      setLocalBigGameIndexInput('');
+                      setBigGameSpecificIndex(undefined);
+                    }
+                  }}
                 />
                 <span className="toggle-label">Enable "Big Game" scoring</span>
               </label>
@@ -223,9 +243,35 @@ const TeeSelectionScreen: React.FC = () => {
                   The total is shared with other groups playing in the Big Game.
                   <br />
                   <strong>Note:</strong> Big Game has different rules for gimmes and pick-ups than the Millbrook side match.
+                  As per Big Game rules, strokes are based on the lowest index in the ENTIRE FIELD. 
+                  You can optionally enter that field-wide low index below. If left blank, strokes will be based on the lowest index in this foursome.
                 </div>
               )}
             </div>
+            {bigGame && (
+              <div className="big-game-specific-index-input" style={{ marginTop: '10px', display: 'flex', flexDirection: 'column' }}>
+                <label htmlFor="bigGameIndexInput" style={{ marginBottom: '5px', fontSize: '0.9rem', color: 'var(--color-grey90)' }}>
+                  Big Game Field Low Index (Optional):
+                </label>
+                <input
+                  type="number"
+                  id="bigGameIndexInput"
+                  step="0.1"
+                  placeholder="e.g., 5.2"
+                  value={localBigGameIndexInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setLocalBigGameIndexInput(val);
+                    if (val === '' || isNaN(parseFloat(val))) {
+                      setBigGameSpecificIndex(undefined);
+                    } else {
+                      setBigGameSpecificIndex(parseFloat(val));
+                    }
+                  }}
+                  style={{ padding: '8px', borderRadius: 'var(--border-radius)', border: '1px solid var(--color-grey30)', fontSize: '0.9rem' }}
+                />
+              </div>
+            )}
           </div>
         </SectionCard>
         

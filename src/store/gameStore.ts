@@ -30,6 +30,7 @@ export interface Match {
   bigGameTotal: number;        // sum of BigGameRow.subtotal
   courseId?: string;           // Reference to selected course
   playerTeeIds?: [string, string, string, string]; // Which tee each player is using
+  bigGameSpecificIndex?: number;
   doubleUsedThisHole?: boolean; // Flag to track double usage on current hole
   startTime?: string;          // ISO date string
   endTime?: string;            // ISO date string
@@ -101,6 +102,7 @@ interface MatchOptions {
   bigGame: boolean;
   courseId?: string;
   playerTeeIds?: [string, string, string, string];
+  bigGameSpecificIndex?: number;
 }
 
 // Utility function to get player-specific stroke indexes
@@ -221,6 +223,7 @@ export const useGameStore = create(
             bigGameTotal: 0,
             courseId: matchOptions.courseId,
             playerTeeIds: matchOptions.playerTeeIds,
+            bigGameSpecificIndex: matchOptions.bigGameSpecificIndex,
             doubleUsedThisHole: false,  // Initialize to false
             startTime: startTime        // Record when the game started
           },
@@ -304,10 +307,18 @@ export const useGameStore = create(
         let strokeMap;
         if (playerSIs) {
           // Use multi-tee stroke allocation
-          strokeMap = allocateStrokesMultiTee(indexes, playerSIs);
+          if (updatedMatch.bigGame && typeof updatedMatch.bigGameSpecificIndex === 'number') {
+            strokeMap = allocateStrokesMultiTee(indexes, playerSIs, updatedMatch.bigGameSpecificIndex);
+          } else {
+            strokeMap = allocateStrokesMultiTee(indexes, playerSIs);
+          }
         } else {
           // Fall back to standard stroke allocation
-          strokeMap = allocateStrokes(indexes, [...match.holeSI]);
+          if (updatedMatch.bigGame && typeof updatedMatch.bigGameSpecificIndex === 'number') {
+            strokeMap = allocateStrokes(indexes, [...match.holeSI], updatedMatch.bigGameSpecificIndex);
+          } else {
+            strokeMap = allocateStrokes(indexes, [...match.holeSI]);
+          }
         }
         
         // Get strokes for this hole

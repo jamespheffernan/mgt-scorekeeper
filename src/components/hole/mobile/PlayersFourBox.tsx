@@ -11,7 +11,8 @@ interface InternalPlayerDisplayCardProps {
   team: Team;
   par: number;
   grossScore: number;
-  strokes: number;
+  strokes: number; // Millbrook strokes
+  bigGameStrokeOnHole: number; // New: Big Game strokes for this player on this hole
   strokeIndex: number;
   yardage?: number;
   onEdit: () => void;
@@ -23,7 +24,8 @@ interface PlayersFourBoxProps {
   playerPars: number[];
   playerYardages: number[];
   playerStrokeIndexes: number[];
-  playerStrokes: number[];
+  playerStrokes: number[]; // Millbrook strokes for current hole for all players
+  bigGameStrokesOnHole?: number[]; // New: Big Game strokes for current hole for all players
 }
 
 const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({ 
@@ -31,7 +33,8 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
   team, 
   par, 
   grossScore,
-  strokes,
+  strokes, // Millbrook strokes
+  bigGameStrokeOnHole, // Big Game stroke
   strokeIndex,
   yardage,
   onEdit
@@ -45,6 +48,7 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
         teamColor={teamColor}
         nameRow={
           <div style={{ display: 'flex', alignItems: 'center' }}>
+            {/* Millbrook Stroke Dot (Team Color) */}
             {strokes > 0 && (
               <span style={{
                 display: 'inline-block',
@@ -52,9 +56,21 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
                 height: 10,
                 borderRadius: '50%',
                 background: teamColor,
+                marginRight: bigGameStrokeOnHole > 0 ? 4 : 8, // Adjust margin if Big Game dot also present
+                verticalAlign: 'middle',
+              }} title={`Millbrook Strokes: ${strokes}`} />
+            )}
+            {/* Big Game Stroke Dot (Dark Green) */}
+            {bigGameStrokeOnHole > 0 && (
+              <span style={{
+                display: 'inline-block',
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: 'darkgreen',
                 marginRight: 8,
                 verticalAlign: 'middle',
-              }} />
+              }} title={`Big Game Strokes: ${bigGameStrokeOnHole}`} />
             )}
             <span style={{ fontWeight: 600 }}>{player.name}</span>
           </div>
@@ -63,10 +79,12 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
         <div>{/* Empty div for grid balance or future use */}</div>
         <div className="player-card-score-text">
           Gross {grossScore}
-          {strokes > 0 && (
+          {(strokes > 0 || bigGameStrokeOnHole > 0) && (
             <>
               {' / '}
-              <span style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span>
+              {/* Net score display might need adjustment if Big Game strokes also affect it for display purposes */}
+              {/* For now, keeping net score based on Millbrook strokes as per original logic */}
+              <span style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span> 
             </>
           )}
         </div>
@@ -81,7 +99,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   playerPars,
   playerYardages,
   playerStrokeIndexes,
-  playerStrokes
+  playerStrokes, // Millbrook strokes
+  bigGameStrokesOnHole // Big Game strokes
 }) => {
   const storePlayers = useGameStore(state => state.players);
   const playerTeams = useGameStore(state => state.playerTeams);
@@ -143,7 +162,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
                   team={playerTeams[red[row].idx] as Team}
                   par={playerPars[red[row].idx]}
                   grossScore={getPlayerScore(red[row].idx)}
-                  strokes={playerStrokes[red[row].idx]}
+                  strokes={playerStrokes[red[row].idx]} // Millbrook
+                  bigGameStrokeOnHole={bigGameStrokesOnHole ? bigGameStrokesOnHole[red[row].idx] : 0} // Big Game
                   strokeIndex={playerStrokeIndexes[red[row].idx]}
                   yardage={playerYardages[red[row].idx]}
                   onEdit={() => handleCardClick(red[row].idx)}
@@ -160,7 +180,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
                   team={playerTeams[blue[row].idx] as Team}
                   par={playerPars[blue[row].idx]}
                   grossScore={getPlayerScore(blue[row].idx)}
-                  strokes={playerStrokes[blue[row].idx]}
+                  strokes={playerStrokes[blue[row].idx]} // Millbrook
+                  bigGameStrokeOnHole={bigGameStrokesOnHole ? bigGameStrokesOnHole[blue[row].idx] : 0} // Big Game
                   strokeIndex={playerStrokeIndexes[blue[row].idx]}
                   yardage={playerYardages[blue[row].idx]}
                   onEdit={() => handleCardClick(blue[row].idx)}
@@ -182,7 +203,8 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
           currentHole={currentHole}
           par={playerPars[activePlayerIndex]}
           initialScore={getPlayerScore(activePlayerIndex)}
-          strokes={playerStrokes[activePlayerIndex]}
+          strokes={playerStrokes[activePlayerIndex]} // Millbrook strokes for BottomSheet context
+          // If BottomSheet needs Big Game strokes, add another prop here
           onScoreChange={handleScoreChange} 
           onJunkChange={handleJunkChange} 
         />

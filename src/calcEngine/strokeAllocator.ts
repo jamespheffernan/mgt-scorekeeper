@@ -11,14 +11,18 @@
  * 
  * @param indexes Player handicap indexes (e.g. [8.4, 6.1, 10.2, 9.3])
  * @param holeSI Course stroke index table (1-18) representing hole difficulty
+ * @param bigGameBaseIndex Optional big game base index
  * @returns Number matrix [players][holes] where value is how many strokes player gets on that hole
  */
 export function allocateStrokes(
   indexes: number[],
-  holeSI: number[]
+  holeSI: number[],
+  bigGameBaseIndex?: number
 ): number[][] {
   // Find the lowest index as baseline
-  const lowestIndex = Math.min(...indexes);
+  const lowestIndex = typeof bigGameBaseIndex === 'number'
+    ? bigGameBaseIndex
+    : Math.min(...indexes);
   
   // Calculate number of strokes for each player (difference from lowest)
   const strokes = indexes.map(index => Math.floor(index - lowestIndex));
@@ -74,14 +78,18 @@ export function allocateStrokes(
  * 
  * @param indexes Player handicap indexes (e.g. [8.4, 6.1, 10.2, 9.3])
  * @param playerSI Array of stroke index arrays, one per player [[SI for player1], [SI for player2], etc.]
+ * @param bigGameBaseIndex Optional big game base index
  * @returns Number matrix [players][holes] where value is how many strokes player gets on that hole
  */
 export function allocateStrokesMultiTee(
   indexes: number[],
-  playerSI: number[][]
+  playerSI: number[][],
+  bigGameBaseIndex?: number
 ): number[][] {
   // Find the lowest index as baseline
-  const lowestIndex = Math.min(...indexes);
+  const lowestIndex = typeof bigGameBaseIndex === 'number' 
+    ? bigGameBaseIndex 
+    : Math.min(...indexes);
   
   // Calculate number of strokes for each player (difference from lowest)
   const strokes = indexes.map(index => Math.floor(index - lowestIndex));

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGameStore } from '../../store/gameStore';
 import CancelGameDialog from '../CancelGameDialog';
 import EndGameDialog from '../EndGameDialog';
@@ -9,6 +9,8 @@ import { millbrookDb } from '../../db/millbrookDb';
 import { allocateStrokes, allocateStrokesMultiTee } from '../../calcEngine/strokeAllocator';
 import { PlayerName } from '../../components/PlayerName';
 import { getFullName } from '../../utils/nameUtils';
+import { getPlayerStrokeIndexes } from '../../store/gameStore';
+import { Player } from '../../db/API-GameState';
 
 const toTitleCase = (str: string): string => {
   if (!str) return '';
@@ -21,6 +23,9 @@ const toTitleCase = (str: string): string => {
 
 export const HoleView = () => {
   const navigate = useNavigate();
+  const { holeNumberStr } = useParams<{ holeNumberStr: string }>();
+  const holeNumber = parseInt(holeNumberStr || '1');
+  const currentHoleIndex = holeNumber - 1;
   
   // Access store state and actions
   const match = useGameStore(state => state.match);
@@ -529,8 +534,12 @@ export const HoleView = () => {
                 <div className="hole-details-for-player">
                   <span className="hole-par">Par {playerPars[index]}</span>
                   <span className="hole-si">SI: {playerSIs[index]}</span>
+                  
                   {playerGetsStroke(index) && (
-                    <span className="stroke-indicator" title={`Player gets ${getPlayerStrokes(index)} stroke(s) on this hole`}>
+                    <span 
+                      className={`stroke-indicator ${playerTeams[index]?.toLowerCase()}`}
+                      title={`Player gets ${getPlayerStrokes(index)} stroke(s) on this hole`}
+                    >
                       {getPlayerStrokes(index) > 1 ? `${getPlayerStrokes(index)}★` : '★'}
                     </span>
                   )}

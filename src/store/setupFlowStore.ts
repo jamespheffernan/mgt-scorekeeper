@@ -12,6 +12,7 @@ interface SetupFlowState {
   selectedCourseId: string;
   playerTeeIds: string[];
   bigGame: boolean;
+  bigGameSpecificIndex?: number;
   
   // Store actions
   setTeamPlayers: (redIds: string[], blueIds: string[]) => void;
@@ -19,6 +20,7 @@ interface SetupFlowState {
   setPlayerTee: (playerIndex: number, teeId: string) => void;
   setAllTees: (teeIds: string[]) => void;
   setBigGame: (enabled: boolean) => void;
+  setBigGameSpecificIndex: (index?: number) => void;
   reset: () => void;
   
   // Helper functions
@@ -33,8 +35,9 @@ const initialState = {
   redTeamIds: [],
   blueTeamIds: [],
   selectedCourseId: '',
-  playerTeeIds: [],
+  playerTeeIds: ['', '', '', ''],
   bigGame: true,
+  bigGameSpecificIndex: undefined,
 };
 
 // Create the store
@@ -51,7 +54,8 @@ export const useSetupFlowStore = create<SetupFlowState>((set, get) => ({
   }),
   setAllTees: (teeIds) => set({ playerTeeIds: teeIds }),
   setBigGame: (enabled) => set({ bigGame: enabled }),
-  reset: () => set(initialState),
+  setBigGameSpecificIndex: (index?: number) => set({ bigGameSpecificIndex: index }),
+  reset: () => set({...initialState, bigGameSpecificIndex: undefined }),
   
   // Convert roster players to game players
   convertToGamePlayers: (rosterPlayers) => {
