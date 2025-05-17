@@ -72,6 +72,20 @@ class MillbrookDatabase extends Dexie {
         }
       });
     });
+
+    // Add migration for ensuring all player.index fields are numbers
+    this.version(6).stores({
+      players: 'id, name, first, last, index, ghin, defaultTeam, preferredTee, lastUsed',
+      matchState: 'id'
+    }).upgrade(tx => {
+      // Ensure all player.index fields are numbers
+      return tx.table('players').toCollection().modify(player => {
+        if (typeof player.index === 'string') {
+          const parsed = parseFloat(player.index);
+          player.index = isNaN(parsed) ? 0 : parsed;
+        }
+      });
+    });
   }
 
   /**
