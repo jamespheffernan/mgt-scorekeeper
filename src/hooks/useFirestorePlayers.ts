@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, doc, getDocs, addDoc, setDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, setDoc, deleteDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { millbrookDb } from '../db/millbrookDb';
 import { Player } from '../db/API-GameState';
@@ -22,87 +22,95 @@ export function useFirestorePlayers() {
 
   // Load player data on mount or when user auth state changes
   useEffect(() => {
-    const loadPlayers = async () => {
-      console.log('[useFirestorePlayers] loadPlayers called. Auth initialized:', authInitialized, 'Auth loading:', authLoading, 'User:', currentUser?.uid);
-      setIsLoading(true);
-      setError(null);
+    // console.log('[useFirestorePlayers] Effect triggered. Auth initialized:', authInitialized, 'Auth loading:', authLoading, 'User:', currentUser?.uid);
+    setIsLoading(true);
+    setError(null);
 
-      if (!authInitialized) {
-        console.log('[useFirestorePlayers] Auth not initialized yet. Waiting...');
-        // isLoading is already true, or will be set by authLoading effect.
-        // We don't set players or error here, just wait for auth to initialize.
-        return;
-      }
+    if (!authInitialized) {
+      console.log('[useFirestorePlayers] Auth not initialized yet. Waiting...');
+      // setIsLoading(true) is already set above or will be handled by authLoading effect
+      return;
+    }
 
-      try {
-        if (currentUser) {
-          // User is logged in - fetch from Firestore global collection
-          console.log('[useFirestorePlayers] Fetching from global sharedPlayers collection (user authenticated)');
-          const playersRef = collection(db, globalPlayersCollection);
-          // Consider ordering by a specific field, e.g., lastName, then firstName for consistency
-          const q = query(playersRef, orderBy('last', 'asc'), orderBy('first', 'asc'));
+    let unsubscribe = () => {}; // Initialize unsubscribe to a no-op
+
+    if (currentUser) {
+      console.log('[useFirestorePlayers] Setting up Firestore snapshot listener (user authenticated).');
+      const playersRef = collection(db, globalPlayersCollection);
+      const q = query(playersRef, orderBy('last', 'asc'), orderBy('first', 'asc'));
+
+      unsubscribe = onSnapshot(q, 
+        async (snapshot) => {
+          // console.log('[useFirestorePlayers] Snapshot received from Firestore.');
+          setIsLoading(true); // Indicate processing of new snapshot
+          const loadedPlayers: Player[] = [];
+          snapshot.forEach(doc => {
+            loadedPlayers.push({ id: doc.id, ...doc.data() } as Player);
+          });
+          
+          setPlayers(loadedPlayers);
+          // console.log('[useFirestorePlayers] Players updated from Firestore snapshot:', loadedPlayers.length);
           
           try {
-            const snapshot = await getDocs(q);
-            const loadedPlayers: Player[] = [];
-            snapshot.forEach(doc => {
-              loadedPlayers.push({ id: doc.id, ...doc.data() } as Player);
-            });
-            
-            setPlayers(loadedPlayers);
-            console.log('[useFirestorePlayers] Players loaded from Firestore:', loadedPlayers.length);
-            
-            // Also save to local DB for offline access
+            // Consider optimizing Dexie sync if it becomes a bottleneck.
+            // For now, keep existing behavior of full sync on update.
+            // console.log('[useFirestorePlayers] Syncing snapshot players to local DB.');
             for (const player of loadedPlayers) {
               await millbrookDb.savePlayer(player);
             }
-            console.log('[useFirestorePlayers] Synced Firestore players to local DB.');
-          } catch (firestoreErr: any) {
-            console.error('[useFirestorePlayers] Error loading from Firestore (user authenticated):', firestoreErr);
-            setError(`Firestore error: ${firestoreErr.message || 'Failed to load players.'}`);
-            // Fallback to local DB if Firestore fails even with auth
-            console.log('[useFirestorePlayers] Firestore failed with auth, attempting local DB fallback');
-            const localPlayers = await millbrookDb.getAllPlayers();
-            setPlayers(localPlayers);
-            console.log('[useFirestorePlayers] Players loaded from local DB after Firestore fail (auth):', localPlayers.length);
+            // console.log('[useFirestorePlayers] Synced snapshot players to local DB finished.');
+          } catch (dexieErr: any) {
+            console.error('[useFirestorePlayers] Error syncing snapshot to Dexie:', dexieErr);
+            // Optionally set a specific error for Dexie sync failure
           }
-        } else {
-          // No authenticated user, but auth is initialized (e.g., anonymous login failed or not used)
-          // Load directly from local DB only.
-          console.log('[useFirestorePlayers] No authenticated user (auth initialized). Loading from local DB only.');
-          const localPlayers = await millbrookDb.getAllPlayers();
-          setPlayers(localPlayers);
-          console.log('[useFirestorePlayers] Players loaded from local DB (no auth user):', localPlayers.length);
+          setError(null); // Clear previous errors on successful snapshot
+          setIsLoading(false);
+        }, 
+        (snapshotError) => {
+          console.error('[useFirestorePlayers] Firestore snapshot error:', snapshotError);
+          setError(`Firestore listener error: ${snapshotError.message || 'Failed to listen to players.'}`);
+          // Fallback to local DB if listener fails
+          millbrookDb.getAllPlayers().then(localPlayers => {
+            setPlayers(localPlayers);
+            // console.log('[useFirestorePlayers] Players loaded from local DB after snapshot error:', localPlayers.length);
+          }).catch(localErr => {
+            console.error('[useFirestorePlayers] Local DB fallback failed after snapshot error:', localErr);
+            setError(prevError => prevError + '; Local DB fallback failed: ' + localErr.message);
+          }).finally(() => {
+            setIsLoading(false);
+          });
         }
-      } catch (err: any) {
-        console.error('[useFirestorePlayers] General error in loadPlayers:', err);
-        setError(`Load players error: ${err.message || 'Failed to load players'}`);
-        // Final fallback if any other error occurs
-        try {
-          console.log('[useFirestorePlayers] Attempting final fallback to local DB due to general error');
-          const localPlayers = await millbrookDb.getAllPlayers();
-          setPlayers(localPlayers);
-        } catch (localErr: any) {
-          console.error('[useFirestorePlayers] Final local DB fallback failed:', localErr);
-          setError((prevError) => prevError + `; Local DB fallback also failed: ${localErr.message || 'Unknown error'}`);
-        }
-      } finally {
-        console.log('[useFirestorePlayers] Setting isLoading to false in loadPlayers finally block');
+      );
+    } else {
+      // No authenticated user, but auth is initialized
+      console.log('[useFirestorePlayers] No authenticated user (auth initialized). Loading from local DB only.');
+      setIsLoading(true);
+      millbrookDb.getAllPlayers().then(localPlayers => {
+        setPlayers(localPlayers);
+        // console.log('[useFirestorePlayers] Players loaded from local DB (no auth user):', localPlayers.length);
+      }).catch(err => {
+        console.error('[useFirestorePlayers] Error loading from local DB (no auth user):', err);
+        setError(`Local DB error: ${err.message || 'Failed to load players.'}`);
+      }).finally(() => {
         setIsLoading(false);
-      }
+      });
+    }
+
+    return () => {
+      // console.log('[useFirestorePlayers] Cleanup: Unsubscribing from Firestore snapshot listener.');
+      unsubscribe();
     };
+  }, [currentUser, authInitialized]); // Removed authLoading, handled by separate effect if needed for isLoading
 
-    loadPlayers();
-  }, [currentUser, authInitialized, authLoading]); // Depend on authInitialized and authLoading
-
-  // Adjust isLoading based on authLoading
+  // This effect can remain if authLoading should independently control a global isLoading flag,
+  // but the primary player loading logic is now tied to currentUser and authInitialized.
   useEffect(() => {
     if (authLoading) {
       setIsLoading(true);
     }
-    // If auth is done loading AND we are not already loading players via loadPlayers, 
-    // then internal isLoading can be false. loadPlayers will manage its own loading state.
-    // This prevents premature flicker if auth finishes quickly but loadPlayers takes time.
+    // If auth is done loading and the main effect hasn't set isLoading to false yet,
+    // this might cause a flicker. The main effect now manages isLoading more directly.
+    // Consider removing or simplifying if the main effect handles isLoading sufficiently.
   }, [authLoading]);
 
   // Create a new player
@@ -239,36 +247,38 @@ export function useFirestorePlayers() {
 
   // Delete a player by ID
   const deletePlayerById = async (playerId: string): Promise<void> => {
-    setIsLoading(true);
     setError(null);
     try {
+      // Optimistic update of the local state for immediate UI feedback
+      setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
+      console.log('[useFirestorePlayers] Optimistically updated local players state after delete for ID:', playerId);
+
       if (currentUser && playerId) {
         console.log('[useFirestorePlayers] Attempting to delete player from Firestore (user authenticated):', playerId);
-        try {
-          const playerRef = doc(db, globalPlayersCollection, playerId);
-          await deleteDoc(playerRef);
-          console.log('[useFirestorePlayers] Player deleted from Firestore:', playerId);
-        } catch (firestoreErr: any) {
-          console.error('[useFirestorePlayers] Failed to delete player from Firestore (user authenticated):', firestoreErr);
-          setError(`Firestore delete error: ${firestoreErr.message || 'Failed to delete player.'}`);
-          // Do not rethrow, allow local delete to proceed
-          console.log('[useFirestorePlayers] Proceeding with local delete only for player:', playerId);
-        }
-      } else {
-        console.log(`[useFirestorePlayers] No authenticated user or missing player ID ('${playerId}'). Player delete will be local only.`);
+        const playerRef = doc(db, globalPlayersCollection, playerId);
+        await deleteDoc(playerRef); // Firestore delete will trigger snapshot listener
+        console.log('[useFirestorePlayers] Player delete command sent to Firestore:', playerId);
       }
       
-      // Always delete from local DB
+      // Always delete from local Dexie DB
+      // This is crucial for offline mode and as a backup.
+      // If online, the snapshot listener will be the primary source of truth for UI updates from Firestore.
       await millbrookDb.deletePlayer(playerId);
       console.log('[useFirestorePlayers] Player deleted from local DB:', playerId);
-      
-      setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
+
+      // If no currentUser, the snapshot listener isn't active. The optimistic update above handled the UI.
+      // If currentUser, the snapshot listener will provide the authoritative state from Firestore,
+      // reconciling with the optimistic update.
+
     } catch (err: any) {
-      console.error('[useFirestorePlayers] Error deleting player (after Firestore attempt/local save):', err);
+      console.error('[useFirestorePlayers] Error deleting player:', err);
       setError(`Delete player error: ${err.message || 'Failed to delete player'}`);
+      // Consider strategies to revert optimistic update if Firestore/Dexie delete fails,
+      // e.g., by re-fetching or adding the player back to the state.
+      // For now, the snapshot listener should correct inconsistencies if online and Firestore operation failed.
       throw new Error('Failed to delete player');
     } finally {
-      setIsLoading(false);
+      // isLoading is managed by the snapshot listener when online, or the load from local DB when offline/no-auth.
     }
   };
 

@@ -40,7 +40,7 @@ const dedupePlayersById = (players: Player[]): Player[] => {
 };
 
 export const PlayersScreen: React.FC = () => {
-  const { players: dbPlayers, isLoading, error, createPlayer, updatePlayer } = useFirestorePlayers();
+  const { players: dbPlayers, isLoading, error, createPlayer, updatePlayer, deletePlayerById } = useFirestorePlayers();
 
   const initialize = useRosterStore(state => state.initialize);
   const roster = useRosterStore(state => state.roster);
@@ -84,8 +84,14 @@ export const PlayersScreen: React.FC = () => {
     setTeam(playerId, team);
   };
 
-  const handleRemovePlayer = (playerId: string) => {
-    remove(playerId);
+  const handleRemovePlayer = async (playerId: string) => {
+    try {
+      await deletePlayerById(playerId); // Deletes from Firestore/Dexie
+      remove(playerId); // Removes from current roster/teams in rosterStore
+    } catch (err) {
+      console.error("Failed to remove player:", err);
+      alert("Error removing player. Please try again.");
+    }
   };
 
   const handleAddPlayerClick = () => {
@@ -133,11 +139,15 @@ export const PlayersScreen: React.FC = () => {
   // Handler to delete player (should update Firestore)
   const handleDeletePlayer = async (playerId: string) => {
     try {
-      // TODO: Actually delete player in DB if needed
+      await deletePlayerById(playerId); // Actually delete player in DB
+      // Also remove from selected players in roster store if they were part of it
+      remove(playerId);
       setShowHandicapEditor(false);
       setEditingPlayer(null);
     } catch (error) {
+      console.error('Failed to delete player:', error);
       alert('Failed to delete player. See console for details.');
+      // Ensure UI resets even if DB delete fails, though this might leave orphaned data
       setShowHandicapEditor(false);
       setEditingPlayer(null);
     }
