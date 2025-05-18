@@ -203,6 +203,8 @@ export const useGameStore = create(
 
       // Create a new match
       createMatch: (players, teams, matchOptions: MatchOptions) => {
+        // REMOVED_GEMINI_LOG by Gemini
+
         const today = new Date().toISOString().split('T')[0];
         const playerIds = players.map(p => p.id) as [string, string, string, string];
         const startTime = new Date().toISOString();
