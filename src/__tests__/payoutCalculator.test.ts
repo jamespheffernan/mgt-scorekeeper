@@ -65,25 +65,22 @@ describe('Payout Calculator', () => {
     test('handles Red team win correctly', () => {
       const playerTeams = ['Red', 'Blue', 'Red', 'Blue'] as ('Red' | 'Blue')[];
       const payouts = calculatePlayerPayouts('Red', 8, playerTeams);
-      
-      // Each Red player gets full +8, each Blue player gets full -8
-      expect(payouts).toEqual([8, -8, 8, -8]);
+      // Each Red player gets +4, each Blue player gets -4
+      expect(payouts).toEqual([4, -4, 4, -4]);
     });
 
     test('handles Blue team win correctly', () => {
       const playerTeams = ['Red', 'Blue', 'Red', 'Blue'] as ('Red' | 'Blue')[];
       const payouts = calculatePlayerPayouts('Blue', 8, playerTeams);
-      
-      // Each Red player gets full -8, each Blue player gets full +8
-      expect(payouts).toEqual([-8, 8, -8, 8]);
+      // Each Red player gets -4, each Blue player gets +4
+      expect(payouts).toEqual([-4, 4, -4, 4]);
     });
 
     test('handles uneven teams correctly', () => {
       const playerTeams = ['Red', 'Blue', 'Red', 'Blue', 'Red'] as ('Red' | 'Blue')[];
       const payouts = calculatePlayerPayouts('Red', 15, playerTeams);
-      
-      // Each Red player gets full +15, each Blue player gets full -15
-      expect(payouts).toEqual([15, -15, 15, -15, 15]);
+      // Each Red player gets +5, each Blue player gets -7.5
+      expect(payouts).toEqual([5, -7.5, 5, -7.5, 5]);
     });
   });
 

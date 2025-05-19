@@ -1,0 +1,447 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot tests for anchor screens renders HoleView correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="hole-view"
+  >
+    <div
+      class="hole-header"
+    >
+      <h2>
+        Hole 1
+      </h2>
+      <div
+        class="hole-actions"
+      >
+        <button
+          aria-label="View full ledger"
+          class="view-ledger-button"
+        >
+          <span
+            class="button-icon"
+          >
+            📊
+          </span>
+           View Ledger
+        </button>
+        <button
+          aria-label="Cancel the game"
+          class="cancel-game-button"
+        >
+          <span
+            class="button-icon"
+          >
+            ⛔
+          </span>
+           Cancel Game
+        </button>
+      </div>
+    </div>
+    <div
+      class="scores-container"
+    >
+      <h3>
+        Enter Scores
+      </h3>
+    </div>
+    <div
+      class="hole-controls"
+    >
+      <button
+        aria-label="Submit scores and advance to next hole"
+        class="submit-button"
+      >
+        Submit Scores
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Snapshot tests for anchor screens renders LedgerView correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="ledger-container"
+  >
+    <div
+      class="back-button-container"
+    >
+      <button
+        class="back-to-hole-button"
+      >
+        Back to Hole 1
+      </button>
+    </div>
+    <div
+      class="ledger-header"
+    >
+      <h3>
+        Running Totals
+      </h3>
+      <div
+        class="team-totals"
+      >
+        <span
+          class="team-red"
+        >
+          Red +$0
+        </span>
+        <span
+          class="team-blue"
+        >
+          Blue +$0
+        </span>
+      </div>
+      <div
+        class="drawer-toggle"
+      >
+        ▼
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Snapshot tests for anchor screens renders MatchSetup correctly 1`] = `
+<DocumentFragment>
+  <header
+    class="top-bar-root safe-wrapper"
+    style="display: flex; justify-content: center; align-items: center;"
+  >
+    <h1
+      class="topbar-title"
+      style="text-align: center;"
+    >
+      Game Setup
+    </h1>
+  </header>
+  <div
+    class="setup-container mobile-setup-container"
+  >
+    <div
+      class="stepper-root "
+    >
+      <h2
+        class="stepper-title"
+      >
+        Step 1 of 2
+      </h2>
+      <div
+        class="stepper-bar-container"
+      >
+        <div
+          class="stepper-bar-item stepper-bar-item-active"
+        />
+        <div
+          class="stepper-bar-item stepper-bar-item-inactive"
+        />
+      </div>
+    </div>
+    <div
+      class="player-roster-container mobile-player-roster"
+    >
+      <div
+        style="background: rgb(255, 224, 224); padding: 8px; margin: 8px 0px; font-size: 12px; border: 1px solid #ff0000; flex-shrink: 0;"
+      >
+        <h4>
+          Debug Mode
+        </h4>
+        <button
+          style="font-size: 12px; padding: 2px 5px;"
+        >
+          Hide Debug
+        </button>
+        <div>
+          <strong>
+            Players data:
+          </strong>
+          <pre
+            style="max-height: 100px; overflow: auto; font-size: 10px;"
+          >
+            []
+          </pre>
+        </div>
+        <div>
+          Check browser console for complete sorting logs
+        </div>
+      </div>
+      <div
+        class="selected-players-summary mobile-selected-players-sticky"
+      >
+        <h4
+          class="selected-players-title"
+        >
+          Selected Players
+        </h4>
+        <div
+          class="selected-players-grid"
+        >
+          <div
+            class="empty-player-slot empty-player-slot-red"
+            style="background-color: rgba(255, 0, 0, 0.1);"
+          >
+            Select Red Player
+          </div>
+          <div
+            class="empty-player-slot empty-player-slot-blue"
+            style="background-color: rgba(0, 0, 255, 0.1);"
+          >
+            Select Blue Player
+          </div>
+          <div
+            class="empty-player-slot empty-player-slot-red"
+            style="background-color: rgba(255, 0, 0, 0.1);"
+          >
+            Select Red Player
+          </div>
+          <div
+            class="empty-player-slot empty-player-slot-blue"
+            style="background-color: rgba(0, 0, 255, 0.1);"
+          >
+            Select Blue Player
+          </div>
+        </div>
+      </div>
+      <div
+        class="search-box-wrapper"
+      >
+         
+        <input
+          class="search-input-field"
+          placeholder="Search Players..."
+          type="text"
+          value=""
+        />
+      </div>
+      <button
+        class="add-player-button btn-primary general-button-styling"
+      >
+        Add New Player
+      </button>
+      <div
+        class="player-lists-container mobile-scrollable-list-container"
+      >
+        <p
+          class="no-players-message mobile-centered-text"
+        >
+          No players available. Try adding some!
+        </p>
+      </div>
+      <div
+        class="confirm-selection-section mobile-confirm-button-sticky"
+      >
+        <button
+          aria-live="polite"
+          class="confirm-button mobile-button-fullwidth primary-action-button"
+          disabled=""
+        >
+          Select 4 More Player(s)
+        </button>
+      </div>
+    </div>
+    <div
+      class="setup-actions mobile-full-width-buttons"
+    >
+      <button
+        class="secondary-action-button"
+      >
+        View Course Details
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Snapshot tests for anchor screens renders SettlementView correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="settlement-view"
+  >
+    <div
+      class="settlement-header"
+    >
+      <h2>
+        Game Summary
+      </h2>
+      <div
+        class="settlement-date"
+      >
+        Invalid Date
+      </div>
+    </div>
+    <div
+      class="tab-container"
+    >
+      <div
+        class="settlement-tabs"
+      >
+        <button
+          class="tab-button active"
+          data-tab-id="summary"
+        >
+          Summary
+        </button>
+        <button
+          class="tab-button "
+          data-tab-id="details"
+        >
+          Hole-by-Hole
+        </button>
+      </div>
+      <div
+        class="settlement-content"
+      >
+        <div
+          class="settlement-summary-tab"
+        >
+          <div
+            class="game-result-banner"
+          >
+            <h3>
+              It's a Tie!
+            </h3>
+          </div>
+          <div
+            class="team-summary"
+          >
+            <div
+              class="team-total team-red "
+            >
+              <div
+                class="team-name"
+              >
+                Red Team
+              </div>
+              <div
+                class="team-amount"
+              >
+                +$0
+              </div>
+              <div
+                class="team-holes-won"
+              >
+                0 holes won
+              </div>
+            </div>
+            <div
+              class="team-summary-separator"
+            >
+              vs
+            </div>
+            <div
+              class="team-total team-blue "
+            >
+              <div
+                class="team-name"
+              >
+                Blue Team
+              </div>
+              <div
+                class="team-amount"
+              >
+                +$0
+              </div>
+              <div
+                class="team-holes-won"
+              >
+                0 holes won
+              </div>
+            </div>
+          </div>
+          <div
+            class="player-results"
+          />
+          <div
+            class="game-stats"
+          >
+            <div
+              class="stats-row"
+            >
+              <div
+                class="stat-item"
+              >
+                <div
+                  class="stat-label"
+                >
+                  Holes Played
+                </div>
+                <div
+                  class="stat-value"
+                >
+                  0
+                </div>
+              </div>
+              <div
+                class="stat-item"
+              >
+                <div
+                  class="stat-label"
+                >
+                  Duration
+                </div>
+                <div
+                  class="stat-value"
+                >
+                  00:00
+                </div>
+              </div>
+              <div
+                class="stat-item"
+              >
+                <div
+                  class="stat-label"
+                >
+                  Doubles
+                </div>
+                <div
+                  class="stat-value"
+                >
+                  0
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="settlement-actions"
+    >
+      <div
+        class="export-actions"
+      >
+        <button
+          class="export-button"
+        >
+          Export CSV
+        </button>
+        <button
+          class="export-button"
+        >
+          Save PNG
+        </button>
+      </div>
+      <div
+        class="game-actions"
+      >
+        <button
+          class="action-button rematch-button"
+        >
+          Rematch
+        </button>
+        <button
+          class="action-button new-game-button"
+        >
+          New Game
+        </button>
+        <button
+          class="action-button menu-button"
+        >
+          Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

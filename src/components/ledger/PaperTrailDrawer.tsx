@@ -1,8 +1,85 @@
 import React from 'react';
-const PaperTrailDrawer: React.FC<{open:boolean,onClose:()=>void}> = ({open,onClose}) => (
-  open ? <div style={{background:'#ddd',padding:16,position:'fixed',bottom:0,left:0,right:0,zIndex:100}}>
-    PaperTrailDrawer (placeholder)
-    <button onClick={onClose}>Close</button>
-  </div> : null
-);
+import { useGameStore, selectHoleSummary } from '../../store/gameStore';
+
+const PaperTrailDrawer: React.FC<{open:boolean, hole:number|null, onClose:()=>void}> = ({open, hole, onClose}) => {
+  const match = useGameStore(state => state.match);
+  const players = useGameStore(state => state.players);
+  const playerTeams = useGameStore(state => state.playerTeams);
+  const ledger = useGameStore(state => state.ledger);
+  const holeScores = useGameStore(state => state.holeScores);
+  const junkEvents = useGameStore(state => state.junkEvents);
+  const bigGameRows = useGameStore(state => state.bigGameRows);
+
+  let summary: any = null;
+  if (hole !== null && hole > 0 && hole <= ledger.length) {
+    summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,isDoubleAvailable:false}, hole-1);
+  }
+
+  // Responsive style: maxWidth 390px on small screens, up to 600px or 95vw on larger screens
+  const drawerStyle: React.CSSProperties = {
+    background: '#fff',
+    padding: 16,
+    position: 'fixed',
+    bottom: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 100,
+    boxShadow: '0 -2px 8px #0002',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    width: '95vw',
+    maxWidth: 600,
+    minWidth: 320,
+    margin: '0 auto',
+  };
+
+  return open ? (
+    <div
+      style={drawerStyle}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="paper-trail-title"
+      tabIndex={-1}
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
+    >
+      <button
+        onClick={onClose}
+        style={{float:'right',marginBottom:8}}
+        aria-label="Close paper trail dialog"
+        autoFocus
+      >
+        Close
+      </button>
+      <h3 id="paper-trail-title" style={{marginTop:0}}>Paper Trail {hole !== null ? `(Hole ${hole})` : ''}</h3>
+      {summary ? (
+        <div style={{fontSize:14,lineHeight:1.6}}>
+          <ol style={{paddingLeft: '1.2em'}}>
+            <li><b>Base bet:</b> ${summary.base}</li>
+            <li><b>Carry In:</b> ${summary.carryIn}</li>
+            {summary.doubles > 0 && (
+              <li><b>Doubles:</b> Yes ({summary.doubles})</li>
+            )}
+            {summary.junkEvents.length > 0 && (
+              <li><b>Junk Events:</b>
+                <ul style={{marginTop:4,marginBottom:4}}>
+                  {summary.junkEvents.map((e:any,i:number) => (
+                    <li key={i}>{e.playerName}: {e.type} (${e.value})</li>
+                  ))}
+                </ul>
+              </li>
+            )}
+            <li><b>Winner:</b> {summary.winner}</li>
+            <li><b>Payout:</b> ${summary.payout}</li>
+            <li><b>Team Totals Before:</b> Red ${summary.scoresBeforeHole.redScore}, Blue ${summary.scoresBeforeHole.blueScore}</li>
+            <li><b>Team Totals After:</b> Red ${summary.scoresAfterHole.redScore}, Blue ${summary.scoresAfterHole.blueScore}</li>
+          </ol>
+        </div>
+      ) : (
+        <div style={{color:'#888'}}>No data for this hole.</div>
+      )}
+    </div>
+  ) : null;
+};
 export default PaperTrailDrawer; 

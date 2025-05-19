@@ -791,3 +791,64 @@ export const useGameStore = create(
     }
   )
 ); 
+
+// === SELECTORS ===
+
+/**
+ * Returns a structured summary of the calculation for a given hole, matching the debug log.
+ * @param holeIndex zero-based index (0-17)
+ * @returns summary object or null if not available
+ */
+export function selectHoleSummary(state: GameState, holeIndex: number) {
+  const { players, playerTeams, ledger, junkEvents, match } = state;
+  if (!ledger[holeIndex]) return null;
+  const row = ledger[holeIndex];
+  const previousTotals = holeIndex > 0 ? ledger[holeIndex - 1].runningTotals : [0, 0, 0, 0];
+  const runningTotals = row.runningTotals;
+  const winner = (() => {
+    // Replicate getHoleWinner logic
+    const holeScore = state.holeScores[holeIndex];
+    if (!holeScore) return 'Push';
+    const { teamNet } = holeScore;
+    if (teamNet[0] < teamNet[1]) return 'Red';
+    if (teamNet[1] < teamNet[0]) return 'Blue';
+    return 'Push';
+  })();
+  const debug_holeEvents = junkEvents.filter(e => e.hole === row.hole);
+  const carryIntoThisHole = holeIndex === 0 ? match.carry : ledger[holeIndex - 1].carryAfter;
+  const baseValueForThisHole = row.base;
+  // Team scores before/after
+  const calcTeamScores = (totals: number[]) => {
+    let redScore = 0, blueScore = 0;
+    playerTeams.forEach((team, idx) => {
+      if (team === 'Red') redScore += totals[idx];
+      else if (team === 'Blue') blueScore += totals[idx];
+    });
+    return { redScore, blueScore };
+  };
+  const scoresBeforeHole = calcTeamScores(previousTotals);
+  const scoresAfterHole = calcTeamScores(runningTotals);
+  // Junk breakdown
+  const junkByTeam = { Red: 0, Blue: 0 };
+  debug_holeEvents.forEach(e => { junkByTeam[e.teamId] += e.value; });
+  // Compose summary object
+  return {
+    hole: row.hole,
+    base: row.base,
+    carryIn: carryIntoThisHole,
+    payout: row.payout,
+    doubles: row.doubles,
+    winner,
+    previousTotals,
+    runningTotals,
+    scoresBeforeHole,
+    scoresAfterHole,
+    junkEvents: debug_holeEvents.map(e => ({
+      ...e,
+      playerName: players.find(p => p.id === e.playerId)?.name || 'Unknown',
+    })),
+    junkByTeam,
+    netJunk: junkByTeam.Red - junkByTeam.Blue,
+    // Add more fields as needed for UI
+  };
+} 
