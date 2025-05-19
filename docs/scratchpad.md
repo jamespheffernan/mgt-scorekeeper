@@ -4,8 +4,8 @@ This document is used for general notes, lessons learned during development, and
 
 ## Current Task
 
-*   **Rebuild Ledger View**: `docs/implementation-plan/rebuild-ledger-view.md`
+* **Rebuild Ledger View**: [`docs/implementation-plan/rebuild-ledger-view.md`](implementation-plan/rebuild-ledger-view.md)
 
 ## Lessons Learned
 
-*   [YYYY-MM-DD] Example lesson. 
+*(Add new lessons here in format `[YYYY-MM-DD] <lesson>`)* 
