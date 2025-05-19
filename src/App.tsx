@@ -29,6 +29,7 @@ import { PlayersScreen } from './components/setup/PlayersScreen';
 import TeeSelectionScreen from './components/setup/TeeSelectionScreen';
 import { runAllMigrations } from './utils/migrateFirestorePlayers';
 import AdminDebugPage from './components/admin/AdminDebugPage';
+import LedgerView2 from './components/ledger/LedgerView2';
 
 // Uncomment these for testing/development
 /*
@@ -159,6 +160,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <LedgerView />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ledger2" 
+                element={
+                  <ProtectedRoute>
+                    <LedgerView2 />
                   </ProtectedRoute>
                 } 
               />
