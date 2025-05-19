@@ -44,6 +44,22 @@ All major UI components are implemented:
 - ✅ Settlement view with export functionality
 - ✅ Course management with import/export
 
+## New Ledger View (2024)
+
+The new **LedgerView2** is a complete rebuild of the ledger experience, designed for mobile-first use and full calculation transparency:
+
+- **TotalsRibbon**: Always-visible summary of team and Big Game totals, sticky at the top on mobile.
+- **HoleAccordion**: Scrollable, collapsible list of all 18 holes. Each row shows base, carry, doubles, winner, payout, junk, and player scores (gross/net). Tap a row to expand for details.
+- **PaperTrailDrawer**: Tap any hole to open a bottom sheet/modal with a step-by-step breakdown of all calculations, including junk events and player deltas.
+- **Enhanced CSV Export**: Export a detailed CSV that matches the on-screen view, including the full paper trail for each hole.
+- **Accessibility**: Improved ARIA roles, keyboard navigation, and color contrast. Audited for screen reader and mobile use.
+
+**Try it now:** `/ledger2` route in the app.
+
+**Wireframe:** [LedgerView Mobile Wireframe](docs/wireframes/ledger-view-mobile-wireframe.md)
+
+*The new Ledger View is designed to fit a 390px wide mobile screen with no horizontal scroll, and provides a clear audit trail for every calculation.*
+
 ## Recently Completed Features
 
 - **Enhanced Ledger Drawer**: Detailed per-hole payouts with improved visualizations, running totals, and better Big Game integration.

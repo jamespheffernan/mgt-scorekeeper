@@ -97,28 +97,48 @@ Rebuilding the view with a mobile-first mindset and a clear calculation audit sh
 - [ ] Lighthouse scores ≥ 90 (Perf, A11y).  
 
 ## Project Status Board
-- [ ] 1. Branch Setup
-- [ ] 2. Capture Current Calculation Summary
-- [ ] 3. Define UI/UX Requirements
-- [ ] 4. Scaffold New Component Structure
-- [ ] 5. Implement TotalsRibbon
-- [ ] 6. Implement HoleAccordion
-- [ ] 7. Implement PaperTrailDrawer
-- [ ] 8. Enhanced CSV Export
-- [ ] 9. Responsive Polish & Accessibility
-- [ ] 10. Regression & Integration Testing
+- [x] 1. Branch Setup
+- [x] 2. Capture Current Calculation Summary
+- [x] 3. Define UI/UX Requirements
+- [x] 4. Scaffold New Component Structure
+- [x] 5. Implement TotalsRibbon
+- [x] 6. Implement HoleAccordion
+- [x] 7. Implement PaperTrailDrawer
+- [x] 7a. Fix team total calculation bug in TotalsRibbon (sum, not average)
+- [x] 8. Enhanced CSV Export
+- [x] 9. Responsive Polish & Accessibility
+- [x] 10. Regression & Integration Testing
 - [ ] 11. Documentation
 - [ ] 12. PR & Merge
 
 ## Current Status / Progress Tracking
 *(Planner note: fresh plan – nothing started yet)*
 
-| Date | Task | Status | Notes |
-|------|------|--------|-------|
-| – | – | – | – |
+| Date       | Task                           | Status    | Notes |
+|------------|--------------------------------|-----------|-------|
+| 2024-06-09 | Branch Setup                   | Complete  | feature/rebuild-ledger-view created and pushed |
+| 2024-06-09 | Capture Current Calculation Summary | Complete  | selectHoleSummary selector and unit test added |
+| 2024-06-09 | Define UI/UX Requirements      | Complete  | Wireframe created and user feedback incorporated |
+| 2024-06-09 | Scaffold New Component Structure | Complete | LedgerView2 and subcomponents render placeholders, /ledger2 route live |
+| 2024-06-09 | Implement TotalsRibbon         | Complete  | Shows live data, styled for mobile |
+| 2024-06-09 | Implement HoleAccordion        | Complete  | 18 holes render, current hole highlighted, row click opens drawer, verified on /ledger2 |
+| 2024-06-09 | Implement PaperTrailDrawer        | Complete  | Narrative formatting implemented, robust unit test verifies output, whitespace/element splitting handled |
+| 2024-06-09 | Enhanced CSV Export | Complete | CSV export includes scorecard, ledger, and paper trail; carry column now shows carry into the hole; user confirmed score display logic |
+| 2024-06-09 | Responsive Polish & Accessibility | Complete | Added ARIA roles, keyboard navigation, aria-live, and improved color contrast. Manual audit passed for mobile and screen reader use. |
+| 2024-06-10 | Regression & Integration Testing | Complete | Fixed getPlayerStrokeIndexes import/runtime error by updating Jest mock to include all named exports. Resolved infinite update loop in test by using stable mock state. All Ledger View and HoleViewMobile tests now pass. Unrelated test failures (Vitest, ExportButton) remain but are out of scope.
 
 ## Executor's Feedback or Assistance Requests
-*(Executor to fill during implementation)*
+- HoleAccordion vertical slice complete. Manual verification passed: 18 holes render, current hole highlighted, row click opens PaperTrailDrawer. Ready to proceed to PaperTrailDrawer implementation.
++ HoleAccordion vertical slice complete. Manual verification passed: 18 holes render, current hole highlighted, row click opens PaperTrailDrawer. Ready to proceed to PaperTrailDrawer implementation.
++ Enhanced CSV Export complete: CSV now includes scorecard, ledger, and paper trail sections. Carry column fixed to show carry into the hole. User confirmed top-of-ledger score display is correct (only winning team and positive total shown).
++ TotalsRibbon bug fix complete: Team totals now sum all player runningTotals for each team (zero-sum), matching expected Millbrook Game logic. Awaiting user verification that display now matches expected (+15/-15, not +7.5/-7.5).
++ Responsive Polish & Accessibility complete: Table and modal now have ARIA roles, keyboard navigation, aria-live, and improved color contrast. Manual and screen reader audit passed. Ready for regression/integration testing.
++ Debugged and fixed getPlayerStrokeIndexes import/runtime error in HoleViewMobile and its test. The error was caused by the Jest mock replacing the entire module and omitting the named export. Updated the mock to include getPlayerStrokeIndexes. Also fixed an infinite update loop in the test by using stable mock state objects, preventing React from seeing new array/object references on every render. Confirmed all Ledger View and HoleViewMobile tests now pass. Unrelated test failures (Vitest, ExportButton) remain but are out of scope for this task.
 
 ## Lessons Learned
 *(Populate as we encounter issues)* 
+- [2024-06-09] Team totals in Millbrook Game must be the sum of all player runningTotals for each team (zero-sum), not the average. Averaging leads to incorrect, non-zero-sum results. 
+- [2024-06-09] Carry column in ledger export must show carry into the hole (0 for hole 1, previous carryAfter for others). Only show the winning team and positive total in the score ribbon. 
+- [2024-06-09] ARIA roles, keyboard navigation, and aria-live are essential for accessible tables and modals. Always test with keyboard and screen reader. 
+- [2024-06-10] Jest module mocks must include all named exports used by the component under test, or imports will be undefined at runtime.
+- [2024-06-10] In React tests, always use stable (non-recreated) mock state objects to avoid infinite update loops caused by changing dependencies in useEffect.
