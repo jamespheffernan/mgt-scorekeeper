@@ -83,6 +83,14 @@ export const HoleViewMobile: React.FC = () => {
   // Player indexes (for stroke calculation)
   const playerIndexes = useMemo(() => players.map(p => p.index), [players]);
 
+  // Detect standalone mode
+  const isStandalone = useMemo(() => {
+    return (
+      (window.navigator as any).standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+    );
+  }, []);
+
   // Define navigation items for NavTabs
   const navItems = [
     { id: 'viewLedger', label: 'View Ledger', href: '/ledger' },
@@ -468,7 +476,7 @@ export const HoleViewMobile: React.FC = () => {
           </div>
         )}
         
-        <BottomNav>
+        <BottomNav className={isStandalone ? 'standalone-bottom-padding' : ''}>
           {trailingTeam && isDoubleAvailable && (
             <button
               onClick={handleCallDouble}

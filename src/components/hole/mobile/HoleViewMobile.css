@@ -218,4 +218,8 @@
    but for simple overlap, the :first-child override is a good start. 
 */
 
-/* Other styles for HoleViewMobile.css */ 
+/* Other styles for HoleViewMobile.css */
+
+.standalone-bottom-padding {
+  padding-bottom: 8px !important;
+} 
