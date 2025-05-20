@@ -74,9 +74,11 @@ const PaperTrailDrawer: React.FC<{open:boolean, hole:number|null, onClose:()=>vo
             <li><b>Payout:</b> {
               (() => {
                 const parts = [];
-                if (summary.base) parts.push(`$${summary.base} for Win`);
-                if (summary.carryIn) parts.push(`$${summary.carryIn} for Carry`);
-                if (summary.doubles) parts.push(`$${summary.base * summary.doubles} for Doubles`);
+                // Calculate win amount: base bet times 2 (since both teams pay)
+                const winAmount = summary.base * 2;
+                if (winAmount) parts.push(`$${winAmount} for Win`);
+                if (summary.carryIn) parts.push(`$${summary.carryIn * 2} for Carry`);
+                if (summary.doubles) parts.push(`$${summary.base * summary.doubles * 2} for Doubles`);
                 if (summary.junkEvents.length > 0) {
                   summary.junkEvents.forEach((e:any) => {
                     parts.push(`$${e.value} for ${e.playerName} ${e.type}`);
