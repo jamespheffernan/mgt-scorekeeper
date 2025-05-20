@@ -24,13 +24,14 @@
 
 [When a hole row is tapped:]
 
-+---------------------------------------------------+
-| PaperTrailDrawer (bottom sheet/modal)             |
-| +-----------------------------------------------+ |
-| | Hole 2 - Calculation Paper Trail              | |
-| |-----------------------------------------------| |
-| | Before: Red $0, Blue $0                      | |
-| | Carry in: $0                                 | |
++--------------------------------------------------+
+| PaperTrailDrawer (bottom sheet/modal)            |
+| +----------------------------------------------+ |
+| | Hole 2 - Calculation Paper Trail             | |
+| |----------------------------------------------| |
+| | Score through 1: Red $2, Blue $0             | |
+| |                                              | |
+| | Carrying: $0                                 | |
 | | Base: $2                                     | |
 | | Winner: Blue                                 | |
 | | Payout: $6 (Carry $0 + Base $2 + Win Bonus $2| | 
@@ -55,7 +56,7 @@
 - Junk: Column shows which player(s) got what type of junk (e.g., B1:Birdie, B2:Sandie).
 - Export CSV: Button below the list.
 - PaperTrailDrawer: Modal/bottom sheet with full calculation breakdown for the selected hole, including player gross/net scores and a detailed list of junk events by player and type. Payout now includes win bonus (base value) and junk.
-- Final: Always zero-sum, matches the payout for the winning team and negative for the losing team.
+- Final: Matches the payout for the winning team.
 - **Player columns and breakdowns are always ordered: blue player, blue player, red player, red player.**
 
 *This wireframe is for a 390px wide mobile screen. All elements are touch-friendly and readable at a glance.* 
