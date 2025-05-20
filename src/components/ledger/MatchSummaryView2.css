@@ -210,4 +210,36 @@
 .player-card {
   padding-left: 20px;
   padding-right: 20px;
+}
+
+/* Player final gross/net scores in card header */
+.player-final-scores {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: absolute;
+  right: 12px;
+  top: 8px;
+}
+.player-final-label {
+  font-family: 'Sofia Sans Extra Condensed', 'Gruppo', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1em;
+  color: #888;
+  margin-right: 2px;
+}
+.player-final-value {
+  font-family: 'Sofia Sans Extra Condensed', 'Gruppo', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.13em;
+  color: #222;
+  margin-right: 8px;
+}
+@media (max-width: 600px) {
+  .player-final-scores {
+    right: 8px;
+    top: 4px;
+    font-size: 0.98em;
+  }
 } 

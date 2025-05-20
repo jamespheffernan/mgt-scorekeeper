@@ -163,6 +163,32 @@ function calculateDurationInMinutes(startTime: string, endTime: string): number 
   return Math.round((end - start) / (1000 * 60));
 }
 
+// Utility: Deeply remove functions/unserializable fields
+function deepStripFunctions(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(deepStripFunctions);
+  } else if (obj && typeof obj === 'object') {
+    const clean: any = {};
+    for (const key in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+      const val = obj[key];
+      if (typeof val === 'function') continue;
+      try {
+        // Try to JSON.stringify to catch unserializable fields
+        JSON.stringify(val);
+        clean[key] = deepStripFunctions(val);
+      } catch {
+        // Skip unserializable field
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Stripped unserializable field:', key, val);
+        }
+      }
+    }
+    return clean;
+  }
+  return obj;
+}
+
 // Create the store
 export const useGameStore = create(
   persist<GameState & {
@@ -207,7 +233,8 @@ export const useGameStore = create(
 
         const today = new Date().toISOString().split('T')[0];
         const playerIds = players.map(p => p.id) as [string, string, string, string];
-        const startTime = new Date().toISOString();
+        const nowIso = new Date().toISOString();
+        const startTime = nowIso;
         
         set({
           match: {
@@ -227,7 +254,7 @@ export const useGameStore = create(
             playerTeeIds: matchOptions.playerTeeIds,
             bigGameSpecificIndex: matchOptions.bigGameSpecificIndex,
             doubleUsedThisHole: false,  // Initialize to false
-            startTime: startTime        // Record when the game started
+            startTime: startTime        // Always set startTime
           },
           players,
           playerTeams: teams,
@@ -252,7 +279,7 @@ export const useGameStore = create(
           isDoubleAvailable: fullGameState.isDoubleAvailable,
           trailingTeam: fullGameState.trailingTeam,
         };
-        millbrookDb.saveGameState(gameStateToSave).catch(err => {
+        millbrookDb.saveGameState(deepStripFunctions(gameStateToSave)).catch(err => {
           console.error('Error saving initial game state:', err);
         });
         
@@ -618,11 +645,14 @@ export const useGameStore = create(
         const { match, players, playerTeams, ledger } = state;
         
         // Record end time and update match state
-        const endTime = new Date().toISOString();
+        const nowIso = new Date().toISOString();
+        const endTime = nowIso;
         const updatedMatch = {
           ...match,
           state: 'finished' as const,  // Explicitly type as 'finished'
-          endTime
+          endTime,
+          startTime: match.startTime || nowIso, // Fallback to now if missing
+          date: match.date || nowIso.split('T')[0], // Fallback to today if missing
         };
         
         // Update store with finished state
@@ -635,10 +665,10 @@ export const useGameStore = create(
           await millbrookDb.saveMatch(updatedMatch);
           
           // Save final game state
-          await millbrookDb.saveGameState({
+          await millbrookDb.saveGameState(deepStripFunctions({
             ...state,
             match: updatedMatch
-          });
+          }));
           
           // Calculate final scores and team totals
           const finalScores = ledger.length > 0 

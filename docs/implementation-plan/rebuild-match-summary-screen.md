@@ -25,6 +25,7 @@ This rebuild aims to provide a comprehensive, transparent, and user-friendly end
 -   For each player, show:
     -   The number of holes where their net score could have counted toward the Big Game total (including ties, i.e., if 3 players tie for a counting score, all are credited).
     -   The number of strokes the team would have lost if that player's scores were never used (i.e., the difference in Big Game total if their scores were excluded from all holes).
+    -   Show gross and net scores for front 9, back 9, and full 18 for each player in the player cards.
 
 ## Key Challenges and Analysis
 | Challenge | Notes / Potential Approach |
@@ -63,24 +64,34 @@ This rebuild aims to provide a comprehensive, transparent, and user-friendly end
         -   The number of holes where their net score could have counted toward the Big Game total (including ties).
         -   The number of strokes the team would have lost if their scores were never used (i.e., the difference in Big Game total if their scores were excluded from all holes).
     *   *Done When*: These stats are displayed for each player in the summary, and calculations are verified against sample data.
-7.  **Integrate Scoreline Chart & Other Existing Elements**
+7.  **Enhance Player Cards with Gross/Net Breakdown**
+    *   Calculate gross and net scores for each player on front 9, back 9, and full 18.
+    *   Update each player card UI in `MatchSummaryView2` to include these values with clear labels.
+    *   *Done When*: Each player card displays gross and net scores for front 9, back 9, and full 18, verified with sample data.
+8.  **Integrate Scoreline Chart & Other Existing Elements**
     *   Adapt and integrate the existing scoreline chart component into the new layout.
     *   Integrate any other essential elements from the old summary screen.
     *   *Done When*: Chart and other elements are visually integrated and functional.
-8.  **Styling, Responsive Polish & Accessibility**
+9.  **Add Hole-by-Hole Breakdown Section**
+    *   Add a details tab or expandable section showing, for each hole: hole number, each player's gross/net, team results, doubles, junk, and payout.
+    *   *Done When*: Hole-by-hole breakdown is present, mobile-friendly, and matches new summary UI.
+10. **Add PNG Export for Topline Summary**
+    *   Add a button to export a single mobile-sized PNG with: final results, each player's gross/net (18), and the scoreline chart.
+    *   *Done When*: PNG export works, is styled for mobile, and contains only topline summary (not full details).
+11. **Styling, Responsive Polish & Accessibility**
     *   Apply comprehensive styling based on `LedgerView2`'s theme and mobile-first principles.
     *   Ensure full responsiveness across target devices.
     *   Conduct accessibility audit (WCAG 2.1 AA) and implement improvements (contrast, focus, ARIA).
     *   *Done When*: Screen is visually polished, responsive, and meets accessibility targets. Lighthouse scores ≥ 90.
-9.  **Testing**
+12. **Testing**
     *   Write unit tests for new components, data formatting, and calculation display logic.
     *   Write integration tests to ensure the screen works correctly within the app flow and with real game data.
     *   Perform thorough manual testing.
     *   *Done When*: Test coverage meets targets (e.g., ≥ 80-90%); all tests pass.
-10. **Documentation (If Applicable)**
+13. **Documentation (If Applicable)**
     *   Update any relevant user-facing documentation or READMEs if the changes are significant.
     *   *Done When*: Documentation updated.
-11. **PR & Merge**
+14. **PR & Merge**
     *   Create a Pull Request with a conventional commit title.
     *   Address feedback and ensure all checks pass.
     *   Squash-merge to `main`.
@@ -91,6 +102,8 @@ This rebuild aims to provide a comprehensive, transparent, and user-friendly end
 - [ ] Calculation breakdown for final totals is clear and consistent with `LedgerView2` principles.
 - [ ] UI redesign is consistent with `LedgerView2` and is mobile-first.
 - [ ] Scoreline chart is successfully integrated and functional.
+- [ ] Hole-by-hole breakdown is present and mobile-friendly.
+- [ ] PNG export of topline summary (final results, player gross/net, scoreline chart) is available and styled for mobile.
 - [ ] Lighthouse scores (Performance, Accessibility) are ≥ 90.
 - [ ] All data is accurate and matches ledger outputs.
 - [ ] Unit and integration tests achieve target coverage and pass.
@@ -101,6 +114,7 @@ This rebuild aims to provide a comprehensive, transparent, and user-friendly end
 - [ ]   For each player:
 - [ ]     - Number of holes where their net score could have counted (including ties)
 - [ ]     - Number of strokes the team would have lost if their scores were never used
+- [ ] Player cards display both gross and net scores for front 9, back 9, and full 18 for all players.
 
 ## Project Status Board
 *(To be filled by Executor)*
@@ -110,11 +124,14 @@ This rebuild aims to provide a comprehensive, transparent, and user-friendly end
 - [x] 4. Implement Core Data Display
 - [x] 5. Integrate Ledger-like Calculation Display
 - [x] 6. Implement Big Game Player Contribution Analysis
-- [ ] 7. Integrate Scoreline Chart & Other Existing Elements
-- [ ] 8. Styling, Responsive Polish & Accessibility (in progress)
-- [ ] 9. Testing
-- [ ] 10. Documentation (If Applicable)
-- [ ] 11. PR & Merge
+- [x] 7. Enhance Player Cards with Gross/Net Breakdown
+- [x] 8. Integrate Scoreline Chart & Other Existing Elements
+- [x] 9. Add Hole-by-Hole Breakdown Section
+- [ ] 10. Add PNG Export for Topline Summary
+- [ ] 11. Styling, Responsive Polish & Accessibility (in progress)
+- [ ] 12. Testing
+- [ ] 13. Documentation (If Applicable)
+- [ ] 14. PR & Merge
 
 ## Current Status / Progress Tracking
 *(Planner note: Fresh plan – nothing started yet. To be filled by Executor)*
@@ -123,10 +140,18 @@ This rebuild aims to provide a comprehensive, transparent, and user-friendly end
 |------|------|--------|-------|
 | 2024-06-12 | Define UI/UX Requirements & Wireframes | Complete | Initial text wireframe saved to docs/wireframes/match-summary-v2.txt |
 | 2024-06-12 | Branch Setup & Initial Analysis | Complete | Branch created. Existing summary is in SettlementView.tsx; new analytics and per-player Big Game stats not present. Ready to scaffold new component. |
-| 2024-06-13 | Integrate Scoreline Chart & Other Existing Elements | Complete | Scoreline chart implemented with team totals, doubles, and junk markers. User confirmed chart is accurate; future polish desired for aesthetics. |
+| 2024-06-13 | Integrate Scoreline Chart & Other Existing Elements | In Progress | Beginning review and integration of chart and any remaining legacy elements. |
+| 2024-06-13 | Add Hole-by-Hole Breakdown Section | Complete | Table is present, horizontally scrollable, and mobile-friendly. User confirmed collapsible rows are not needed. |
+| 2024-06-13 | Enhance Player Cards with Gross/Net Breakdown | Complete | Player cards now show gross/net for front 9, back 9, and 18 holes. |
 
 ## Executor's Feedback or Assistance Requests
 *(To be filled by Executor)*
 
+No blockers. Ready for user review and next task (styling/polish or further analytics if needed).
+
+2024-06-13: DataCloneError was traced to unserializable fields (functions or class instances) being included in the game state when saving to IndexedDB. Added a utility to strip such fields before saving. This should resolve issues with missing hole-by-hole summary due to failed persistence.
+
 ## Lessons Learned
-*(Populate as issues are encountered and resolved)* 
+*(Populate as issues are encountered and resolved)*
+
+- [2024-06-13] DataCloneError can occur if any unserializable fields (functions, class instances) are present in the game state saved to IndexedDB. Always sanitize state before saving. 
