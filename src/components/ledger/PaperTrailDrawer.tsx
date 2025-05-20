@@ -71,7 +71,20 @@ const PaperTrailDrawer: React.FC<{open:boolean, hole:number|null, onClose:()=>vo
               </li>
             )}
             <li><b>Winner:</b> {summary.winner}</li>
-            <li><b>Payout:</b> ${summary.payout}</li>
+            <li><b>Payout:</b> {
+              (() => {
+                const parts = [];
+                if (summary.base) parts.push(`$${summary.base} for Win`);
+                if (summary.carryIn) parts.push(`$${summary.carryIn} for Carry`);
+                if (summary.doubles) parts.push(`$${summary.base * summary.doubles} for Doubles`);
+                if (summary.junkEvents.length > 0) {
+                  summary.junkEvents.forEach((e:any) => {
+                    parts.push(`$${e.value} for ${e.playerName} ${e.type}`);
+                  });
+                }
+                return `${summary.winner} +$${summary.payout}: ` + parts.join(' + ');
+              })()
+            }</li>
             <li><b>Team Totals Before:</b> Red ${summary.scoresBeforeHole.redScore}, Blue ${summary.scoresBeforeHole.blueScore}</li>
             <li><b>Team Totals After:</b> Red ${summary.scoresAfterHole.redScore}, Blue ${summary.scoresAfterHole.blueScore}</li>
           </ol>
