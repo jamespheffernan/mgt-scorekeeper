@@ -159,7 +159,7 @@ function App() {
                 path="/ledger" 
                 element={
                   <ProtectedRoute>
-                    <LedgerView />
+                    <LedgerView2 />
                   </ProtectedRoute>
                 } 
               />
