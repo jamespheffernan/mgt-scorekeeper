@@ -41,7 +41,7 @@ const MatchSummaryView2: React.FC = () => {
   // Compute date
   const dateStr = match?.date ? new Date(match.date).toLocaleDateString() : '[No Date]';
 
-  // Compute course name (placeholder for now)
+  // Compute course name (from main)
   const [courseName, setCourseName] = React.useState<string>('[No Course]');
   React.useEffect(() => {
     const fetchCourseName = async () => {
@@ -243,7 +243,6 @@ const MatchSummaryView2: React.FC = () => {
   // PNG export helper
   const handleExportPNG = async () => {
     if (!summaryRef.current) return;
-    // Set width for mobile export
     const width = 375; // iPhone X width
     const canvas = await html2canvas(summaryRef.current, {
       width,
@@ -293,7 +292,7 @@ const MatchSummaryView2: React.FC = () => {
             <div className="summary-course">Course: {courseName}</div>
             <div className="summary-duration">Round Length: {roundLength}</div>
           </div>
-          {/* PNG Export Topline Section */}
+          {/* PNG Export Topline Section (now always visible) */}
           <div ref={summaryRef} style={{
             maxWidth: 400,
             margin: '16px auto',
@@ -361,21 +360,31 @@ const MatchSummaryView2: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          </div>
-
-          {/* Scoreline Chart */}
-          <div className="scoreline-chart-section">
-            <h3>Scoreline Chart</h3>
-            <ScorelineChart 
-              ledger={ledger} 
-              junkEvents={junkEvents} 
-            />
-            <div style={{fontSize:'0.9em',marginTop:8}}>
-              <span style={{marginRight:16}}><strong>D</strong> = Double played</span>
-              <span><span role="img" aria-label="Junk">💰</span> = Junk event</span>
+            {/* Scoreline Chart and Legend */}
+            <div className="scoreline-chart-section">
+              <h3>Scoreline Chart</h3>
+              <ScorelineChart ledger={ledger} junkEvents={junkEvents} />
+              {/* Legend for Scoreline Chart */}
+              <div style={{display:'flex',gap:18,alignItems:'center',justifyContent:'center',marginTop:8,fontSize:'0.98em'}}>
+                <span style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{display:'inline-block',width:18,height:3,background:colors.red,marginRight:4,borderRadius:2}}></span>
+                  <span>Red Team</span>
+                </span>
+                <span style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{display:'inline-block',width:18,height:3,background:colors.blue,marginRight:4,borderRadius:2}}></span>
+                  <span>Blue Team</span>
+                </span>
+                <span style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span role="img" aria-label="Junk">💰</span>
+                  <span>Junk</span>
+                </span>
+                <span style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{fontWeight:'bold',fontSize:'1.1em',color:colors.brand}}>D</span>
+                  <span>Double</span>
+                </span>
+              </div>
             </div>
           </div>
-
           {/* Player Details (Expandable) */}
           <div className="player-details-section">
             <h3>Player Details (Tap to Expand)</h3>
@@ -506,7 +515,6 @@ const MatchSummaryView2: React.FC = () => {
               );
             })}
           </div>
-
           {/* Actions */}
           <div className="summary-actions">
             <button onClick={handleExportPNG}>Export Topline PNG</button>
@@ -517,15 +525,7 @@ const MatchSummaryView2: React.FC = () => {
         </>
       )}
       {activeTab === 'holes' && (
-        <div
-          className="hole-breakdown-tab"
-          style={{
-            marginTop: 8,
-            overflowX: 'auto',
-            width: '100%',
-            maxWidth: '100vw'
-          }}
-        >
+        <div className="hole-breakdown-tab" style={{marginTop:8,overflowX:'auto',width:'100%',maxWidth:'100vw'}}>
           <table
             style={{
               minWidth: 700,
