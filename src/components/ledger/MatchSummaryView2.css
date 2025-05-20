@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Gruppo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans+Extra+Condensed:wght@600&display=swap');
+
+.match-summary-view2 {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 8px 32px 8px;
+  background: var(--color-white, #fff);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  font-family: 'Gruppo', system-ui, sans-serif;
+}
+
+.summary-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.summary-header h2 {
+  color: var(--color-brand, #1A5E46);
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
+.summary-date, .summary-course, .summary-duration {
+  color: var(--color-grey60, #4A5568);
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.final-results {
+  background: var(--color-brand20, #e4efe8);
+  border-radius: 10px;
+  padding: 14px 12px 10px 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px #0001;
+}
+.final-results h3 {
+  margin-top: 0;
+  color: var(--color-brand, #1A5E46);
+  font-size: 1.2rem;
+}
+.final-results em {
+  color: var(--color-grey60, #4A5568);
+  font-size: 0.95em;
+}
+
+.scoreline-chart-section {
+  background: var(--color-brand20, #e4efe8);
+  border-radius: 10px;
+  padding: 12px 8px 8px 8px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px #0001;
+}
+.scoreline-chart-section h3 {
+  color: var(--color-brand, #1A5E46);
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.overall-totals {
+  background: var(--color-brand20, #e4efe8);
+  border-radius: 10px;
+  padding: 12px 12px 8px 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px #0001;
+}
+.overall-totals h3 {
+  color: var(--color-brand, #1A5E46);
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.player-details-section {
+  margin-bottom: 18px;
+}
+.player-details-section h3 {
+  color: var(--color-brand, #1A5E46);
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+.player-card {
+  background: var(--color-brand20, #e4efe8);
+  border-radius: 10px;
+  margin-bottom: 18px;
+  padding: 16px 20px 16px 20px;
+  box-shadow: 0 1px 4px #0001;
+  font-size: 1rem;
+  transition: box-shadow 0.18s, border 0.18s, background 0.18s;
+  min-height: 56px;
+  border-bottom: 1.5px solid #e0e0e0;
+}
+.player-card:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+.player-card:hover, .player-card:focus {
+  box-shadow: 0 2px 8px #0002;
+  background: #f3f8f5;
+  outline: none;
+}
+.player-card.expanded {
+  border: 2.5px solid var(--color-brand, #1A5E46);
+  background: #e0f5e8;
+}
+.player-card .player-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+  min-height: 32px;
+}
+.player-card .chevron {
+  display: inline-block;
+  font-size: 1.2em;
+  margin-left: 12px;
+  transition: transform 0.18s;
+  color: #888;
+  vertical-align: middle;
+  line-height: 1;
+}
+.player-card.expanded .chevron {
+  transform: rotate(90deg);
+}
+.player-card .player-name, .player-card strong {
+  font-family: 'Sofia Sans Extra Condensed', 'Gruppo', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1.13em;
+  letter-spacing: 0.2px;
+}
+.player-card ul {
+  margin: 6px 0 0 0;
+  padding-left: 18px;
+  font-size: 0.98em;
+}
+.player-card li {
+  margin-bottom: 2px;
+}
+
+.player-card.red .player-name {
+  color: #D64533; /* theme red */
+}
+.player-card.blue .player-name {
+  color: #2F80ED; /* theme blue */
+}
+
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+.summary-actions button {
+  background: var(--color-brand, #1A5E46);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+  box-shadow: 0 1px 4px #0001;
+}
+.summary-actions button:hover {
+  background: var(--color-brand90, #1d684f);
+}
+
+@media (max-width: 600px) {
+  .match-summary-view2 {
+    padding: 8px 0 24px 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .player-card, .final-results, .overall-totals, .scoreline-chart-section {
+    border-radius: 0;
+    box-shadow: none;
+    margin-left: -8px;
+    margin-right: -8px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .player-card {
+    margin-bottom: 14px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .player-card .player-name {
+    min-height: 28px;
+  }
+}
+
+/* Optionally, style key numbers (currency, totals) with Gruppo for emphasis */
+.final-results,
+.overall-totals,
+.player-card {
+  font-variant-numeric: tabular-nums;
+}
+.final-results .team-amount,
+.overall-totals .team-amount,
+.player-card .net-result,
+.player-card .match-payout,
+.player-card .junk-total {
+  font-family: 'Gruppo', 'Inter', system-ui, sans-serif;
+  font-size: 1.15em;
+  letter-spacing: 0.5px;
+}
+
+.final-results,
+.scoreline-chart-section,
+.overall-totals,
+.player-card {
+  padding-left: 20px;
+  padding-right: 20px;
+} 

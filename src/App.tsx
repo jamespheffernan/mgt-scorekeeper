@@ -30,6 +30,7 @@ import TeeSelectionScreen from './components/setup/TeeSelectionScreen';
 import { runAllMigrations } from './utils/migrateFirestorePlayers';
 import AdminDebugPage from './components/admin/AdminDebugPage';
 import LedgerView2 from './components/ledger/LedgerView2';
+import MatchSummaryView2 from './components/ledger/MatchSummaryView2';
 
 // Uncomment these for testing/development
 /*
@@ -175,9 +176,13 @@ function App() {
                 path="/settlement" 
                 element={
                   <ProtectedRoute>
-                    <SettlementView matchId={match.id} />
+                    <MatchSummaryView2 />
                   </ProtectedRoute>
                 } 
+              />
+              <Route 
+                path="/match-summary2" 
+                element={<MatchSummaryView2 />} 
               />
               <Route 
                 path="/history" 

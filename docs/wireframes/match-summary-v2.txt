@@ -1,0 +1,62 @@
++--------------------------------------+
+| Match Summary                        |
+| [App Logo/Title]                     |
++--------------------------------------+
+| Date: YYYY-MM-DD                     |
+| Course: [Course Name]                |
++--------------------------------------+
+| == FINAL RESULTS ==                  |
+|                                      |
+| Winners: Team Red (Player A & C)     |
+| Total Payout: $XX.XX (Red to Blue)   |
++--------------------------------------+
+| SCORELINE CHART                      |
+|                                      |
+|  [ Visual representation of         ] |
+|  [ team scores progressing over     ] |
+|  [ the 18 holes. Could be a line   ] |
+|  [ chart similar to existing one.   ] |
+|                                      |
++--------------------------------------+
+| OVERALL TOTALS                       |
++--------------------------------------+
+| Millbrook Game:                      |
+|   Team Red:  +$XX.XX                 |
+|   Team Blue: -$XX.XX                 |
+|                                      |
+| Big Game (if played):                |
+|   Foursome Total: YY points          |
+|   [Optional: Top 2 players/scores]   |
++--------------------------------------+
+| PLAYER DETAILS (Tap to Expand)       |
++--------------------------------------+
+| Player A (Team Red)         [+]      |
+|   Net Result: +$X.XX                 |
+|   (Hidden by default, expands below) |
+|   ---------------------------------- |
+|   Match Payout: +$M.MM               |
+|   Junk Bets:                         |
+|     Birdies (3): +$B.BB              |
+|     Sandies (1): +$S.SS              |
+|     Greenies (2): +$G.GG             |
+|   Presses Won: Z                     |
+|   Big Game Contribution: X pts       |
++--------------------------------------+
+| Player B (Team Blue)        [+]      |
+|   Net Result: -$Y.YY                 |
+|   (Expandable details similar to A)  |
++--------------------------------------+
+| Player C (Team Red)         [+]      |
+|   Net Result: +$Z.ZZ                 |
+|   (Expandable details similar to A)  |
++--------------------------------------+
+| Player D (Team Blue)        [+]      |
+|   Net Result: -$W.WW                 |
+|   (Expandable details similar to A)  |
++--------------------------------------+
+| ACTIONS                              |
++--------------------------------------+
+| [ Export Detailed CSV Button ]       |
+| [ View Full Ledger (LedgerView2) ]   |
+| [ Start New Game Button ]            |
++--------------------------------------+ 
