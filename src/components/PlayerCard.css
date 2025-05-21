@@ -44,4 +44,18 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr)); /* Tailwind's grid-cols-2 */
   gap: 0.5rem; /* Tailwind's gap-2 */
-} 
+}
+
+/* Ghost player visual distinction */
+.ghost-player-card {
+  opacity: 0.65;
+  filter: grayscale(0.3) brightness(1.05);
+  background: linear-gradient(90deg, #f3f4f6 60%, #e0e7ef 100%);
+  position: relative;
+  transition: box-shadow 0.2s, opacity 0.2s;
+}
+.ghost-player-card:focus {
+  outline: 2px solid #8b5cf6; /* Violet focus ring for a11y */
+  box-shadow: 0 0 0 3px #c7d2fe;
+}
+/* End ghost player visual distinction */ 

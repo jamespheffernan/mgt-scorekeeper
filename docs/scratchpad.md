@@ -6,6 +6,7 @@ This document is used for general notes, lessons learned during development, and
 
 * **Rebuild Match Summary Screen**: [`docs/implementation-plan/rebuild-match-summary-screen.md`](implementation-plan/rebuild-match-summary-screen.md)
 * *Previously: Rebuild Ledger View*: [`docs/implementation-plan/rebuild-ledger-view.md`](implementation-plan/rebuild-ledger-view.md) *(This task is nearing completion and documentation/PR merge are the remaining steps based on its plan)*
+* **Ghost Player Feature**: [`docs/implementation-plan/ghost-player.md`](implementation-plan/ghost-player.md)
 
 ## Lessons Learned
 

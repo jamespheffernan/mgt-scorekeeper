@@ -46,9 +46,14 @@ const TeamPill: React.FC<TeamPillProps> = ({
         {displayPlayers.map((player) => (
           <div
             key={player.id}
-            className="avatar-circle"
-            title={player.name}
+            className={`avatar-circle${player.isGhost ? ' ghost-avatar' : ''}`}
+            title={player.isGhost ? `Ghost: Synthetic player generated from ${player.name || player.first}` : player.name}
+            aria-label={player.isGhost ? `Ghost player: Synthetic player generated from ${player.name || player.first}` : player.name}
+            tabIndex={0}
           >
+            {player.isGhost ? (
+              <span style={{ marginRight: 2, opacity: 0.7 }} role="img" aria-label="Ghost">👻</span>
+            ) : null}
             {getInitials(player)}
           </div>
         ))}

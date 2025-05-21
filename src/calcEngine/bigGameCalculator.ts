@@ -20,7 +20,7 @@ export interface BigGameRow {
  * Calculate the two best net scores for a hole
  * 
  * @param hole Hole number (1-18)
- * @param netScores Array of 4 net scores, one per player
+ * @param netScores Array of net scores (2-4), one per non-ghost player
  * @returns BigGameRow with the two best net scores and their sum
  */
 export function calculateBigGameRow(
@@ -28,8 +28,8 @@ export function calculateBigGameRow(
   netScores: number[]
 ): BigGameRow {
   // Validate input
-  if (netScores.length !== 4) {
-    throw new Error('Big Game calculation requires exactly 4 net scores');
+  if (netScores.length < 2) {
+    throw new Error('Big Game calculation requires at least 2 non-ghost players');
   }
   
   // Sort scores ascending (lowest first)
@@ -62,12 +62,12 @@ export function calculateBigGameTotal(rows: BigGameRow[]): number {
  * Find the indexes of the two best scores
  * This is useful for highlighting which players' scores were used
  * 
- * @param netScores Array of 4 net scores
+ * @param netScores Array of net scores (2-4), one per non-ghost player
  * @returns Array of indexes for the two best (lowest) scores
  */
 export function findBestScoreIndexes(netScores: number[]): number[] {
-  if (netScores.length !== 4) {
-    throw new Error('Finding best score indexes requires exactly 4 net scores');
+  if (netScores.length < 2) {
+    throw new Error('Finding best score indexes requires at least 2 net scores');
   }
   
   // Create array of {score, index} objects

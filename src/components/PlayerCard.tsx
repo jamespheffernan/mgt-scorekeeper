@@ -19,16 +19,43 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   className = '',
   nameRow
 }) => {
+  const isGhost = !!player.isGhost;
   return (
-    <div className={`player-card-root ${className}`}>
+    <div 
+      className={`player-card-root${isGhost ? ' ghost-player-card' : ''} ${className}`}
+      aria-label={isGhost ? `Ghost player: Synthetic player generated from ${player.name || player.first}` : undefined}
+      tabIndex={0}
+    >
       <aside className="player-card-team-indicator" 
              style={{ '--team-color': teamColor } as React.CSSProperties} />
       
       <div className="player-card-content-wrapper">
         {nameRow ? (
-          <div className="player-card-name" style={{ color: teamColor }}>{nameRow}</div>
+          <div className="player-card-name" style={{ color: teamColor }}>
+            {isGhost && (
+              <span 
+                role="img" 
+                aria-label="Ghost player" 
+                title={`Synthetic player generated from ${player.name || player.first}`}
+                style={{ marginRight: 6, opacity: 0.7 }}
+              >
+                👻
+              </span>
+            )}
+            {nameRow}
+          </div>
         ) : (
           <h3 className="player-card-name" style={{ color: teamColor }}>
+            {isGhost && (
+              <span 
+                role="img" 
+                aria-label="Ghost player" 
+                title={`Synthetic player generated from ${player.name || player.first}`}
+                style={{ marginRight: 6, opacity: 0.7 }}
+              >
+                👻
+              </span>
+            )}
             {toTitleCase(formatPlayerName(player))}
           </h3>
         )}

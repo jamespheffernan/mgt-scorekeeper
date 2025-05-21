@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import { Player, Team } from '../../store/gameStore';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
+import React from 'react';
 import { Chip } from '../Chip';
 import './PlayersRoster.css';
 import { getFullName, splitNameParts } from '../../utils/nameUtils';
@@ -68,6 +69,8 @@ const dedupePlayersById = (players: Player[]): Player[] => {
   });
 };
 
+const GHOST_ICON = <span role="img" aria-label="Ghost">👻</span>;
+
 const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // Access database with Firestore and Dexie fallback
   const { 
@@ -102,6 +105,20 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
   // State for handicap editor
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showHandicapEditor, setShowHandicapEditor] = useState(false);
+
+  // Ghost player state
+  const [showGhostModal, setShowGhostModal] = useState(false);
+  const [ghostBaseId, setGhostBaseId] = useState<string>('');
+  const [ghostError, setGhostError] = useState<string | null>(null);
+
+  // Helper: Get IDs of all base players used for ghosts
+  const ghostBaseIds = selectedPlayers.filter(p => p.isGhost && p.sourcePlayerId).map(p => p.sourcePlayerId!);
+  // Helper: Get IDs of all real players selected
+  const realPlayerIds = selectedPlayers.filter(p => !p.isGhost).map(p => p.id);
+  // Helper: Get all eligible base players for ghosts (not already selected or used as ghost base)
+  const eligibleGhostBases = players.filter(
+    p => !realPlayerIds.includes(p.id) && !ghostBaseIds.includes(p.id)
+  );
 
   // Function to migrate player data from legacy format
   const migratePlayersWithLegacyData = async (playersToCheck: Player[]) => {
@@ -365,6 +382,44 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
     });
   };
 
+  // Add a ghost player to the selection
+  const handleAddGhost = () => {
+    setGhostError(null);
+    if (!ghostBaseId) {
+      setGhostError('Please select a base player for the ghost.');
+      return;
+    }
+    const base = players.find(p => p.id === ghostBaseId);
+    if (!base) {
+      setGhostError('Base player not found.');
+      return;
+    }
+    // Prevent duplicates
+    if (selectedPlayers.length >= 4) {
+      setGhostError('You cannot add more than 4 players.');
+      return;
+    }
+    // Add ghost player
+    const ghost: Player = {
+      ...base,
+      id: `ghost-${base.id}-${Date.now()}`,
+      isGhost: true,
+      sourcePlayerId: base.id,
+      first: base.first,
+      last: base.last,
+      name: `Ghost (${base.first})`,
+      // Optionally, add a flag or note for UI
+    };
+    setSelectedPlayers(prev => [...prev, ghost]);
+    setShowGhostModal(false);
+    setGhostBaseId('');
+  };
+
+  // Remove a ghost player
+  const handleRemoveGhost = (ghostId: string) => {
+    setSelectedPlayers(prev => prev.filter(p => p.id !== ghostId));
+  };
+
   if (isLoading) {
     return <div className="loading-message mobile-loading">Loading players...</div>;
   }
@@ -400,17 +455,22 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
             const team = teams[index];
 
             if (player) {
+              const isGhost = !!player.isGhost;
               return (
                 <div key={player.id || index} className="team-selection-cell">
                   <Chip
-                    name={getFullName(player)}
-                    onRemove={() => togglePlayer(player)}
-                    className={team === 'Blue' ? 'chip-blue' : 'chip-red'}
+                    name={isGhost ? <span style={{opacity:0.7}}>{GHOST_ICON} Ghost ({player.first})</span> : getFullName(player)}
+                    onRemove={() => isGhost ? handleRemoveGhost(player.id) : togglePlayer(player)}
+                    className={
+                      (team === 'Blue' ? 'chip-blue' : 'chip-red') + (isGhost ? ' ghost-avatar' : '')
+                    }
+                    style={isGhost ? { opacity: 0.6, filter: 'grayscale(0.4) brightness(1.1)' } : {}}
                   />
                   <select
                     value={team}
                     onChange={(e) => updateTeam(index, e.target.value as Team)}
                     className="team-select-dropdown"
+                    aria-label={isGhost ? `Team for ghost player based on ${player.first}` : `Team for ${getFullName(player)}`}
                   >
                     <option value="Blue">Blue</option>
                     <option value="Red">Red</option>
@@ -464,6 +524,16 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
 
   return (
     <div className="player-roster-container mobile-player-roster">
+      <div style={{background:'#ff0',color:'#000',padding:'4px',fontWeight:'bold'}}>TEST-PLAYER-ROSTER-DEBUG</div>
+      {/* Debug: Ghost FAB logic state */}
+      <div style={{ background: '#fffbe6', color: '#8a6d3b', padding: '8px', margin: '8px 0', fontSize: '13px', border: '1px solid #faebcc', borderRadius: 6 }}>
+        <strong>Ghost FAB Debug:</strong><br />
+        Selected Players: {selectedPlayers.length} <br />
+        Eligible Ghost Bases: {eligibleGhostBases.length} <br />
+        {eligibleGhostBases.length > 0 && (
+          <span>Eligible: {eligibleGhostBases.map(p => getFullName(p)).join(', ')}</span>
+        )}
+      </div>
       {/* Error Display */}
       {error && <div className="error-message mobile-error">{error}</div>}
 
@@ -616,6 +686,56 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
           onCancel={handleCancelEdit}
           onDelete={handleDeletePlayer}
         />
+      )}
+
+      {/* Ghost Player FAB */}
+      {selectedPlayers.length < 4 && eligibleGhostBases.length > 0 && (
+        <button
+          className="fab-add-player"
+          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 20 }}
+          aria-label="Add Ghost Player"
+          onClick={() => setShowGhostModal(true)}
+        >
+          {GHOST_ICON} <span style={{ marginLeft: 8, fontWeight: 600 }}>Ghost</span>
+        </button>
+      )}
+
+      {/* Ghost Player Modal */}
+      {showGhostModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Add Ghost Player">
+          <div className="modal-content">
+            <button aria-label="Close" onClick={() => setShowGhostModal(false)} style={{ position: 'absolute', top: 14, right: 14, fontSize: '1.8rem', background: 'none', border: 'none', color: '#aaa', cursor: 'pointer' }}>&times;</button>
+            <h2 style={{ textAlign: 'center', marginBottom: 18 }}>{GHOST_ICON} Add Ghost Player</h2>
+            <p style={{ marginBottom: 12 }}>Select a roster player to base the ghost on. This player cannot be currently selected or already used as a ghost base.</p>
+            <select
+              value={ghostBaseId}
+              onChange={e => setGhostBaseId(e.target.value)}
+              className="form-input-field form-input-field-spacing"
+              aria-label="Select base player for ghost"
+            >
+              <option value="">-- Select Player --</option>
+              {eligibleGhostBases.map(p => (
+                <option key={p.id} value={p.id}>{getFullName(p)} (Index {p.index.toFixed(1)})</option>
+              ))}
+            </select>
+            {ghostError && <div style={{ color: '#e74c3c', marginTop: 8 }}>{ghostError}</div>}
+            <div className="form-actions-row" style={{ marginTop: 18 }}>
+              <button
+                onClick={() => setShowGhostModal(false)}
+                className="cancel-button form-button general-button-styling"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddGhost}
+                className="save-button btn-primary form-button general-button-styling"
+                disabled={!ghostBaseId}
+              >
+                Add Ghost
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Action Button to Confirm */}

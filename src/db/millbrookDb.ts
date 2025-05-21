@@ -92,7 +92,15 @@ class MillbrookDatabase extends Dexie {
    * Get all saved players
    */
   async getAllPlayers(): Promise<Player[]> {
-    return this.players.toArray();
+    try {
+      console.log('[millbrookDb] getAllPlayers called');
+      const arr = await this.players.toArray();
+      console.log('[millbrookDb] getAllPlayers result:', arr);
+      return arr;
+    } catch (err) {
+      console.error('[millbrookDb] getAllPlayers threw error:', err);
+      return [];
+    }
   }
 
   /**

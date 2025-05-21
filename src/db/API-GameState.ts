@@ -22,6 +22,9 @@ export interface Player {
   preferredTee?: string;
   lastUsed?: string;   // ISO date string
   notes?: string;
+  // Ghost player support
+  isGhost?: boolean;         // True if this is a ghost player
+  sourcePlayerId?: string;   // If ghost, the real player this ghost is based on
 }
 
 export interface Match {
@@ -45,6 +48,8 @@ export interface Match {
   // Timestamps for tracking game duration
   startTime?: string;          // ISO timestamp when game started
   endTime?: string;            // ISO timestamp when game ended
+  // Ghost player support
+  hasGhost?: boolean;          // True if this match includes a ghost player
 }
 
 /* ––––– 2. Per-hole Snapshots ––––– */
@@ -126,6 +131,7 @@ export interface GameHistory {
   holesPlayed: number;                // Total number of holes completed
   isComplete: boolean;                // Whether the game was completed or cancelled
   bigGameEnabled: boolean;            // Whether Big Game was enabled
+  hasGhost?: boolean;                // True if this match included a ghost player
 }
 
 /* ––––– 4. Dexie Schema ––––– */

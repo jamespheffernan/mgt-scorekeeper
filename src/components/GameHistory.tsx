@@ -8,6 +8,7 @@ const GameHistoryView = () => {
   const [gameRecords, setGameRecords] = useState<GameHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showGhostOnly, setShowGhostOnly] = useState(false);
 
   useEffect(() => {
     const fetchGameHistory = async () => {
@@ -96,26 +97,37 @@ const GameHistoryView = () => {
     return 'Unknown';
   };
 
+  // Filtered records based on toggle
+  const filteredRecords = showGhostOnly ? gameRecords.filter(r => r.hasGhost) : gameRecords;
+
   return (
     <div className="game-history-container">
       <h2>Game History</h2>
       
       <div className="game-history-actions">
         <Link to="/" className="button">Back to Main Menu</Link>
+        <button
+          className={`ghost-toggle${showGhostOnly ? ' active' : ''}`}
+          style={{ marginLeft: 12, padding: '6px 14px', borderRadius: 6, border: '1px solid #ccc', background: showGhostOnly ? '#f3f4f6' : '#fff', cursor: 'pointer' }}
+          onClick={() => setShowGhostOnly(v => !v)}
+          title="Show only rounds with ghost players"
+        >
+          👻 Ghost Rounds Only
+        </button>
       </div>
       
       {isLoading ? (
         <div className="loading">Loading game records...</div>
       ) : error ? (
         <div className="error">{error}</div>
-      ) : gameRecords.length === 0 ? (
+      ) : filteredRecords.length === 0 ? (
         <div className="empty-state">
-          <p>No game records found. Complete a game to see it here.</p>
+          <p>No game records found{showGhostOnly ? ' with ghost players.' : '.'} Complete a game to see it here.</p>
         </div>
       ) : (
         <div className="game-records">
           <div className="records-count">
-            Showing {gameRecords.length} game {gameRecords.length === 1 ? 'record' : 'records'}
+            Showing {filteredRecords.length} game {filteredRecords.length === 1 ? 'record' : 'records'}{showGhostOnly ? ' (ghost rounds)' : ''}
           </div>
           
           <table className="records-table">
@@ -127,10 +139,11 @@ const GameHistoryView = () => {
                 <th>Final Scores</th>
                 <th>Duration</th>
                 <th>Status</th>
+                <th>Ghost</th>
               </tr>
             </thead>
             <tbody>
-              {gameRecords.map(record => (
+              {filteredRecords.map(record => (
                 <tr key={record.id} className={record.isComplete ? 'complete-game' : 'cancelled-game'}>
                   <td>{formatDate(record.date)}</td>
                   <td>{record.courseName}</td>
@@ -170,6 +183,11 @@ const GameHistoryView = () => {
                     ) : (
                       <span className="status-cancelled">Cancelled</span>
                     )}
+                  </td>
+                  <td style={{textAlign:'center'}}>
+                    {record.hasGhost ? (
+                      <span role="img" aria-label="Ghost Round" title="This round included one or more ghost players." style={{fontSize:'1.3em'}}>👻</span>
+                    ) : ''}
                   </td>
                 </tr>
               ))}

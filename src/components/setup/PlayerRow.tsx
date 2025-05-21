@@ -9,6 +9,7 @@ interface PlayerRowProps {
   onTeamSelect: (id: string, team: Team) => void;
   onRemove: (id: string) => void;
   onEdit?: (player: Player) => void;
+  isGhostDisplay?: boolean;
 }
 
 // Get initials as fallback for avatar
@@ -26,7 +27,7 @@ const getInitials = (player: Player): string => {
   return player.name ? player.name.substring(0, 2).toUpperCase() : '??';
 };
 
-export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect, onRemove, onEdit }) => {
+export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect, onRemove, onEdit, isGhostDisplay }) => {
 
   const handleRemoveClick = () => {
     onRemove(player.id);
@@ -35,9 +36,10 @@ export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect
   };
 
   return (
-    <div className="player-row">
+    <div className={"player-row" + (isGhostDisplay ? " ghost-avatar" : "") }>
       <div className="player-info">
-        <div className="player-initials" title={player.name}>
+        <div className="player-initials" title={player.name} style={isGhostDisplay ? { opacity: 0.7, filter: 'grayscale(0.4) brightness(1.1)', background: 'linear-gradient(90deg, #e0e7ef 60%, #f3f4f6 100%)', color: '#888', position: 'relative' } : {}}>
+          {isGhostDisplay && <span role="img" aria-label="Ghost" style={{ marginRight: 2, opacity: 0.7 }}>👻</span>}
           {getInitials(player)}
         </div>
         <div>
@@ -50,7 +52,7 @@ export const PlayerRow: React.FC<PlayerRowProps> = ({ player, team, onTeamSelect
             aria-label={onEdit ? `Edit ${player.name}` : undefined}
             onKeyPress={onEdit ? (e) => { if (e.key === 'Enter') onEdit(player); } : undefined}
           >
-            {player.name}
+            {isGhostDisplay ? `Ghost (${player.first})` : player.name}
           </span>
           {/* Display handicap index if available */}
           {player.index !== undefined && player.index !== null && (

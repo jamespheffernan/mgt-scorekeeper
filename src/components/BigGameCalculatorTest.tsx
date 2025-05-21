@@ -42,6 +42,18 @@ export function BigGameCalculatorTest() {
       hole: 4,
       netScores: [6, 3, 5, 4],
       expected: { bestNet: [3, 4], subtotal: 7 }
+    },
+    {
+      name: 'Three players (4,5,6)',
+      hole: 5,
+      netScores: [4, 5, 6],
+      expected: { bestNet: [4, 5], subtotal: 9 }
+    },
+    {
+      name: 'Two players (4,5)',
+      hole: 6,
+      netScores: [4, 5],
+      expected: { bestNet: [4, 5], subtotal: 9 }
     }
   ];
   

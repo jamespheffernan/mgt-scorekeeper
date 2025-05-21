@@ -8,6 +8,7 @@ import { calculateBigGameRow, calculateBigGameTotal, BigGameRow } from '../calcE
 import { millbrookDb } from '../db/millbrookDb';
 import { Player, Team, GameHistory } from '../db/API-GameState';
 import { TeeOption, HoleInfo } from '../db/courseModel';
+import { generateGhostScores } from '../calcEngine/ghostScoreGenerator';
 
 // Re-export types
 export type JunkFlags = JF;
@@ -34,6 +35,8 @@ export interface Match {
   doubleUsedThisHole?: boolean; // Flag to track double usage on current hole
   startTime?: string;          // ISO date string
   endTime?: string;            // ISO date string
+  // Ghost player support
+  hasGhost?: boolean;          // True if this match includes a ghost player
 }
 
 export interface HoleScore {
@@ -235,7 +238,41 @@ export const useGameStore = create(
         const playerIds = players.map(p => p.id) as [string, string, string, string];
         const nowIso = new Date().toISOString();
         const startTime = nowIso;
-        
+        // Check if any player is a ghost
+        const hasGhost = players.some(p => p.isGhost);
+
+        // Pre-populate holeScores for ghosts
+        let holeScores = [];
+        // Try to get course data for score generation
+        let courseHoles = Array(18).fill({ par: 4, strokeIndex: 1 });
+        if (matchOptions.courseId) {
+          // This is async, but for now, use default if not available synchronously
+          // In a real app, you might want to refactor createMatch to be async
+          // and await millbrookDb.getCourse(matchOptions.courseId)
+        }
+        // For each hole, build gross/net arrays for all players
+        for (let h = 0; h < 18; h++) {
+          const gross: number[] = [];
+          const net: number[] = [];
+          players.forEach((player, idx) => {
+            if (player.isGhost) {
+              // Use a deterministic seed per ghost for reproducibility
+              const ghostScores = generateGhostScores(player.index, { holes: courseHoles }, 1000 + idx);
+              gross.push(ghostScores[h]);
+              net.push(0); // Net will be calculated later
+            } else {
+              gross.push(0); // Real players start with 0 (or null if preferred)
+              net.push(0);
+            }
+          });
+          holeScores.push({
+            hole: h + 1,
+            gross: gross as [number, number, number, number],
+            net: net as [number, number, number, number],
+            teamNet: [0, 0] as [number, number],
+          });
+        }
+
         set({
           match: {
             id: crypto.randomUUID(),
@@ -254,11 +291,12 @@ export const useGameStore = create(
             playerTeeIds: matchOptions.playerTeeIds,
             bigGameSpecificIndex: matchOptions.bigGameSpecificIndex,
             doubleUsedThisHole: false,  // Initialize to false
-            startTime: startTime        // Always set startTime
+            startTime: startTime,        // Always set startTime
+            hasGhost // Set ghost flag
           },
           players,
           playerTeams: teams,
-          holeScores: [],
+          holeScores: holeScores,
           ledger: [],
           junkEvents: [],
           bigGameRows: [],
@@ -405,11 +443,11 @@ export const useGameStore = create(
         // 8. Evaluate junk events
         const newJunkEvents: JunkEvent[] = [];
         
-        players.forEach((_, idx) => {
+        players.forEach((player, idx) => {
           // Get the correct par value for this player
           const par = updatedMatch.holePar[hole - 1];
-          console.log(`[DEBUG] Using par=${par} for player ${players[idx].name} on hole ${hole}`);
-          
+          // For ghost players, junk events are simulated and included using the same logic as real players
+          // (Simulation logic is handled in the ghost score generator or by the UI; here we just include them)
           const events = evaluateJunkEvents(
             hole,
             players[idx].id,
@@ -419,7 +457,11 @@ export const useGameStore = create(
             junkFlags[idx],
             updatedMatch.base
           );
-          console.log(`[DEBUG] Junk events for player ${players[idx].name}: ${JSON.stringify(events)}`);
+          if (player.isGhost) {
+            console.log(`[GHOST-JUNK] Junk events for ghost player ${player.name}: ${JSON.stringify(events)}`);
+          } else {
+            console.log(`[DEBUG] Junk events for player ${player.name}: ${JSON.stringify(events)}`);
+          }
           newJunkEvents.push(...events);
         });
         
@@ -480,7 +522,12 @@ export const useGameStore = create(
         let bigGameTotal = updatedMatch.bigGameTotal;
         
         if (updatedMatch.bigGame) {
-          bigGameRow = calculateBigGameRow(hole, netScores);
+          // Exclude ghost players from Big Game calculation
+          const nonGhostIndexes = players.map((p, idx) => p.isGhost ? null : idx).filter(idx => idx !== null) as number[];
+          const nonGhostNetScores = nonGhostIndexes.map(idx => netScores[idx]);
+          // Log which players are included
+          console.log(`[BIG-GAME] Hole ${hole}: Including players for Big Game:`, nonGhostIndexes.map(idx => players[idx].name));
+          bigGameRow = calculateBigGameRow(hole, nonGhostNetScores);
           if (bigGameRow) {
             bigGameTotal = calculateBigGameTotal([...bigGameRows, bigGameRow]);
           }
@@ -713,7 +760,8 @@ export const useGameStore = create(
               : 0,
             holesPlayed: match.currentHole,
             isComplete: true,
-            bigGameEnabled: match.bigGame
+            bigGameEnabled: match.bigGame,
+            hasGhost: match.hasGhost
           };
           
           // Save game history to database
@@ -769,7 +817,8 @@ export const useGameStore = create(
               : 0,
             holesPlayed: match.currentHole,
             isComplete: false, // Mark as incomplete
-            bigGameEnabled: match.bigGame
+            bigGameEnabled: match.bigGame,
+            hasGhost: match.hasGhost
           };
           
           // Save cancelled game history

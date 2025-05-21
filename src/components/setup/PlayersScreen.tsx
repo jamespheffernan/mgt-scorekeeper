@@ -10,6 +10,7 @@ import { useFirestorePlayers } from '../../hooks/useFirestorePlayers';
 import AddPlayerForm from './AddPlayerForm';
 import StartMatchButton from './StartMatchButton';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
+import { v4 as uuidv4 } from 'uuid';
 
 // Helper function to sort players by last name, then first name
 const sortPlayersByLastName = (players: Player[]): Player[] => {
@@ -49,6 +50,12 @@ export const PlayersScreen: React.FC = () => {
   const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showHandicapEditor, setShowHandicapEditor] = useState(false);
+
+  // --- Ghost Player State ---
+  const [ghostPlayers, setGhostPlayers] = useState<Player[]>([]); // local ghosts only
+  const [ghostMode, setGhostMode] = useState(false);
+  const [ghostError, setGhostError] = useState<string | null>(null);
+  const [ghostTeamSelections, setGhostTeamSelections] = useState<{ [playerId: string]: Team }>({});
 
   // Sort and dedupe players by last name
   const sortedPlayers = useMemo(() => {
@@ -159,6 +166,64 @@ export const PlayersScreen: React.FC = () => {
     setEditingPlayer(null);
   };
 
+  // Helper: All player IDs in roster (real + ghost)
+  const allRosterIds = [...roster.red, ...roster.blue, ...ghostPlayers.map(g => g.id)];
+  // Helper: All real player IDs in roster
+  const realRosterIds = [...roster.red, ...roster.blue];
+  // Helper: All base IDs used for ghosts
+  const ghostBaseIds = ghostPlayers.map(g => g.sourcePlayerId!).filter(Boolean);
+
+  // --- Ghost Mode Unified List ---
+  // All eligible base players (not in match, not already used as ghost base)
+  const eligibleGhostBases = sortedPlayers.filter(
+    p => !ghostPlayers.some(g => g.sourcePlayerId === p.id)
+  );
+  // All assigned ghosts (in ghostPlayers)
+  // Unified list: eligible + assigned ghosts
+  const ghostModeList = [
+    ...eligibleGhostBases.map(p => ({ type: 'candidate', player: p })),
+    ...ghostPlayers.map(g => ({ type: 'ghost', player: g }))
+  ];
+
+  // Total selected (real + ghost)
+  const totalSelected = realRosterIds.length + ghostPlayers.length;
+
+  // Add ghost player to local state and assign to a team
+  const assignGhostToTeam = (basePlayer: Player, team: Team) => {
+    setGhostError(null);
+    if (ghostPlayers.length + realRosterIds.length >= 4) {
+      setGhostError('You cannot add more than 4 players.');
+      return;
+    }
+    if (ghostPlayers.some(g => g.sourcePlayerId === basePlayer.id)) {
+      setGhostError('This player is already used as a ghost base.');
+      return;
+    }
+    const ghost: Player = {
+      ...basePlayer,
+      id: `ghost-${basePlayer.id}-${Date.now()}`,
+      isGhost: true,
+      sourcePlayerId: basePlayer.id,
+      name: `Ghost (${basePlayer.first})`,
+    };
+    setGhostPlayers(prev => [...prev, ghost]);
+    setTeam(ghost.id, team);
+    setGhostTeamSelections(prev => {
+      const copy = { ...prev };
+      delete copy[basePlayer.id];
+      return copy;
+    });
+  };
+  // Remove ghost player
+  const handleRemoveGhost = (ghostId: string) => {
+    setGhostPlayers(prev => prev.filter(g => g.id !== ghostId));
+    remove(ghostId);
+  };
+
+  // --- Render helpers ---
+  // Show all available players for selection
+  const availablePlayers = sortedPlayers;
+
   return (
     <div className="players-screen">
       <div className="sticky-pills-wrapper">
@@ -168,33 +233,105 @@ export const PlayersScreen: React.FC = () => {
       <div className="players-content players-content-inline players-content-scrollable">
         <h1 className="players-title">Player Roster</h1>
 
+        {/* Ghost Mode Banner */}
+        {ghostMode && (
+          <div style={{ background: '#f3f3fa', color: '#333', padding: '10px', borderRadius: 8, marginBottom: 12, border: '1px solid #d0d0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span><span role="img" aria-label="Ghost">👻</span> <b>Ghost Mode:</b> Tap a player below to add as a ghost. <span style={{ color: '#888', fontSize: 13 }}>(Max 4 total players)</span></span>
+            <button onClick={() => setGhostMode(false)} style={{ marginLeft: 16, background: '#fff', border: '1px solid #aaa', borderRadius: 6, padding: '4px 12px', cursor: 'pointer' }}>Done</button>
+          </div>
+        )}
+        {ghostError && (
+          <div style={{ color: '#e74c3c', marginBottom: 8 }}>{ghostError}</div>
+        )}
         <div className="player-roster-inline">
           {isLoading ? (
             <div className="roster-message">Loading players...</div>
           ) : error ? (
             <div className="roster-message error">{error}</div>
-          ) : sortedPlayers.length === 0 ? (
+          ) : availablePlayers.length === 0 ? (
             <div className="roster-message empty-state">
               <div className="empty-icon">🏌️</div>
               <p>No players found in the database.</p>
             </div>
           ) : (
             <ul className={`player-list player-list-divided${isIOSStandalone ? ' players-list--standalone' : ''}`} aria-label="Player Roster">
-              {sortedPlayers.map(player => (
-                <li key={player.id}>
-                  <PlayerRow
-                    player={player}
-                    team={getPlayerTeam(player.id)}
-                    onTeamSelect={handleTeamSelect}
-                    onRemove={handleRemovePlayer}
-                    onEdit={handleEditPlayer}
-                  />
-                </li>
-              ))}
+              {ghostMode
+                ? ghostModeList.map(item => {
+                    if (item.type === 'candidate') {
+                      const player = item.player;
+                      const selectedTeam = ghostTeamSelections[player.id] || 'red';
+                      return (
+                        <li key={player.id}>
+                          <div className="player-row ghost-candidate" style={{ opacity: 0.7, background: '#f8f8ff', border: '1px dashed #aaa', borderRadius: 8, margin: '4px 0', padding: 8, display: 'flex', alignItems: 'center' }}>
+                            <div className="player-info">
+                              <div className="player-initials" title={player.name} style={{ opacity: 0.7, filter: 'grayscale(0.4) brightness(1.1)', background: 'linear-gradient(90deg, #e0e7ef 60%, #f3f4f6 100%)', color: '#888', position: 'relative' }}>
+                                <span role="img" aria-label="Ghost" style={{ marginRight: 2, opacity: 0.7 }}>👻</span>
+                                {player.first.charAt(0)}{player.last.charAt(0)}
+                              </div>
+                              <div>
+                                <span className="player-name">{player.first} {player.last}</span>
+                                <span className="player-index"> ({player.index})</span>
+                              </div>
+                            </div>
+                            <div className="player-actions">
+                              <div className="team-selection" role="radiogroup" aria-label={`Team selection for ${player.first} ${player.last}`}>
+                                <button
+                                  role="radio"
+                                  aria-checked={selectedTeam === 'red'}
+                                  className={`team-radio red ${selectedTeam === 'red' ? 'selected' : ''}`}
+                                  onClick={() => assignGhostToTeam(player, 'red')}
+                                  aria-label={`Assign ${player.first} ${player.last} to Red team`}
+                                >
+                                  Red
+                                </button>
+                                <button
+                                  role="radio"
+                                  aria-checked={selectedTeam === 'blue'}
+                                  className={`team-radio blue ${selectedTeam === 'blue' ? 'selected' : ''}`}
+                                  onClick={() => assignGhostToTeam(player, 'blue')}
+                                  aria-label={`Assign ${player.first} ${player.last} to Blue team`}
+                                >
+                                  Blue
+                                </button>
+                              </div>
+                              {/* No remove button for candidates */}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    } else if (item.type === 'ghost') {
+                      const ghost = item.player;
+                      return (
+                        <li key={ghost.id}>
+                          <PlayerRow
+                            player={ghost}
+                            team={getPlayerTeam(ghost.id)}
+                            onTeamSelect={setTeam}
+                            onRemove={handleRemoveGhost}
+                            onEdit={undefined}
+                            isGhostDisplay
+                          />
+                        </li>
+                      );
+                    }
+                    return null;
+                  })
+                : availablePlayers.map(player => (
+                    <li key={player.id}>
+                      <PlayerRow
+                        player={player}
+                        team={getPlayerTeam(player.id)}
+                        onTeamSelect={handleTeamSelect}
+                        onRemove={player.isGhost ? handleRemoveGhost : handleRemovePlayer}
+                        onEdit={player.isGhost ? undefined : handleEditPlayer}
+                      />
+                    </li>
+                  ))}
             </ul>
           )}
         </div>
 
+        {/* Add Player FAB */}
         {!isLoading && !error && (
           <>
             <button 
@@ -217,12 +354,35 @@ export const PlayersScreen: React.FC = () => {
                 />
               </svg>
             </button>
+            {/* Ghost FAB */}
+            {totalSelected < 4 && eligibleGhostBases.length > 0 ? (
+              <button
+                className="fab-add-player"
+                style={{ position: 'fixed', bottom: 90, right: 24, zIndex: 20, background: ghostMode ? '#e0e0ff' : '#fff', border: '2px solid #aaa' }}
+                aria-label="Toggle Ghost Mode"
+                title="Toggle Ghost Mode"
+                onClick={() => setGhostMode(g => !g)}
+              >
+                <span role="img" aria-label="Ghost" style={{ fontSize: 24, marginRight: 8 }}>👻</span>
+                {ghostMode ? 'Done' : 'Ghost'}
+              </button>
+            ) : (
+              // Debug info if FAB not shown
+              <div style={{ background: '#fffbe6', color: '#8a6d3b', padding: '8px', margin: '8px 0', fontSize: '13px', border: '1px solid #faebcc', borderRadius: 6 }}>
+                <strong>Ghost FAB Debug:</strong><br />
+                Selected Players: {totalSelected} <br />
+                Eligible Ghost Bases: {eligibleGhostBases.length} <br />
+                {eligibleGhostBases.length > 0 && (
+                  <span>Eligible: {eligibleGhostBases.map(p => p.first + ' ' + p.last).join(', ')}</span>
+                )}
+              </div>
+            )}
             <StartMatchButton />
           </>
         )}
-
       </div>
 
+      {/* Add Player Modal */}
       {showAddPlayerForm && (
         <AddPlayerForm
           show={showAddPlayerForm}
@@ -231,6 +391,7 @@ export const PlayersScreen: React.FC = () => {
         />
       )}
 
+      {/* Handicap Editor Modal */}
       {showHandicapEditor && editingPlayer && (
         <QuickHandicapEditor
           player={editingPlayer}

@@ -40,7 +40,7 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
   onEdit
 }) => {
   const teamColor = team === 'Red' ? colors.red : colors.blue;
-  
+  const isGhost = !!player.isGhost;
   return (
     <div onClick={onEdit} className="player-card-clickable-wrapper">
       <PlayerCard 
@@ -72,7 +72,14 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
                 verticalAlign: 'middle',
               }} title={`Big Game Strokes: ${bigGameStrokeOnHole}`} />
             )}
-            <span style={{ fontWeight: 600 }}>{player.name}</span>
+            <span
+              style={{ fontWeight: 600, opacity: isGhost ? 0.7 : 1, fontStyle: isGhost ? 'italic' : 'normal' }}
+              aria-label={isGhost ? `Ghost player: Synthetic player generated from ${player.name}` : player.name}
+              title={isGhost ? `Ghost player: Synthetic player generated from ${player.name}` : player.name}
+            >
+              {isGhost && <span role="img" aria-label="Ghost" style={{ marginRight: 4 }}>👻</span>}
+              {player.name}
+            </span>
           </div>
         }
       >

@@ -269,6 +269,20 @@ ul.player-list {
   border: 1px solid rgba(0,0,0,0.1);
 }
 
+/* Ghost avatar visual distinction */
+.ghost-avatar {
+  opacity: 0.6;
+  filter: grayscale(0.4) brightness(1.1);
+  background: linear-gradient(90deg, #e0e7ef 60%, #f3f4f6 100%);
+  color: #888;
+  position: relative;
+}
+.ghost-avatar:focus {
+  outline: 2px solid #8b5cf6;
+  box-shadow: 0 0 0 2px #c7d2fe;
+}
+/* End ghost avatar visual distinction */
+
 .avatar-stack .avatar-circle:first-child {
   margin-left: 0;
 }
