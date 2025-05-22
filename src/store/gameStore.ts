@@ -251,13 +251,24 @@ export const useGameStore = create(
           // and await millbrookDb.getCourse(matchOptions.courseId)
         }
         // For each hole, build gross/net arrays for all players
+        // --- SAFEGUARD: Track ghost score generation ---
+        const ghostScoreMap: { [playerId: string]: number[] } = {};
+        players.forEach((player, idx) => {
+          if (player.isGhost) {
+            ghostScoreMap[player.id] = generateGhostScores(player.index, { holes: courseHoles }, 1000 + idx);
+          }
+        });
+        // --- END SAFEGUARD ---
         for (let h = 0; h < 18; h++) {
           const gross: number[] = [];
           const net: number[] = [];
           players.forEach((player, idx) => {
             if (player.isGhost) {
-              // Use a deterministic seed per ghost for reproducibility
-              const ghostScores = generateGhostScores(player.index, { holes: courseHoles }, 1000 + idx);
+              // Use precomputed ghost scores
+              const ghostScores = ghostScoreMap[player.id];
+              if (!ghostScores || ghostScores.length !== 18) {
+                throw new Error(`Ghost player ${player.name} missing generated scores at match creation!`);
+              }
               gross.push(ghostScores[h]);
               net.push(0); // Net will be calculated later
             } else {

@@ -48,6 +48,7 @@ export function detectBirdie(
   par: number,
   base: number
 ): JunkEvent | null {
+  console.log(`[BIRDIE-DEBUG] hole=${hole}, playerId=${playerId}, grossScore=${grossScore}, par=${par}`);
   if (grossScore < par) {
     return {
       hole,

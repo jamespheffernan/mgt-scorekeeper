@@ -28,7 +28,8 @@ const TeeSelectionScreen: React.FC = () => {
     setBigGame,
     setBigGameSpecificIndex,
     convertToGamePlayers,
-    reset
+    reset,
+    ghostPlayers
   } = useSetupFlowStore();
   const createMatch = useGameStore(state => state.createMatch);
   
@@ -172,8 +173,8 @@ const TeeSelectionScreen: React.FC = () => {
     // Set navigation flag before any state changes
     isNavigatingAwayRef.current = true;
     
-    // Convert roster players to game players
-    const { players, teams } = convertToGamePlayers(dbPlayers);
+    // Convert roster players to game players, including ghosts
+    const { players, teams } = convertToGamePlayers(dbPlayers, ghostPlayers);
     
     // Create match with selected options
     createMatch(players, teams, {

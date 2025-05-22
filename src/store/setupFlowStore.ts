@@ -8,6 +8,12 @@ interface SetupFlowState {
   redTeamIds: string[];
   blueTeamIds: string[];
   
+  // Ghost player state
+  ghostPlayers: RosterPlayer[];
+  addGhostPlayer: (ghost: RosterPlayer) => void;
+  removeGhostPlayer: (ghostId: string) => void;
+  getGhostPlayers: () => RosterPlayer[];
+  
   // Course setup stage
   selectedCourseId: string;
   playerTeeIds: string[];
@@ -24,7 +30,7 @@ interface SetupFlowState {
   reset: () => void;
   
   // Helper functions
-  convertToGamePlayers: (rosterPlayers: RosterPlayer[]) => {
+  convertToGamePlayers: (rosterPlayers: RosterPlayer[], ghostPlayers?: RosterPlayer[]) => {
     players: GamePlayer[];
     teams: GameTeam[];
   };
@@ -34,6 +40,7 @@ interface SetupFlowState {
 const initialState = {
   redTeamIds: [],
   blueTeamIds: [],
+  ghostPlayers: [],
   selectedCourseId: '',
   playerTeeIds: ['', '', '', ''],
   bigGame: true,
@@ -43,6 +50,11 @@ const initialState = {
 // Create the store
 export const useSetupFlowStore = create<SetupFlowState>((set, get) => ({
   ...initialState,
+  
+  // Ghost player actions
+  addGhostPlayer: (ghost) => set(state => ({ ghostPlayers: [...state.ghostPlayers, ghost] })),
+  removeGhostPlayer: (ghostId) => set(state => ({ ghostPlayers: state.ghostPlayers.filter(g => g.id !== ghostId) })),
+  getGhostPlayers: () => get().ghostPlayers,
   
   // Actions
   setTeamPlayers: (redIds, blueIds) => set({ redTeamIds: redIds, blueTeamIds: blueIds }),
@@ -57,15 +69,17 @@ export const useSetupFlowStore = create<SetupFlowState>((set, get) => ({
   setBigGameSpecificIndex: (index?: number) => set({ bigGameSpecificIndex: index }),
   reset: () => set({...initialState, bigGameSpecificIndex: undefined }),
   
-  // Convert roster players to game players
-  convertToGamePlayers: (rosterPlayers) => {
+  // Convert roster players to game players (now supports ghosts)
+  convertToGamePlayers: (rosterPlayers, ghostPlayers = []) => {
     const { redTeamIds, blueTeamIds } = get();
     const players: GamePlayer[] = [];
     const teams: GameTeam[] = [];
-    
+    // Helper to find player by ID (ghosts take precedence)
+    const findPlayer = (id: string) =>
+      ghostPlayers.find(g => g.id === id) || rosterPlayers.find(p => p.id === id);
     // Add red team players
     redTeamIds.forEach(id => {
-      const player = rosterPlayers.find(p => p.id === id);
+      const player = findPlayer(id);
       if (player) {
         players.push({
           id: player.id,
@@ -73,14 +87,15 @@ export const useSetupFlowStore = create<SetupFlowState>((set, get) => ({
           index: player.index,
           first: player.first || '',
           last: player.last || '',
+          isGhost: (player as any).isGhost || false,
+          sourcePlayerId: (player as any).sourcePlayerId || undefined,
         });
         teams.push('Red');
       }
     });
-    
     // Add blue team players
     blueTeamIds.forEach(id => {
-      const player = rosterPlayers.find(p => p.id === id);
+      const player = findPlayer(id);
       if (player) {
         players.push({
           id: player.id,
@@ -88,11 +103,12 @@ export const useSetupFlowStore = create<SetupFlowState>((set, get) => ({
           index: player.index,
           first: player.first || '',
           last: player.last || '',
+          isGhost: (player as any).isGhost || false,
+          sourcePlayerId: (player as any).sourcePlayerId || undefined,
         });
         teams.push('Blue');
       }
     });
-    
     return { players, teams };
   }
 })); 

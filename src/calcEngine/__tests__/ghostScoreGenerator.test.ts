@@ -51,4 +51,37 @@ describe('generateGhostScores', () => {
     expect(allScores[0]).not.toEqual(allScores[1]);
     expect(allScores[2]).not.toEqual(allScores[3]);
   });
+});
+
+describe('generateGhostScores (bug regression and plausibility)', () => {
+  it('produces plausible gross totals for a range of indexes', () => {
+    const indexes = [0, 5, 10, 15, 20, 25, 30];
+    indexes.forEach(idx => {
+      const scores = generateGhostScores(idx, mockCourse, 42 + idx);
+      const total = scores.reduce((a, b) => a + b, 0);
+      // For 18 holes, plausible gross should be between 65 and 120
+      expect(total).toBeGreaterThanOrEqual(65);
+      expect(total).toBeLessThanOrEqual(120);
+    });
+  });
+
+  it('never returns all net scores as zero for plausible indexes', () => {
+    // Simulate net calculation: gross - strokes (simple, e.g., 1 per hole for index 18)
+    const idx = 18;
+    const gross = generateGhostScores(idx, mockCourse, 1234);
+    const net = gross.map(g => g - 1); // crude net for test
+    expect(net.some(n => n !== 0)).toBe(true);
+    expect(net.reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
+    expect(net.reduce((a, b) => a + b, 0)).toBeLessThan(gross.reduce((a, b) => a + b, 0));
+  });
+
+  it('handles missing or default course data gracefully', () => {
+    // All holes par 4, SI 1
+    const defaultCourse = { holes: Array(18).fill({ par: 4, strokeIndex: 1 }) };
+    const scores = generateGhostScores(12, defaultCourse, 99);
+    const total = scores.reduce((a, b) => a + b, 0);
+    expect(scores).toHaveLength(18);
+    expect(total).toBeGreaterThanOrEqual(65);
+    expect(total).toBeLessThanOrEqual(120);
+  });
 }); 

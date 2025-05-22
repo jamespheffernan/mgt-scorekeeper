@@ -11,6 +11,7 @@ import AddPlayerForm from './AddPlayerForm';
 import StartMatchButton from './StartMatchButton';
 import { QuickHandicapEditor } from './QuickHandicapEditor';
 import { v4 as uuidv4 } from 'uuid';
+import { useSetupFlowStore } from '../../store/setupFlowStore';
 
 // Helper function to sort players by last name, then first name
 const sortPlayersByLastName = (players: Player[]): Player[] => {
@@ -47,15 +48,19 @@ export const PlayersScreen: React.FC = () => {
   const roster = useRosterStore(state => state.roster);
   const { setTeam, remove } = useRosterStore();
 
-  const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [showHandicapEditor, setShowHandicapEditor] = useState(false);
+  // --- Ghost Player State (now from SetupFlowStore) ---
+  const ghostPlayers = useSetupFlowStore(state => state.ghostPlayers);
+  const addGhostPlayer = useSetupFlowStore(state => state.addGhostPlayer);
+  const removeGhostPlayer = useSetupFlowStore(state => state.removeGhostPlayer);
 
-  // --- Ghost Player State ---
-  const [ghostPlayers, setGhostPlayers] = useState<Player[]>([]); // local ghosts only
+  // Restore local UI state for ghost mode, error, and team selections
   const [ghostMode, setGhostMode] = useState(false);
   const [ghostError, setGhostError] = useState<string | null>(null);
   const [ghostTeamSelections, setGhostTeamSelections] = useState<{ [playerId: string]: Team }>({});
+
+  const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [showHandicapEditor, setShowHandicapEditor] = useState(false);
 
   // Sort and dedupe players by last name
   const sortedPlayers = useMemo(() => {
@@ -91,14 +96,9 @@ export const PlayersScreen: React.FC = () => {
     setTeam(playerId, team);
   };
 
-  const handleRemovePlayer = async (playerId: string) => {
-    try {
-      await deletePlayerById(playerId); // Deletes from Firestore/Dexie
-      remove(playerId); // Removes from current roster/teams in rosterStore
-    } catch (err) {
-      console.error("Failed to remove player:", err);
-      alert("Error removing player. Please try again.");
-    }
+  // Remove a player from the current team/roster (not from DB)
+  const handleRemovePlayer = (playerId: string) => {
+    remove(playerId);
   };
 
   const handleAddPlayerClick = () => {
@@ -188,9 +188,10 @@ export const PlayersScreen: React.FC = () => {
   // Total selected (real + ghost)
   const totalSelected = realRosterIds.length + ghostPlayers.length;
 
-  // Add ghost player to local state and assign to a team
+  // Add ghost player to store and assign to a team
   const assignGhostToTeam = (basePlayer: Player, team: Team) => {
     setGhostError(null);
+    const realRosterIds = [...roster.red, ...roster.blue];
     if (ghostPlayers.length + realRosterIds.length >= 4) {
       setGhostError('You cannot add more than 4 players.');
       return;
@@ -206,7 +207,7 @@ export const PlayersScreen: React.FC = () => {
       sourcePlayerId: basePlayer.id,
       name: `Ghost (${basePlayer.first})`,
     };
-    setGhostPlayers(prev => [...prev, ghost]);
+    addGhostPlayer(ghost);
     setTeam(ghost.id, team);
     setGhostTeamSelections(prev => {
       const copy = { ...prev };
@@ -214,15 +215,20 @@ export const PlayersScreen: React.FC = () => {
       return copy;
     });
   };
-  // Remove ghost player
+  // Remove a ghost from the store and from the team
   const handleRemoveGhost = (ghostId: string) => {
-    setGhostPlayers(prev => prev.filter(g => g.id !== ghostId));
+    removeGhostPlayer(ghostId);
     remove(ghostId);
   };
 
   // --- Render helpers ---
   // Show all available players for selection
-  const availablePlayers = sortedPlayers;
+  const availablePlayers = ghostMode
+    ? sortedPlayers // ghostMode handled separately below
+    : [
+        ...sortedPlayers,
+        ...ghostPlayers.filter(g => !sortedPlayers.some(p => p.id === g.id)),
+      ];
 
   return (
     <div className="players-screen">
@@ -321,9 +327,10 @@ export const PlayersScreen: React.FC = () => {
                       <PlayerRow
                         player={player}
                         team={getPlayerTeam(player.id)}
-                        onTeamSelect={handleTeamSelect}
+                        onTeamSelect={player.isGhost ? setTeam : handleTeamSelect}
                         onRemove={player.isGhost ? handleRemoveGhost : handleRemovePlayer}
                         onEdit={player.isGhost ? undefined : handleEditPlayer}
+                        isGhostDisplay={!!player.isGhost}
                       />
                     </li>
                   ))}
@@ -335,22 +342,48 @@ export const PlayersScreen: React.FC = () => {
         {!isLoading && !error && (
           <>
             <button 
-              className="fab-add-player" 
+              className="fab-add-player"
               onClick={handleAddPlayerClick}
               aria-label="Add New Player"
               title="Add New Player"
+              style={{
+                position: 'fixed',
+                bottom: 24,
+                right: 24,
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                background: '#256029',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                fontSize: 24,
+                zIndex: 21,
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'box-shadow 0.2s',
+              }}
+              onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 4px #a3c9a8'}
+              onBlur={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)'}
+              onMouseDown={e => e.currentTarget.style.background = '#256029'}
+              onMouseUp={e => e.currentTarget.style.background = '#256029'}
             >
-              <span style={{ fontSize: '28px', lineHeight: '1', marginRight: '4px' }}>+</span> 
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="currentColor" 
-                className="fab-add-player-icon"
+              <span style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 0 }}>+</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ width: 24, height: 24, marginLeft: 0 }}
+                aria-hidden="true"
               >
-                <path 
-                  fillRule="evenodd" 
-                  d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" 
-                  clipRule="evenodd" 
+                <path
+                  fillRule="evenodd"
+                  d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+                  clipRule="evenodd"
                 />
               </svg>
             </button>
@@ -358,13 +391,30 @@ export const PlayersScreen: React.FC = () => {
             {totalSelected < 4 && eligibleGhostBases.length > 0 ? (
               <button
                 className="fab-add-player"
-                style={{ position: 'fixed', bottom: 90, right: 24, zIndex: 20, background: ghostMode ? '#e0e0ff' : '#fff', border: '2px solid #aaa' }}
-                aria-label="Toggle Ghost Mode"
-                title="Toggle Ghost Mode"
+                style={{
+                  position: 'fixed',
+                  bottom: 90,
+                  right: 24,
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  background: ghostMode ? '#e0e0ff' : '#fff',
+                  border: '2px solid #aaa',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                  fontSize: 32,
+                  zIndex: 22,
+                  padding: 0,
+                  cursor: 'pointer',
+                  color: '#333',
+                }}
+                aria-label={ghostMode ? 'Exit Ghost Mode' : 'Enter Ghost Mode'}
+                title={ghostMode ? 'Exit Ghost Mode' : 'Enter Ghost Mode'}
                 onClick={() => setGhostMode(g => !g)}
               >
-                <span role="img" aria-label="Ghost" style={{ fontSize: 24, marginRight: 8 }}>👻</span>
-                {ghostMode ? 'Done' : 'Ghost'}
+                <span role="img" aria-label="Ghost" style={{ fontSize: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👻</span>
               </button>
             ) : (
               // Debug info if FAB not shown
