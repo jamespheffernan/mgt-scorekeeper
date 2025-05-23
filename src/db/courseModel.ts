@@ -33,6 +33,7 @@ export interface Course {
   teeOptions: TeeOption[]; // Available tee options
   dateAdded?: Date;      // When the course was added
   lastPlayed?: Date;     // When the course was last played
+  timesPlayed?: number;  // Number of times this course has been played
   isDefault?: boolean;   // Whether this is the default course
 }
 

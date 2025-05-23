@@ -208,6 +208,153 @@ class MillbrookDatabase extends Dexie {
   }
 
   /**
+   * Search courses by name or location
+   */
+  async searchCourses(query: string): Promise<Course[]> {
+    if (!query || query.trim().length === 0) {
+      return this.getAllCourses();
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    const allCourses = await this.courses.toArray();
+    
+    return allCourses.filter(course => 
+      course.name.toLowerCase().includes(searchTerm) ||
+      course.location.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  /**
+   * Filter courses by various criteria
+   */
+  async filterCourses(filters: {
+    location?: string;
+    hasRating?: boolean;
+    minTimesPlayed?: number;
+    maxTimesPlayed?: number;
+    playedAfter?: Date;
+    playedBefore?: Date;
+  }): Promise<Course[]> {
+    let courses = await this.courses.toArray();
+
+    if (filters.location) {
+      const locationLower = filters.location.toLowerCase();
+      courses = courses.filter(course => 
+        course.location.toLowerCase().includes(locationLower)
+      );
+    }
+
+    if (filters.hasRating !== undefined) {
+      courses = courses.filter(course => {
+        const hasRatings = course.teeOptions.some(tee => 
+          tee.rating > 0 && tee.slope > 0
+        );
+        return filters.hasRating ? hasRatings : !hasRatings;
+      });
+    }
+
+    if (filters.minTimesPlayed !== undefined) {
+      courses = courses.filter(course => 
+        (course.timesPlayed || 0) >= filters.minTimesPlayed!
+      );
+    }
+
+    if (filters.maxTimesPlayed !== undefined) {
+      courses = courses.filter(course => 
+        (course.timesPlayed || 0) <= filters.maxTimesPlayed!
+      );
+    }
+
+    if (filters.playedAfter) {
+      courses = courses.filter(course => 
+        course.lastPlayed && course.lastPlayed >= filters.playedAfter!
+      );
+    }
+
+    if (filters.playedBefore) {
+      courses = courses.filter(course => 
+        course.lastPlayed && course.lastPlayed <= filters.playedBefore!
+      );
+    }
+
+    return courses;
+  }
+
+  /**
+   * Get courses sorted by usage (most played first)
+   */
+  async getCoursesByUsage(): Promise<Course[]> {
+    const courses = await this.courses.toArray();
+    return courses.sort((a, b) => (b.timesPlayed || 0) - (a.timesPlayed || 0));
+  }
+
+  /**
+   * Get recently played courses
+   */
+  async getRecentCourses(limit: number = 5): Promise<Course[]> {
+    const courses = await this.courses.toArray();
+    return courses
+      .filter(course => course.lastPlayed)
+      .sort((a, b) => {
+        const aDate = a.lastPlayed?.getTime() || 0;
+        const bDate = b.lastPlayed?.getTime() || 0;
+        return bDate - aDate;
+      })
+      .slice(0, limit);
+  }
+
+  /**
+   * Update course usage statistics when a match is played
+   */
+  async updateCourseUsage(courseId: string): Promise<void> {
+    const course = await this.getCourse(courseId);
+    if (!course) {
+      return;
+    }
+
+    const updatedCourse: Course = {
+      ...course,
+      lastPlayed: new Date(),
+      timesPlayed: (course.timesPlayed || 0) + 1
+    };
+
+    await this.saveCourse(updatedCourse);
+  }
+
+  /**
+   * Get course statistics
+   */
+  async getCourseStats(): Promise<{
+    totalCourses: number;
+    coursesWithRatings: number;
+    mostPlayedCourse?: Course;
+    averageTimesPlayed: number;
+  }> {
+    const courses = await this.courses.toArray();
+    const totalCourses = courses.length;
+    
+    const coursesWithRatings = courses.filter(course => 
+      course.teeOptions.some(tee => tee.rating > 0 && tee.slope > 0)
+    ).length;
+
+    const coursesWithPlays = courses.filter(course => (course.timesPlayed || 0) > 0);
+    const mostPlayedCourse = coursesWithPlays.reduce((max, course) => 
+      (course.timesPlayed || 0) > (max?.timesPlayed || 0) ? course : max, 
+      undefined as Course | undefined
+    );
+
+    const totalPlays = courses.reduce((sum, course) => sum + (course.timesPlayed || 0), 0);
+    const averageTimesPlayed = totalCourses > 0 ? totalPlays / totalCourses : 0;
+
+    return {
+      totalCourses,
+      coursesWithRatings,
+      mostPlayedCourse,
+      averageTimesPlayed
+    };
+  }
+
+  /**
    * Initialize with sample data if empty
    */
   async initializeIfEmpty(): Promise<void> {
