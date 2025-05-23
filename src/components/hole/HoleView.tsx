@@ -177,8 +177,22 @@ export const HoleView = () => {
             setPlayerSIs(newPlayerSIs);
             console.log(`[COURSE-DEBUG] Final player pars: ${newPlayerPars.join(', ')}`);
             
-            // Update the default gross scores based on pars
-            setGrossScores(newPlayerPars as [number, number, number, number]);
+            // Update gross scores: preserve ghost scores from store, use new pars for real players
+            const currentHoleIndex = currentHole - 1;
+            const holeScore = holeScores[currentHoleIndex];
+            
+            const updatedScores = newPlayerPars.map((par, index) => {
+              const player = players[index];
+              if (player?.isGhost && holeScore) {
+                // Use pre-generated ghost score from store
+                return holeScore.gross[index];
+              } else {
+                // For real players, use the new par value
+                return par;
+              }
+            }) as [number, number, number, number];
+            
+            setGrossScores(updatedScores);
           }
         }
       } catch (error) {
