@@ -40,6 +40,7 @@ const TeeSelectionScreen: React.FC = () => {
   const [localBigGameIndexInput, setLocalBigGameIndexInput] = useState<string>(
     bigGameSpecificIndex !== undefined ? String(bigGameSpecificIndex) : ''
   );
+  const [isCreatingMatch, setIsCreatingMatch] = useState(false);
   
   // Check if we have the required team data
   const hasTeamData = redTeamIds.length > 0 || blueTeamIds.length > 0;
@@ -146,8 +147,7 @@ const TeeSelectionScreen: React.FC = () => {
   };
   
   // Create the match and start
-  const handleCreateMatch = () => {
-    // Validation
+  const handleCreateMatch = async () => {
     if (!selectedCourseId || !selectedCourse) {
       alert('Please select a course.');
       return;
@@ -176,21 +176,21 @@ const TeeSelectionScreen: React.FC = () => {
     // Convert roster players to game players, including ghosts
     const { players, teams } = convertToGamePlayers(dbPlayers, ghostPlayers);
     
-    // Create match with selected options
-    createMatch(players, teams, {
-      bigGame,
-      courseId: selectedCourseId,
-      playerTeeIds: playerTeeIds as [string, string, string, string],
-      bigGameSpecificIndex: bigGame && localBigGameIndexInput !== '' && !isNaN(parseFloat(localBigGameIndexInput)) 
-                            ? parseFloat(localBigGameIndexInput) 
-                            : undefined 
-    });
-    
-    // Navigate to first hole
-    navigate('/hole/1');
-    
-    // Reset setup flow state
-    reset();
+    setIsCreatingMatch(true);
+    try {
+      await createMatch(players, teams, {
+        bigGame,
+        courseId: selectedCourseId,
+        playerTeeIds: playerTeeIds as [string, string, string, string],
+        bigGameSpecificIndex: bigGame && localBigGameIndexInput !== '' && !isNaN(parseFloat(localBigGameIndexInput)) 
+                              ? parseFloat(localBigGameIndexInput) 
+                              : undefined 
+      });
+      navigate('/hole/1');
+      reset();
+    } finally {
+      setIsCreatingMatch(false);
+    }
   };
   
   // Effect to update local state if store changes (e.g. on reset or initial load)
@@ -202,9 +202,12 @@ const TeeSelectionScreen: React.FC = () => {
     return <div className="loading-indicator">Loading...</div>;
   }
   
-  // Get player objects for the teams
-  const redPlayers = redTeamIds.map(id => dbPlayers.find(p => p.id === id)).filter(Boolean) as any[];
-  const bluePlayers = blueTeamIds.map(id => dbPlayers.find(p => p.id === id)).filter(Boolean) as any[];
+  // Helper to find a player by ID, checking ghosts first
+  const findPlayer = (id: string) =>
+    ghostPlayers.find(g => g.id === id) || dbPlayers.find(p => p.id === id);
+
+  const redPlayers = redTeamIds.map(findPlayer).filter(Boolean) as any[];
+  const bluePlayers = blueTeamIds.map(findPlayer).filter(Boolean) as any[];
   const allPlayers = [...redPlayers, ...bluePlayers];
   
   return (
@@ -333,8 +336,9 @@ const TeeSelectionScreen: React.FC = () => {
           <button
             className="continue-button"
             onClick={handleCreateMatch}
+            disabled={isCreatingMatch}
           >
-            Start Match
+            {isCreatingMatch ? 'Creating Match...' : 'Start Match'}
           </button>
         </div>
         </div>

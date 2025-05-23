@@ -67,16 +67,19 @@ const SettlementView: React.FC<SettlementViewProps> = ({ matchId }) => {
   });
   
   // Start a new match with the same players
-  const handleRematch = () => {
-    // Create a new match with the same players and teams
-    createMatch(players, playerTeams, {
-      bigGame: match.bigGame,
-      courseId: match.courseId,
-      playerTeeIds: match.playerTeeIds
-    });
-    
-    // Navigate to the hole view
-    navigate('/hole/1');
+  const [isCreatingMatch, setIsCreatingMatch] = useState(false);
+  const handleRematch = async () => {
+    setIsCreatingMatch(true);
+    try {
+      await createMatch(players, playerTeams, {
+        bigGame: match.bigGame,
+        courseId: match.courseId,
+        playerTeeIds: match.playerTeeIds
+      });
+      navigate('/hole/1');
+    } finally {
+      setIsCreatingMatch(false);
+    }
   };
   
   // Export results as CSV

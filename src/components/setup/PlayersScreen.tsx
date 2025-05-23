@@ -46,7 +46,7 @@ export const PlayersScreen: React.FC = () => {
 
   const initialize = useRosterStore(state => state.initialize);
   const roster = useRosterStore(state => state.roster);
-  const { setTeam, remove } = useRosterStore();
+  const { setTeam, remove, resetRoster } = useRosterStore();
 
   // --- Ghost Player State (now from SetupFlowStore) ---
   const ghostPlayers = useSetupFlowStore(state => state.ghostPlayers);
@@ -79,6 +79,14 @@ export const PlayersScreen: React.FC = () => {
     const initializeRoster = async () => {
       try {
         await initialize();
+        // Debug log for current roster state
+        console.debug('Roster on PlayersScreen mount:', roster);
+        // If both teams are empty, reset the roster to ensure clean state
+        if (roster.red.length > 0 || roster.blue.length > 0) {
+          // Do nothing, roster already has players
+        } else {
+          resetRoster();
+        }
       } catch (err: any) {
         console.error("Roster initialization failed:", err);
       }
@@ -225,10 +233,7 @@ export const PlayersScreen: React.FC = () => {
   // Show all available players for selection
   const availablePlayers = ghostMode
     ? sortedPlayers // ghostMode handled separately below
-    : [
-        ...sortedPlayers,
-        ...ghostPlayers.filter(g => !sortedPlayers.some(p => p.id === g.id)),
-      ];
+    : dedupePlayersById([...sortedPlayers, ...ghostPlayers]);
 
   return (
     <div className="players-screen">

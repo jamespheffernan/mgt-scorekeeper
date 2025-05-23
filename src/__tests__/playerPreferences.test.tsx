@@ -42,7 +42,7 @@ describe('Player Preferences', () => {
       );
       
       expect(screen.getByText(/Edit Player/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Handicap Index/i)).toHaveValue('9.5');
+      expect(screen.getByLabelText(/Handicap Index/i)).toHaveValue(9.5);
       expect(screen.getByLabelText(/GHIN Number/i)).toHaveValue('1234567');
       // expect(screen.getByLabelText(/Notes/i)).toHaveValue('Test notes'); // Remove if Notes is not rendered
     });

@@ -8,7 +8,8 @@ import { calculateBigGameRow, calculateBigGameTotal, BigGameRow } from '../calcE
 import { millbrookDb } from '../db/millbrookDb';
 import { Player, Team, GameHistory } from '../db/API-GameState';
 import { TeeOption, HoleInfo } from '../db/courseModel';
-import { generateGhostScores } from '../calcEngine/ghostScoreGenerator';
+import { generateGhostScores, generateGhostJunkEvents, GhostJunkEvents } from '../calcEngine/ghostScoreGenerator';
+import { useSetupFlowStore } from './setupFlowStore';
 
 // Re-export types
 export type JunkFlags = JF;
@@ -63,6 +64,10 @@ export interface GameState {
   ledger: LedgerRow[];
   junkEvents: JunkEvent[];
   bigGameRows: BigGameRow[];
+  // Ghost player pre-generated junk events
+  ghostJunkEvents: { [playerId: string]: GhostJunkEvents };
+  // Ghost score reveal state - tracks which holes are revealed for each ghost
+  ghostRevealState: { [ghostPlayerId: string]: Set<number> };
   // UI state
   isDoubleAvailable: boolean;
   trailingTeam?: Team;
@@ -202,6 +207,11 @@ export const useGameStore = create(
     finishRound: () => Promise<void>;
     cancelMatch: () => Promise<void>;
     resetGame: () => void;
+    // Ghost reveal actions
+    revealGhostScore: (ghostPlayerId: string, hole: number) => void;
+    hideGhostScore: (ghostPlayerId: string, hole: number) => void;
+    isGhostScoreRevealed: (ghostPlayerId: string, hole: number) => boolean;
+    revealAllGhostScores: (ghostPlayerId: string) => void;
     // Utility
     getPlayerById: (id: string) => Player | undefined;
   }>(
@@ -227,54 +237,95 @@ export const useGameStore = create(
       ledger: [],
       junkEvents: [],
       bigGameRows: [],
+      ghostJunkEvents: {},
+      ghostRevealState: {},
       isDoubleAvailable: false,
       trailingTeam: undefined,
 
       // Create a new match
-      createMatch: (players, teams, matchOptions: MatchOptions) => {
-        // REMOVED_GEMINI_LOG by Gemini
-
+      createMatch: async (players, teams, matchOptions: MatchOptions) => {
         const today = new Date().toISOString().split('T')[0];
         const playerIds = players.map(p => p.id) as [string, string, string, string];
         const nowIso = new Date().toISOString();
         const startTime = nowIso;
-        // Check if any player is a ghost
         const hasGhost = players.some(p => p.isGhost);
 
-        // Pre-populate holeScores for ghosts
-        let holeScores = [];
-        // Try to get course data for score generation
-        let courseHoles = Array(18).fill({ par: 4, strokeIndex: 1 });
-        if (matchOptions.courseId) {
-          // This is async, but for now, use default if not available synchronously
-          // In a real app, you might want to refactor createMatch to be async
-          // and await millbrookDb.getCourse(matchOptions.courseId)
+        // Prepare for async course/tee data fetch
+        let courseHoles: HoleInfo[] = Array(18).fill({ par: 4, strokeIndex: 1 });
+        let playerSIs: number[][] | null = null;
+        let courseError: string | null = null;
+        if (matchOptions.courseId && matchOptions.playerTeeIds) {
+          try {
+            const course = await millbrookDb.getCourse(matchOptions.courseId);
+            if (course) {
+              // Use the first player's tee as the default for ghost score generation
+              const teeId = matchOptions.playerTeeIds[0];
+              const tee = course.teeOptions.find(t => t.id === teeId);
+              if (tee && tee.holes && tee.holes.length === 18) {
+                courseHoles = tee.holes;
+              } else {
+                courseError = 'Tee data missing or incomplete for selected course.';
+              }
+              // Get player-specific SIs for net calculation
+              playerSIs = await getPlayerStrokeIndexes(matchOptions.courseId, matchOptions.playerTeeIds);
+            } else {
+              courseError = 'Course data not found.';
+            }
+          } catch (err) {
+            courseError = 'Error fetching course/tee data.';
+            console.error('[createMatch] Error fetching course/tee data:', err);
+          }
         }
-        // For each hole, build gross/net arrays for all players
+        if (courseError) {
+          // Optionally, notify user or abort. For now, fallback to defaults and log error.
+          console.warn('[createMatch] Proceeding with default course/tee data due to error:', courseError);
+        }
+
         // --- SAFEGUARD: Track ghost score generation ---
         const ghostScoreMap: { [playerId: string]: number[] } = {};
+        const ghostJunkMap: { [playerId: string]: GhostJunkEvents } = {};
+        
         players.forEach((player, idx) => {
           if (player.isGhost) {
-            ghostScoreMap[player.id] = generateGhostScores(player.index, { holes: courseHoles }, 1000 + idx);
+            const ghostScores = generateGhostScores(player.index, { holes: courseHoles }, 1000 + idx);
+            ghostScoreMap[player.id] = ghostScores;
+            
+            // Generate junk events for this ghost
+            const ghostJunk = generateGhostJunkEvents(player.index, ghostScores, { holes: courseHoles }, 2000 + idx);
+            ghostJunkMap[player.id] = ghostJunk;
+            
+            console.log(`[GHOST-INIT] Generated ${ghostScores.length} scores and junk events for ghost ${player.name}`);
           }
         });
         // --- END SAFEGUARD ---
+        // Prepare player indexes
+        const indexes = players.map(p => p.index);
+        // Allocate strokes for all players for all holes
+        let strokeMatrix: number[][] = [];
+        if (playerSIs) {
+          strokeMatrix = allocateStrokesMultiTee(indexes, playerSIs);
+        } else {
+          strokeMatrix = allocateStrokes(indexes, Array(18).fill(1).map((_, i) => i + 1));
+        }
+        let holeScores = [];
         for (let h = 0; h < 18; h++) {
           const gross: number[] = [];
           const net: number[] = [];
           players.forEach((player, idx) => {
+            let grossScore = 0;
             if (player.isGhost) {
-              // Use precomputed ghost scores
               const ghostScores = ghostScoreMap[player.id];
               if (!ghostScores || ghostScores.length !== 18) {
                 throw new Error(`Ghost player ${player.name} missing generated scores at match creation!`);
               }
-              gross.push(ghostScores[h]);
-              net.push(0); // Net will be calculated later
+              grossScore = ghostScores[h];
             } else {
-              gross.push(0); // Real players start with 0 (or null if preferred)
-              net.push(0);
+              grossScore = 0; // Real players start with 0 (or null if preferred)
             }
+            gross.push(grossScore);
+            // Net = gross - strokes allocated for this player/hole
+            const strokes = strokeMatrix[idx]?.[h] || 0;
+            net.push(grossScore - strokes);
           });
           holeScores.push({
             hole: h + 1,
@@ -284,14 +335,22 @@ export const useGameStore = create(
           });
         }
 
+        // Initialize ghost reveal state for ghost players (all holes hidden by default)
+        const initialGhostRevealState: { [ghostPlayerId: string]: Set<number> } = {};
+        players.forEach(player => {
+          if (player.isGhost) {
+            initialGhostRevealState[player.id] = new Set<number>();
+          }
+        });
+
         set({
           match: {
             id: crypto.randomUUID(),
             date: today,
             bigGame: matchOptions.bigGame,
             playerIds,
-            holePar: Array(18).fill(4),  // Default all holes to par 4
-            holeSI: Array(18).fill(0).map((_, i) => i + 1),   // Default stroke indexes 1-18
+            holePar: courseHoles.map(h => h.par),
+            holeSI: courseHoles.map(h => h.strokeIndex),
             state: 'active',
             currentHole: 1,
             carry: 0,
@@ -311,10 +370,11 @@ export const useGameStore = create(
           ledger: [],
           junkEvents: [],
           bigGameRows: [],
+          ghostJunkEvents: ghostJunkMap,
+          ghostRevealState: initialGhostRevealState,
           isDoubleAvailable: false,
           trailingTeam: undefined
         });
-        
         // Also save the initial game state to IndexedDB
         const fullGameState = get();
         const gameStateToSave: GameState = {
@@ -325,13 +385,14 @@ export const useGameStore = create(
           ledger: fullGameState.ledger,
           junkEvents: fullGameState.junkEvents,
           bigGameRows: fullGameState.bigGameRows,
+          ghostJunkEvents: fullGameState.ghostJunkEvents,
+          ghostRevealState: fullGameState.ghostRevealState,
           isDoubleAvailable: fullGameState.isDoubleAvailable,
           trailingTeam: fullGameState.trailingTeam,
         };
         millbrookDb.saveGameState(deepStripFunctions(gameStateToSave)).catch(err => {
           console.error('Error saving initial game state:', err);
         });
-        
         // Update player lastUsed timestamps
         players.forEach(player => {
           const updatedPlayer = {
@@ -457,17 +518,41 @@ export const useGameStore = create(
         players.forEach((player, idx) => {
           // Get the correct par value for this player
           const par = updatedMatch.holePar[hole - 1];
-          // For ghost players, junk events are simulated and included using the same logic as real players
-          // (Simulation logic is handled in the ghost score generator or by the UI; here we just include them)
+          
+          let junkFlagsToUse: JunkFlags;
+          
+          if (player.isGhost) {
+            // Use pre-generated junk events for ghost players
+            const ghostJunkEvents = get().ghostJunkEvents[player.id];
+            if (ghostJunkEvents && ghostJunkEvents[hole]) {
+              junkFlagsToUse = ghostJunkEvents[hole];
+              console.log(`[GHOST-JUNK] Using pre-generated junk flags for ghost ${player.name} on hole ${hole}:`, junkFlagsToUse);
+            } else {
+              // Fallback to empty flags if no pre-generated data
+              junkFlagsToUse = {
+                hadBunkerShot: false,
+                isOnGreenFromTee: false,
+                isClosestOnGreen: false,
+                hadThreePutts: false,
+                isLongDrive: false
+              };
+              console.warn(`[GHOST-JUNK] No pre-generated junk events found for ghost ${player.name} on hole ${hole}`);
+            }
+          } else {
+            // Use UI-provided flags for real players
+            junkFlagsToUse = junkFlags[idx];
+          }
+          
           const events = evaluateJunkEvents(
             hole,
             players[idx].id,
             playerTeams[idx],
             grossScores[idx],
             par,
-            junkFlags[idx],
+            junkFlagsToUse,
             updatedMatch.base
           );
+          
           if (player.isGhost) {
             console.log(`[GHOST-JUNK] Junk events for ghost player ${player.name}: ${JSON.stringify(events)}`);
           } else {
@@ -533,14 +618,40 @@ export const useGameStore = create(
         let bigGameTotal = updatedMatch.bigGameTotal;
         
         if (updatedMatch.bigGame) {
-          // Exclude ghost players from Big Game calculation
-          const nonGhostIndexes = players.map((p, idx) => p.isGhost ? null : idx).filter(idx => idx !== null) as number[];
-          const nonGhostNetScores = nonGhostIndexes.map(idx => netScores[idx]);
-          // Log which players are included
-          console.log(`[BIG-GAME] Hole ${hole}: Including players for Big Game:`, nonGhostIndexes.map(idx => players[idx].name));
-          bigGameRow = calculateBigGameRow(hole, nonGhostNetScores);
-          if (bigGameRow) {
-            bigGameTotal = calculateBigGameTotal([...bigGameRows, bigGameRow]);
+          try {
+            // Exclude ghost players from Big Game calculation
+            const nonGhostIndexes = players.map((p, idx) => p.isGhost ? null : idx).filter(idx => idx !== null) as number[];
+            const nonGhostNetScores = nonGhostIndexes.map(idx => netScores[idx]);
+            
+            // Ensure we have at least 2 non-ghost players for Big Game
+            if (nonGhostNetScores.length < 2) {
+              console.warn(`[BIG-GAME] Hole ${hole}: Not enough non-ghost players (${nonGhostNetScores.length}) for Big Game calculation`);
+            } else {
+              // Log which players are included
+              console.log(`[BIG-GAME] Hole ${hole}: Including players for Big Game:`, nonGhostIndexes.map(idx => players[idx].name));
+              
+              // Validate net scores are numbers
+              const validNetScores = nonGhostNetScores.every(score => typeof score === 'number' && !isNaN(score));
+              if (!validNetScores) {
+                console.error(`[BIG-GAME] Hole ${hole}: Invalid net scores for Big Game:`, nonGhostNetScores);
+              } else {
+                bigGameRow = calculateBigGameRow(hole, nonGhostNetScores);
+                if (bigGameRow && typeof bigGameRow.subtotal === 'number' && !isNaN(bigGameRow.subtotal)) {
+                  const newBigGameTotal = calculateBigGameTotal([...bigGameRows, bigGameRow]);
+                  if (typeof newBigGameTotal === 'number' && !isNaN(newBigGameTotal)) {
+                    bigGameTotal = newBigGameTotal;
+                  } else {
+                    console.error(`[BIG-GAME] Hole ${hole}: Invalid Big Game total calculated:`, newBigGameTotal);
+                    bigGameTotal = updatedMatch.bigGameTotal; // Keep previous total
+                  }
+                } else {
+                  console.error(`[BIG-GAME] Hole ${hole}: Invalid Big Game row calculated:`, bigGameRow);
+                }
+              }
+            }
+          } catch (error) {
+            console.error(`[BIG-GAME] Hole ${hole}: Error calculating Big Game row:`, error);
+            // Don't update bigGameRow or bigGameTotal on error
           }
         }
         
@@ -864,9 +975,92 @@ export const useGameStore = create(
           ledger: [],
           junkEvents: [],
           bigGameRows: [],
+          ghostJunkEvents: {},
+          ghostRevealState: {},
           isDoubleAvailable: false,
           trailingTeam: undefined
         });
+      },
+
+      // Ghost reveal actions
+      revealGhostScore: (ghostPlayerId, hole) => {
+        const { ghostRevealState } = get();
+        const currentRevealed = ghostRevealState[ghostPlayerId];
+        
+        // Convert to Set if it's an array (from persistence)
+        let revealedSet: Set<number>;
+        if (Array.isArray(currentRevealed)) {
+          revealedSet = new Set(currentRevealed);
+        } else if (currentRevealed instanceof Set) {
+          revealedSet = new Set(currentRevealed);
+        } else {
+          revealedSet = new Set<number>();
+        }
+        
+        revealedSet.add(hole);
+        
+        set({
+          ghostRevealState: {
+            ...ghostRevealState,
+            [ghostPlayerId]: revealedSet
+          }
+        });
+        
+        console.log(`[GHOST-REVEAL] Revealed hole ${hole} for ghost ${ghostPlayerId}`);
+      },
+
+      hideGhostScore: (ghostPlayerId, hole) => {
+        const { ghostRevealState } = get();
+        const currentRevealed = ghostRevealState[ghostPlayerId];
+        
+        // Convert to Set if it's an array (from persistence)
+        let revealedSet: Set<number>;
+        if (Array.isArray(currentRevealed)) {
+          revealedSet = new Set(currentRevealed);
+        } else if (currentRevealed instanceof Set) {
+          revealedSet = new Set(currentRevealed);
+        } else {
+          revealedSet = new Set<number>();
+        }
+        
+        revealedSet.delete(hole);
+        
+        set({
+          ghostRevealState: {
+            ...ghostRevealState,
+            [ghostPlayerId]: revealedSet
+          }
+        });
+        
+        console.log(`[GHOST-REVEAL] Hid hole ${hole} for ghost ${ghostPlayerId}`);
+      },
+
+      isGhostScoreRevealed: (ghostPlayerId, hole) => {
+        const { ghostRevealState } = get();
+        const revealed = ghostRevealState[ghostPlayerId];
+        if (!revealed) return false;
+        
+        // Handle case where Set was serialized as array during persistence
+        if (Array.isArray(revealed)) {
+          return revealed.includes(hole);
+        }
+        
+        // Handle normal Set case
+        return revealed.has ? revealed.has(hole) : false;
+      },
+
+      revealAllGhostScores: (ghostPlayerId) => {
+        const { ghostRevealState } = get();
+        const allHoles = new Set(Array.from({length: 18}, (_, i) => i + 1));
+        
+        set({
+          ghostRevealState: {
+            ...ghostRevealState,
+            [ghostPlayerId]: allHoles
+          }
+        });
+        
+        console.log(`[GHOST-REVEAL] Revealed all holes for ghost ${ghostPlayerId}`);
       },
 
       // Get player by ID

@@ -3,6 +3,11 @@ import { render, fireEvent } from '@testing-library/react';
 import * as gameStore from '../../store/gameStore';
 import ExportButton from './ExportButton';
 
+// Set up testing environment for React
+Object.defineProperty(window, 'HTMLElement', {
+  value: global.HTMLElement,
+});
+
 // Mock getFullName utility
 jest.mock('../../utils/nameUtils', () => ({
   getFullName: (player: any) => player.name || 'Player',
@@ -24,15 +29,17 @@ jest.mock('../../db/millbrookDb', () => ({
 }));
 
 describe('ExportButton CSV Export', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     // Mock URL.createObjectURL
     global.URL.createObjectURL = jest.fn(() => 'blob:mock');
-    // Remove global document.createElement mock
+    // Mock DOM methods
+    const originalAppendChild = document.body.appendChild;
+    const originalRemoveChild = document.body.removeChild;
     document.body.appendChild = jest.fn();
     document.body.removeChild = jest.fn();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.restoreAllMocks();
   });
 
@@ -84,20 +91,25 @@ describe('ExportButton CSV Export', () => {
       };
     });
 
-    // Only mock document.createElement for 'a' elements
+    // Mock document.createElement for anchor elements
+    const mockAnchor = {
+      setAttribute: jest.fn(),
+      click: jest.fn(),
+      style: {},
+    };
     const origCreateElement = document.createElement;
-    document.createElement = ((tagName: string) => {
+    document.createElement = jest.fn((tagName: string) => {
       if (tagName === 'a') {
-        return {
-          setAttribute: jest.fn(),
-          click: jest.fn(),
-          style: {},
-        } as any;
+        return mockAnchor as any;
       }
       return origCreateElement.call(document, tagName);
-    }) as typeof document.createElement;
+    });
 
-    const { getByText } = render(<ExportButton />);
+    // Create a container for the test
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    
+    const { getByText } = render(<ExportButton />, { container });
     const btn = getByText(/Export CSV/i);
     fireEvent.click(btn);
 

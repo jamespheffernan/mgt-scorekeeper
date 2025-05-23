@@ -41,6 +41,7 @@ export const useRosterStore = create<{
   setTeam: (id: string, team: Team) => void;
   remove: (id: string) => void;
   initialize: () => Promise<void>;
+  resetRoster: () => void;
 }>((set, get) => ({
   roster: { red: [], blue: [] },
   
@@ -96,6 +97,12 @@ export const useRosterStore = create<{
       roster: newRoster 
     });
     
+    return { roster: newRoster };
+  }),
+  
+  resetRoster: () => set(() => {
+    const newRoster = { red: [], blue: [] };
+    millbrookDb.matchState.put({ id: 'currentRoster', roster: newRoster });
     return { roster: newRoster };
   })
 })); 
