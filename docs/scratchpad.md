@@ -41,6 +41,7 @@ The implementation plan has been significantly updated to reflect actual progres
 [2024-06-11] When mocking hooks or context in React tests, always use a stable reference for arrays/objects (e.g., move the mock array/object outside the mock implementation) to prevent infinite update loops caused by dependency changes in useEffect.
 [2024-06-11] In Jest/jsdom tests, mock window.scrollTo and HTMLElement.prototype.scrollTo if your components use them, as jsdom does not implement these methods by default and will throw errors otherwise. 
 [2024-12-27] Feature implementation should identify architectural changes (like async match creation) early in the planning phase to avoid cascading updates across the codebase.
+[2024-12-27] Statistical validation tests for probabilistic systems require careful tolerance balancing - too strict and they fail due to inherent randomness, too loose and they don't validate the statistical properties. Floating point precision issues can also cause seemingly correct values to fail exact boundary checks.
 
 ## Overall App Plan Review (Planner Mode - [2024-06-12])
 
