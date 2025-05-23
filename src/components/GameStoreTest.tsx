@@ -61,15 +61,20 @@ export function GameStoreTest() {
   // Local state for players and teams before creating match
   const [testPlayers, setTestPlayers] = useState<Player[]>([]);
   const [testTeams, setTestTeams] = useState<Team[]>([]);
+  const [isCreatingMatch, setIsCreatingMatch] = useState(false);
   
   // Create a test match
-  const handleCreateMatch = () => {
+  const handleCreateMatch = async () => {
     if (testPlayers.length !== 4) {
       alert('You need exactly 4 players to create a match');
       return;
     }
-    
-    createMatch(testPlayers, testTeams, { bigGame: enableBigGame });
+    setIsCreatingMatch(true);
+    try {
+      await createMatch(testPlayers, testTeams, { bigGame: enableBigGame });
+    } finally {
+      setIsCreatingMatch(false);
+    }
   };
   
   // Enter scores for the current hole

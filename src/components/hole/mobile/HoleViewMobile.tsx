@@ -179,13 +179,29 @@ export const HoleViewMobile: React.FC = () => {
 
   // Millbrook Strokes Calculation (for current hole)
   useEffect(() => {
-    if (playerIndexes && playerStrokeIndexes && players.length > 0) {
-      const millbrookStrokeMap = allocateStrokesMultiTee(playerIndexes, playerStrokeIndexes);
-      const millbrookStrokesForCurrentHole = millbrookStrokeMap.map(
-        (pStrokes) => pStrokes[currentHoleIndex] || 0
+    if (playerIndexes && playerStrokeIndexes && playerStrokeIndexes.length > 0 && players.length > 0) {
+      // Validate that all players have valid stroke index arrays
+      const allValidSIs = playerStrokeIndexes.every(siArray => 
+        siArray && Array.isArray(siArray) && siArray.length === 18
       );
-      setPlayerStrokes(millbrookStrokesForCurrentHole);
+      
+      if (allValidSIs) {
+        const millbrookStrokeMap = allocateStrokesMultiTee(playerIndexes, playerStrokeIndexes);
+        const millbrookStrokesForCurrentHole = millbrookStrokeMap.map(
+          (pStrokes) => pStrokes[currentHoleIndex] || 0
+        );
+        setPlayerStrokes(millbrookStrokesForCurrentHole);
+      } else {
+        console.warn('[HoleViewMobile] Invalid player stroke indexes, falling back to standard allocation');
+        // Fallback to standard allocation
+        const fallbackStrokeMap = allocateStrokes(playerIndexes, match.holeSI);
+        const millbrookStrokesForCurrentHole = fallbackStrokeMap.map(
+          (pStrokes) => pStrokes[currentHoleIndex] || 0
+        );
+        setPlayerStrokes(millbrookStrokesForCurrentHole);
+      }
     } else if (playerIndexes && players.length > 0) {
+      // Standard fallback allocation
       const fallbackStrokeMap = allocateStrokes(playerIndexes, match.holeSI);
       const millbrookStrokesForCurrentHole = fallbackStrokeMap.map(
         (pStrokes) => pStrokes[currentHoleIndex] || 0
@@ -199,13 +215,26 @@ export const HoleViewMobile: React.FC = () => {
     if (
       !match.bigGame ||
       typeof match.bigGameSpecificIndex !== 'number' ||
-      !playerStrokeIndexes || // Ensure we have the 18-hole SIs
+      !playerStrokeIndexes || 
+      playerStrokeIndexes.length === 0 ||
       !players.length
     ) {
       return null;
     }
+    
+    // Validate that all players have valid stroke index arrays
+    const allValidSIs = playerStrokeIndexes.every(siArray => 
+      siArray && Array.isArray(siArray) && siArray.length === 18
+    );
+    
+    if (!allValidSIs) {
+      console.warn('[HoleViewMobile] Invalid player stroke indexes for Big Game, using standard allocation');
+      // Fallback to standard allocation for Big Game
+      return allocateStrokes(playerIndexes, match.holeSI, match.bigGameSpecificIndex);
+    }
+    
     return allocateStrokesMultiTee(playerIndexes, playerStrokeIndexes, match.bigGameSpecificIndex);
-  }, [match.bigGame, match.bigGameSpecificIndex, playerIndexes, playerStrokeIndexes, players]);
+  }, [match.bigGame, match.bigGameSpecificIndex, playerIndexes, playerStrokeIndexes, players, match.holeSI]);
 
   const bigGameStrokesForCurrentHole = useMemo(() => {
     if (!bigGameStrokeMap) return players.map(() => 0); // Return array of zeros if no big game strokes

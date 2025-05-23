@@ -524,16 +524,6 @@ const PlayerRoster = ({ onPlayersSelected }: PlayerRosterProps) => {
 
   return (
     <div className="player-roster-container mobile-player-roster">
-      <div style={{background:'#ff0',color:'#000',padding:'4px',fontWeight:'bold'}}>TEST-PLAYER-ROSTER-DEBUG</div>
-      {/* Debug: Ghost FAB logic state */}
-      <div style={{ background: '#fffbe6', color: '#8a6d3b', padding: '8px', margin: '8px 0', fontSize: '13px', border: '1px solid #faebcc', borderRadius: 6 }}>
-        <strong>Ghost FAB Debug:</strong><br />
-        Selected Players: {selectedPlayers.length} <br />
-        Eligible Ghost Bases: {eligibleGhostBases.length} <br />
-        {eligibleGhostBases.length > 0 && (
-          <span>Eligible: {eligibleGhostBases.map(p => getFullName(p)).join(', ')}</span>
-        )}
-      </div>
       {/* Error Display */}
       {error && <div className="error-message mobile-error">{error}</div>}
 

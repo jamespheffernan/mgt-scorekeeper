@@ -92,7 +92,7 @@ const ExportButton: React.FC = () => {
     csv += 'Paper Trail\n';
     csv += 'Hole,Step,Detail\n';
     ledger.forEach((row, i) => {
-      const summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,isDoubleAvailable:false}, i);
+      const summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,ghostJunkEvents:{},isDoubleAvailable:false}, i);
       if (!summary) return;
       const steps = [];
       steps.push(['Base bet', `$${summary.base}`]);

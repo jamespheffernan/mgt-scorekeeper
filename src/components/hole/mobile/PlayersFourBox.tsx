@@ -4,6 +4,7 @@ import { BottomSheet } from './BottomSheet';
 import { PlayerCard } from '../../PlayerCard';
 import { colors } from '../../../theme/tokens';
 import { formatPlayerName } from '../../../utils/nameFormatter';
+import { GhostRevealModal } from './GhostRevealModal';
 import './PlayersFourBox.css';
 
 interface InternalPlayerDisplayCardProps {
@@ -16,6 +17,7 @@ interface InternalPlayerDisplayCardProps {
   strokeIndex: number;
   yardage?: number;
   onEdit: () => void;
+  onGhostReveal?: (player: PlayerType, grossScore: number, par: number, yardage?: number) => void;
 }
 
 interface PlayersFourBoxProps {
@@ -37,12 +39,80 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
   bigGameStrokeOnHole, // Big Game stroke
   strokeIndex,
   yardage,
-  onEdit
+  onEdit,
+  onGhostReveal
 }) => {
   const teamColor = team === 'Red' ? colors.red : colors.blue;
   const isGhost = !!player.isGhost;
+  
+  // Ghost reveal functionality
+  const { revealGhostScore, isGhostScoreRevealed } = useGameStore();
+  const currentHole = useGameStore(state => state.match.currentHole);
+  const isScoreRevealed = isGhost ? isGhostScoreRevealed(player.id, currentHole) : true;
+  
+  const [isRevealing, setIsRevealing] = useState(false);
+  
+  const handleRevealClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering onEdit
+    if (isGhost && !isScoreRevealed && onGhostReveal) {
+      setIsRevealing(true);
+      revealGhostScore(player.id, currentHole);
+      onGhostReveal(player, grossScore, par, yardage);
+      // Animation duration
+      setTimeout(() => setIsRevealing(false), 500);
+    }
+  };
+  
+  const getScoreDisplay = () => {
+    if (!isGhost || isScoreRevealed) {
+      return (
+        <>
+          Gross {grossScore}
+          {(strokes > 0 || bigGameStrokeOnHole > 0) && (
+            <>
+              {' / '}
+              <span style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span> 
+            </>
+          )}
+        </>
+      );
+    }
+    
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{ color: '#666' }}>Score: ?</span>
+        <button
+          onClick={handleRevealClick}
+          style={{
+            background: 'linear-gradient(45deg, #8B5CF6, #06B6D4)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '4px 8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+          }}
+          aria-label={`Reveal ghost score for ${player.name} on hole ${currentHole}`}
+        >
+          👁️ Reveal
+        </button>
+      </div>
+    );
+  };
+  
   return (
-    <div onClick={onEdit} className="player-card-clickable-wrapper">
+    <div onClick={isGhost && !isScoreRevealed ? undefined : onEdit} className="player-card-clickable-wrapper">
       <PlayerCard 
         player={player} 
         teamColor={teamColor}
@@ -84,16 +154,15 @@ const PlayerCardDisplay: React.FC<InternalPlayerDisplayCardProps> = ({
         }
       >
         <div>{/* Empty div for grid balance or future use */}</div>
-        <div className="player-card-score-text">
-          Gross {grossScore}
-          {(strokes > 0 || bigGameStrokeOnHole > 0) && (
-            <>
-              {' / '}
-              {/* Net score display might need adjustment if Big Game strokes also affect it for display purposes */}
-              {/* For now, keeping net score based on Millbrook strokes as per original logic */}
-              <span style={{ fontStyle: 'italic', fontWeight: 700 }}>Net {grossScore - strokes}</span> 
-            </>
-          )}
+        <div 
+          className="player-card-score-text"
+          style={{
+            opacity: isRevealing ? 0 : 1,
+            transform: isRevealing ? 'scale(1.1)' : 'scale(1)',
+            transition: 'all 0.5s ease'
+          }}
+        >
+          {getScoreDisplay()}
         </div>
       </PlayerCard>
     </div>
@@ -114,10 +183,18 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
   const currentHole = useGameStore(state => state.match.currentHole);
   const holePar = useGameStore(state => state.match.holePar);
   const holeScores = useGameStore(state => state.holeScores);
+  const ghostJunkEvents = useGameStore(state => state.ghostJunkEvents);
   const currentHoleScore = holeScores.find(score => score.hole === currentHole);
   
   const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null);
   const [localScores, setLocalScores] = useState<Record<number, number>>({});
+  const [ghostRevealModal, setGhostRevealModal] = useState<{
+    isOpen: boolean;
+    player?: PlayerType;
+    grossScore?: number;
+    par?: number;
+    yardage?: number;
+  }>({ isOpen: false });
 
   useEffect(() => {
     setLocalScores({});
@@ -142,9 +219,32 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
 
   const closeSheet = () => setActivePlayerIndex(null);
 
+  const handleGhostReveal = (player: PlayerType, grossScore: number, par: number, yardage?: number) => {
+    setGhostRevealModal({
+      isOpen: true,
+      player,
+      grossScore,
+      par,
+      yardage
+    });
+  };
+
+  const closeGhostModal = () => {
+    setGhostRevealModal({ isOpen: false });
+  };
+
   const getPlayerScore = (playerIndex: number): number => {
     if (localScores[playerIndex] !== undefined) return localScores[playerIndex];
-    if (currentHoleScore && currentHoleScore.gross[playerIndex] !== undefined) return currentHoleScore.gross[playerIndex];
+    if (currentHoleScore && currentHoleScore.gross[playerIndex] !== undefined) {
+      const grossScore = currentHoleScore.gross[playerIndex];
+      // For real players, if gross score is 0 (no score entered yet), show par instead
+      // Ghost players can have 0 as a valid generated score, so we don't override for them
+      const player = storePlayers[playerIndex];
+      if (!player?.isGhost && grossScore === 0) {
+        return playerPars[playerIndex] || holePar[currentHole - 1] || 4;
+      }
+      return grossScore;
+    }
     return playerPars[playerIndex] || holePar[currentHole - 1] || 4;
   };
   
@@ -174,6 +274,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
                   strokeIndex={playerStrokeIndexes[red[row].idx]}
                   yardage={playerYardages[red[row].idx]}
                   onEdit={() => handleCardClick(red[row].idx)}
+                  onGhostReveal={handleGhostReveal}
                 />
               ) : (
                 <div className="team-placeholder-box team-placeholder-red">Red</div>
@@ -192,6 +293,7 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
                   strokeIndex={playerStrokeIndexes[blue[row].idx]}
                   yardage={playerYardages[blue[row].idx]}
                   onEdit={() => handleCardClick(blue[row].idx)}
+                  onGhostReveal={handleGhostReveal}
                 />
               ) : (
                 <div className="team-placeholder-box team-placeholder-blue">Blue</div>
@@ -214,6 +316,19 @@ export const PlayersFourBox: React.FC<PlayersFourBoxProps> = ({
           // If BottomSheet needs Big Game strokes, add another prop here
           onScoreChange={handleScoreChange} 
           onJunkChange={handleJunkChange} 
+        />
+      )}
+
+      {ghostRevealModal.isOpen && ghostRevealModal.player && (
+        <GhostRevealModal
+          isOpen={ghostRevealModal.isOpen}
+          onClose={closeGhostModal}
+          player={ghostRevealModal.player}
+          grossScore={ghostRevealModal.grossScore!}
+          par={ghostRevealModal.par!}
+          hole={currentHole}
+          junkFlags={ghostJunkEvents[ghostRevealModal.player.id]?.[currentHole]}
+          yardage={ghostRevealModal.yardage}
         />
       )}
     </div>

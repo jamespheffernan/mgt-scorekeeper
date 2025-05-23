@@ -29,6 +29,7 @@ export const MatchSetup = () => {
   const [teams, setTeams] = useState<Team[]>(['Red', 'Blue', 'Red', 'Blue']);
   const [bigGame, setBigGame] = useState(false);
   const [showBigGameExplanation, setShowBigGameExplanation] = useState(false);
+  const [isCreatingMatch, setIsCreatingMatch] = useState(false);
   
   // Handle players selected from roster
   const handlePlayersSelected = (selectedPlayers: Player[], selectedTeams: Team[]) => {
@@ -45,16 +46,18 @@ export const MatchSetup = () => {
   };
   
   // Handle course setup completion
-  const handleCourseSetupComplete = (courseId: string, playerTeeIds: [string, string, string, string]) => {
-    // Create the match with all information
-    createMatch(players, teams, { 
-      bigGame,
-      courseId,
-      playerTeeIds
-    });
-    
-    // Navigate to hole 1 after match creation
-    navigate('/hole/1');
+  const handleCourseSetupComplete = async (courseId: string, playerTeeIds: [string, string, string, string]) => {
+    setIsCreatingMatch(true);
+    try {
+      await createMatch(players, teams, { 
+        bigGame,
+        courseId,
+        playerTeeIds
+      });
+      navigate('/hole/1');
+    } finally {
+      setIsCreatingMatch(false);
+    }
   };
   
   // Go back to player setup

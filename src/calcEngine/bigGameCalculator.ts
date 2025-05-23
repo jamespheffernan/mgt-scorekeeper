@@ -32,6 +32,11 @@ export function calculateBigGameRow(
     throw new Error('Big Game calculation requires at least 2 non-ghost players');
   }
   
+  // Validate all scores are numbers
+  if (!netScores.every(score => typeof score === 'number' && !isNaN(score))) {
+    throw new Error('Big Game calculation requires all net scores to be valid numbers');
+  }
+  
   // Sort scores ascending (lowest first)
   const sortedScores = [...netScores].sort((a, b) => a - b);
   
@@ -40,6 +45,11 @@ export function calculateBigGameRow(
   
   // Calculate subtotal (sum of two best)
   const subtotal = bestNet[0] + bestNet[1];
+  
+  // Validate the result
+  if (isNaN(subtotal)) {
+    throw new Error(`Big Game calculation resulted in NaN for hole ${hole} with scores ${JSON.stringify(netScores)}`);
+  }
   
   return {
     hole,

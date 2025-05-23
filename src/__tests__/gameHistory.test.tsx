@@ -38,10 +38,12 @@ describe('Game History and End Game Features', () => {
       const store = useGameStore.getState();
       
       // Create a match
-      store.createMatch(mockPlayers, mockTeams, {
-        bigGame: true,
-        courseId: 'test-course',
-        playerTeeIds: ['t1', 't2', 't3', 't4']
+      await act(async () => {
+        await store.createMatch(mockPlayers, mockTeams, {
+          bigGame: true,
+          courseId: 'test-course',
+          playerTeeIds: ['t1', 't2', 't3', 't4']
+        });
       });
       
       // Mock some ledger data
@@ -102,10 +104,12 @@ describe('Game History and End Game Features', () => {
       const store = useGameStore.getState();
       
       // Create a match
-      store.createMatch(mockPlayers, mockTeams, {
-        bigGame: false,
-        courseId: 'test-course',
-        playerTeeIds: ['t1', 't2', 't3', 't4']
+      await act(async () => {
+        await store.createMatch(mockPlayers, mockTeams, {
+          bigGame: false,
+          courseId: 'test-course',
+          playerTeeIds: ['t1', 't2', 't3', 't4']
+        });
       });
       
       // Execute - cancel the match
@@ -145,15 +149,17 @@ describe('Game History and End Game Features', () => {
   });
   
   describe('resetGame()', () => {
-    it('should reset the game state to defaults', () => {
+    it('should reset the game state to defaults', async () => {
       // Setup - create a match
       const store = useGameStore.getState();
       
       // Create a match
-      store.createMatch(mockPlayers, mockTeams, {
-        bigGame: true,
-        courseId: 'test-course',
-        playerTeeIds: ['t1', 't2', 't3', 't4']
+      await act(async () => {
+        await store.createMatch(mockPlayers, mockTeams, {
+          bigGame: true,
+          courseId: 'test-course',
+          playerTeeIds: ['t1', 't2', 't3', 't4']
+        });
       });
       
       // Execute - reset the game

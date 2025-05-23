@@ -12,7 +12,7 @@ const PaperTrailDrawer: React.FC<{open:boolean, hole:number|null, onClose:()=>vo
 
   let summary: any = null;
   if (hole !== null && hole > 0 && hole <= ledger.length) {
-    summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,isDoubleAvailable:false}, hole-1);
+    summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,ghostJunkEvents:{},isDoubleAvailable:false}, hole-1);
   }
 
   // Responsive style: maxWidth 390px on small screens, up to 600px or 95vw on larger screens
