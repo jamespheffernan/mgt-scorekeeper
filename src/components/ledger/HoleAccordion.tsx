@@ -57,7 +57,7 @@ const HoleAccordion: React.FC<{onSelectHole:(hole:number)=>void}> = ({onSelectHo
         </thead>
         <tbody>
           {ledger.map((row, i) => {
-            const summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,ghostJunkEvents:{},isDoubleAvailable:false}, i);
+            const summary = selectHoleSummary({match,players,playerTeams,ledger,holeScores,junkEvents,bigGameRows,ghostJunkEvents:{},ghostRevealState:{},isDoubleAvailable:false}, i);
             if (!summary) return null;
             const winner = summary.winner;
             const bgRow = match.bigGame ? bigGameRows[i] : null;
