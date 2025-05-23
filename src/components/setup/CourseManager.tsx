@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
+import { CourseCreationWizard } from './CourseCreationWizard';
 
 // CourseForm component
 interface CourseFormProps {
@@ -203,6 +204,7 @@ export const CourseManager: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [isEditingHoles, setIsEditingHoles] = useState(false);
+  const [isUsingWizard, setIsUsingWizard] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
   // Form state
@@ -354,6 +356,25 @@ export const CourseManager: React.FC = () => {
   // Handle tee selection
   const handleTeeSelect = (tee: TeeOption) => {
     setSelectedTee(tee);
+  };
+
+  // Handle wizard completion
+  const handleWizardComplete = async (course: Course) => {
+    try {
+      await millbrookDb.saveCourse(course);
+      setIsUsingWizard(false);
+      setSelectedCourse(course);
+      await loadCourses();
+      alert(`Course "${course.name}" created successfully!`);
+    } catch (error) {
+      console.error('Error saving course from wizard:', error);
+      alert('Failed to save course. Please try again.');
+    }
+  };
+
+  // Handle wizard cancel
+  const handleWizardCancel = () => {
+    setIsUsingWizard(false);
   };
 
   // Export selected course as JSON
@@ -512,14 +533,25 @@ export const CourseManager: React.FC = () => {
     />;
   }
 
+  // If using wizard, show the course creation wizard
+  if (isUsingWizard) {
+    return <CourseCreationWizard 
+      onComplete={handleWizardComplete}
+      onCancel={handleWizardCancel}
+    />;
+  }
+
   return (
     <div className="course-manager">
       <h2>Course Manager</h2>
       <p>Add, edit, and manage golf courses for your games.</p>
       
       <div className="course-manager-actions">
+        <button className="add-button" onClick={() => setIsUsingWizard(true)}>
+          Create Course (Wizard)
+        </button>
         <button className="add-button" onClick={() => setIsAddingCourse(true)}>
-          Add New Course
+          Quick Add Course
         </button>
         <button 
           className="export-button"

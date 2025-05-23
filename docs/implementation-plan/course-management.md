@@ -142,8 +142,8 @@ The implementation will be phased, with photo/OCR import as the final feature to
 
 ## Current Status / Progress Tracking
 
-**Current Phase**: Phase 1 - Course Management Foundation  
-**Current Task**: Task 1.3 - Course Management UI Foundation ✅ **COMPLETED**  
+**Current Phase**: Phase 2 - Manual Course Entry  
+**Current Task**: Task 2.1 - Course Creation Wizard 🚧 **IN PROGRESS**  
 **Overall Progress**: 3/8 tasks completed (37.5%)
 
 ### Recently Completed ✅
