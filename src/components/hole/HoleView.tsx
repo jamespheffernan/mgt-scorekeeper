@@ -42,6 +42,31 @@ export const HoleView = () => {
   const currentHole = match.currentHole;
   const defaultPar = match.holePar[currentHole - 1];
   
+  // Access holeScores from the store
+  const holeScores = useGameStore(state => state.holeScores);
+  
+  // Get initial scores: use pre-generated ghost scores from store, or par for real players
+  const getInitialScores = (): [number, number, number, number] => {
+    const currentHoleIndex = currentHole - 1;
+    const holeScore = holeScores[currentHoleIndex];
+    
+    if (holeScore) {
+      return players.map((player, index) => {
+        if (player.isGhost) {
+          // Use pre-generated ghost score from store
+          return holeScore.gross[index];
+        } else {
+          // For real players, check if they already have a score entered, otherwise use par
+          const existingScore = holeScore.gross[index];
+          return existingScore > 0 ? existingScore : defaultPar;
+        }
+      }) as [number, number, number, number];
+    }
+    
+    // Fallback: use par for all players
+    return [defaultPar, defaultPar, defaultPar, defaultPar];
+  };
+  
   // State for course data
   const [course, setCourse] = useState<Course | null>(null);
   const [teeOptions, setTeeOptions] = useState<Record<string, TeeOption>>({});
@@ -49,9 +74,7 @@ export const HoleView = () => {
   const [playerSIs, setPlayerSIs] = useState<number[]>([currentHole, currentHole, currentHole, currentHole]);
   
   // Local state for scores
-  const [grossScores, setGrossScores] = useState<[number, number, number, number]>([
-    defaultPar, defaultPar, defaultPar, defaultPar
-  ]);
+  const [grossScores, setGrossScores] = useState<[number, number, number, number]>(getInitialScores());
   
   // Local state for junk flags
   const [junkFlags, setJunkFlags] = useState<JunkFlags[]>([
@@ -250,8 +273,21 @@ export const HoleView = () => {
       setIsSubmitting(true);
       setErrorMessage(null);
       
+      // Get the current hole scores from the store
+      const currentHoleIndex = currentHole - 1;
+      
+      // Create the scores array: use UI scores for real players, preserve ghost scores from store
+      const finalScores: [number, number, number, number] = [...grossScores];
+      
+      // For each player, if they're a ghost, use the pre-generated score from the store
+      players.forEach((player, index) => {
+        if (player.isGhost && holeScores[currentHoleIndex]) {
+          finalScores[index] = holeScores[currentHoleIndex].gross[index];
+        }
+      });
+      
       // Call the store action to record scores
-      await enterHoleScores(currentHole, grossScores, junkFlags);
+      await enterHoleScores(currentHole, finalScores, junkFlags);
       
       // If this is the final hole, show the end game dialog
       if (currentHole === 18) {

@@ -62,10 +62,33 @@ export const HoleViewMobile: React.FC = () => {
   const [playerYardages, setPlayerYardages] = useState<number[]>([0, 0, 0, 0]);
   const [playerStrokes, setPlayerStrokes] = useState<number[]>([0, 0, 0, 0]); // These are Millbrook strokes for current hole
   
+  // Access holeScores from the store
+  const holeScores = useGameStore(state => state.holeScores);
+
+  // Get initial scores: use pre-generated ghost scores from store, or par for real players
+  const getInitialScores = (): [number, number, number, number] => {
+    const currentHoleIndex = currentHole - 1;
+    const holeScore = holeScores[currentHoleIndex];
+    
+    if (holeScore) {
+      return players.map((player, index) => {
+        if (player.isGhost) {
+          // Use pre-generated ghost score from store
+          return holeScore.gross[index];
+        } else {
+          // For real players, check if they already have a score entered, otherwise use par
+          const existingScore = holeScore.gross[index];
+          return existingScore > 0 ? existingScore : (playerPars[index] || defaultPar);
+        }
+      }) as [number, number, number, number];
+    }
+    
+    // Fallback: use par for all players
+    return [defaultPar, defaultPar, defaultPar, defaultPar];
+  };
+
   // Local state for scores and junk
-  const [grossScores, setGrossScores] = useState<[number, number, number, number]>([
-    defaultPar, defaultPar, defaultPar, defaultPar
-  ]);
+  const [grossScores, setGrossScores] = useState<[number, number, number, number]>(getInitialScores());
   
   const [junkFlags, setJunkFlags] = useState<JunkFlags[]>([
     { hadBunkerShot: false, isOnGreenFromTee: false, isClosestOnGreen: false, hadThreePutts: false, isLongDrive: false },
@@ -164,7 +187,23 @@ export const HoleViewMobile: React.FC = () => {
           });
           setPlayerPars(newPlayerPars);
           setPlayerYardages(newPlayerYardages);
-          setGrossScores(newPlayerPars as [number, number, number, number]);
+          
+          // Update gross scores: preserve ghost scores from store, use new pars for real players
+          const currentHoleIndex = currentHole - 1;
+          const holeScore = holeScores[currentHoleIndex];
+          
+          const updatedScores = newPlayerPars.map((par, index) => {
+            const player = players[index];
+            if (player?.isGhost && holeScore) {
+              // Use pre-generated ghost score from store
+              return holeScore.gross[index];
+            } else {
+              // For real players, use the new par value
+              return par;
+            }
+          }) as [number, number, number, number];
+          
+          setGrossScores(updatedScores);
         }
       }
     };
@@ -265,7 +304,20 @@ export const HoleViewMobile: React.FC = () => {
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
-      await enterHoleScores(currentHole, grossScores, junkFlags);
+      // Get the current hole scores from the store
+      const currentHoleIndex = currentHole - 1;
+      
+      // Create the scores array: use UI scores for real players, preserve ghost scores from store
+      const finalScores: [number, number, number, number] = [...grossScores];
+      
+      // For each player, if they're a ghost, use the pre-generated score from the store
+      players.forEach((player, index) => {
+        if (player.isGhost && holeScores[currentHoleIndex]) {
+          finalScores[index] = holeScores[currentHoleIndex].gross[index];
+        }
+      });
+      
+      await enterHoleScores(currentHole, finalScores, junkFlags);
       if (currentHole === 18) {
         setShowEndGameDialog(true);
       } else {

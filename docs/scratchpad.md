@@ -4,7 +4,7 @@ This document is used for general notes, lessons learned during development, and
 
 ## Current Task
 
-* **Ghost Player Feature**: [`docs/implementation-plan/ghost-player.md`](implementation-plan/ghost-player.md) - **COMPLETED** ✅ *All 10 tasks completed including performance optimization*
+* **Ghost Player Feature**: [`docs/implementation-plan/ghost-player.md`](implementation-plan/ghost-player.md) - **MERGED TO MAIN** ✅ 🎉 *All 10 tasks completed, PR #11 merged successfully*
 * *Previously: Rebuild Match Summary Screen*: [`docs/implementation-plan/rebuild-match-summary-screen.md`](implementation-plan/rebuild-match-summary-screen.md)
 * *Previously: Rebuild Ledger View*: [`docs/implementation-plan/rebuild-ledger-view.md`](implementation-plan/rebuild-ledger-view.md) *(This task is nearing completion and documentation/PR merge are the remaining steps based on its plan)*
 
@@ -44,6 +44,8 @@ The implementation plan has been significantly updated to reflect actual progres
 [2024-12-27] Statistical validation tests for probabilistic systems require careful tolerance balancing - too strict and they fail due to inherent randomness, too loose and they don't validate the statistical properties. Floating point precision issues can also cause seemingly correct values to fail exact boundary checks.
 [2024-12-27] Critical bug found in `enterHoleScores`: was appending new entries instead of replacing existing ones, causing holeScores array to grow beyond 18 entries. This type of fundamental store logic bug can cause cascading test failures and should be caught early with comprehensive integration tests.
 [2024-12-27] Ghost score generation randomization requires multiple entropy sources for realistic variation. Simple timestamp-based seeding can produce insufficient variation in test environments where multiple iterations run quickly. Combining player ID hash, source player hash, name hash, timestamp, and live entropy provides better statistical variation while maintaining deterministic behavior for testing when needed.
+[2024-12-27] Ghost Player Feature successfully completed end-to-end: 10 tasks across 3 phases, 149/149 tests passing, comprehensive documentation, performance optimized, and merged to main via PR #11. This large feature implementation took a structured approach with clear acceptance criteria, statistical validation, and comprehensive testing. The key to success was breaking down the work into small, measurable tasks with clear success criteria and maintaining rigorous testing throughout.
+[2024-12-28] When adding new required properties to TypeScript interfaces (like GameState), all existing code that creates objects of that type must be updated simultaneously. The Netlify build failure showed that three ledger components were missing the new `ghostRevealState` property when calling `selectHoleSummary`. Always search for all usages of the interface when making breaking changes to prevent build failures in CI/CD.
 
 ## Overall App Plan Review (Planner Mode - [2024-06-12])
 
