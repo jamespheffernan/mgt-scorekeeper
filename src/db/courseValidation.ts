@@ -403,7 +403,7 @@ export function sanitizeCourseData(data: unknown): Course | null {
     if (Array.isArray(input.teeOptions)) {
       course.teeOptions = input.teeOptions
         .map((tee: unknown) => sanitizeTeeOption(tee))
-        .filter((tee): tee is TeeOption => tee !== null);
+        .filter((tee: TeeOption | null): tee is TeeOption => tee !== null);
     }
 
     return course;
@@ -437,7 +437,7 @@ function sanitizeTeeOption(data: unknown): TeeOption | null {
     if (Array.isArray(input.holes)) {
       tee.holes = input.holes
         .map((hole: unknown) => sanitizeHoleInfo(hole))
-        .filter((hole): hole is HoleInfo => hole !== null);
+        .filter((hole: HoleInfo | null): hole is HoleInfo => hole !== null);
     }
 
     return tee;

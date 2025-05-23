@@ -86,9 +86,11 @@ const CourseForm: React.FC<CourseFormProps> = ({ course, onSave, onCancel, onDel
 // CourseDetails component
 interface CourseDetailsProps {
   course: Course;
+  onTeeSelect?: (tee: TeeOption) => void;
+  selectedTee?: TeeOption | null;
 }
 
-const CourseDetails: React.FC<CourseDetailsProps> = ({ course }) => {
+const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onTeeSelect, selectedTee }) => {
   return (
     <div className="course-details">
       <div className="detail-group">
@@ -105,8 +107,17 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course }) => {
         <label>Tee Options:</label>
         <div className="tee-list">
           {course.teeOptions.map(tee => (
-            <div key={tee.id} className="tee-pill" style={{ backgroundColor: tee.color.toLowerCase() }}>
-              {tee.name}
+            <div 
+              key={tee.id} 
+              className={`tee-item ${selectedTee?.id === tee.id ? 'selected' : ''}`}
+              onClick={() => onTeeSelect?.(tee)}
+              style={{ cursor: onTeeSelect ? 'pointer' : 'default' }}
+            >
+              <div 
+                className="tee-color-indicator" 
+                style={{ backgroundColor: tee.color.toLowerCase() }}
+              ></div>
+              <span className="tee-name">{tee.name}</span>
             </div>
           ))}
         </div>
@@ -192,6 +203,7 @@ export const CourseManager: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [isEditingHoles, setIsEditingHoles] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Form state
   const [courseForm, setCourseForm] = useState<{
@@ -337,6 +349,11 @@ export const CourseManager: React.FC = () => {
   // Cancel hole editing
   const handleCancelHoleEdit = () => {
     setIsEditingHoles(false);
+  };
+
+  // Handle tee selection
+  const handleTeeSelect = (tee: TeeOption) => {
+    setSelectedTee(tee);
   };
 
   // Export selected course as JSON
@@ -532,19 +549,40 @@ export const CourseManager: React.FC = () => {
             <h3>Courses</h3>
           </div>
           
+          {courses.length > 0 && (
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search courses by name or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          )}
+          
           {courses.length === 0 ? (
             <div className="empty-state">No courses available. Add a new course to get started.</div>
           ) : (
             <div className="course-list">
-              {courses.map(course => (
-                <div
-                  key={course.id}
-                  className={`course-item ${selectedCourse?.id === course.id ? 'selected' : ''}`}
-                  onClick={() => handleCourseSelect(course.id)}
-                >
-                  {course.name} ({course.location})
-                </div>
-              ))}
+              {courses
+                .filter(course => {
+                  if (!searchQuery.trim()) return true;
+                  const query = searchQuery.toLowerCase();
+                  return (
+                    course.name.toLowerCase().includes(query) ||
+                    course.location?.toLowerCase().includes(query)
+                  );
+                })
+                .map(course => (
+                  <div
+                    key={course.id}
+                    className={`course-item ${selectedCourse?.id === course.id ? 'selected' : ''}`}
+                    onClick={() => handleCourseSelect(course.id)}
+                  >
+                    {course.name} ({course.location})
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -577,7 +615,11 @@ export const CourseManager: React.FC = () => {
               onDelete={handleDeleteCourse}
             />
           ) : selectedCourse ? (
-            <CourseDetails course={selectedCourse} />
+            <CourseDetails 
+              course={selectedCourse} 
+              onTeeSelect={handleTeeSelect}
+              selectedTee={selectedTee}
+            />
           ) : (
             <div className="empty-state">Select a course to view details.</div>
           )}
