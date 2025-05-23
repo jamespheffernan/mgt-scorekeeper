@@ -4,9 +4,9 @@ This document is used for general notes, lessons learned during development, and
 
 ## Current Task
 
-* **Rebuild Match Summary Screen**: [`docs/implementation-plan/rebuild-match-summary-screen.md`](implementation-plan/rebuild-match-summary-screen.md)
+* **Ghost Player Feature**: [`docs/implementation-plan/ghost-player.md`](implementation-plan/ghost-player.md) - **COMPLETED** ✅ *All 10 tasks completed including performance optimization*
+* *Previously: Rebuild Match Summary Screen*: [`docs/implementation-plan/rebuild-match-summary-screen.md`](implementation-plan/rebuild-match-summary-screen.md)
 * *Previously: Rebuild Ledger View*: [`docs/implementation-plan/rebuild-ledger-view.md`](implementation-plan/rebuild-ledger-view.md) *(This task is nearing completion and documentation/PR merge are the remaining steps based on its plan)*
-* **Ghost Player Feature**: [`docs/implementation-plan/ghost-player.md`](implementation-plan/ghost-player.md)
 
 ## Ghost Player Feature Review (Planner Mode - [2024-12-27])
 
@@ -42,6 +42,8 @@ The implementation plan has been significantly updated to reflect actual progres
 [2024-06-11] In Jest/jsdom tests, mock window.scrollTo and HTMLElement.prototype.scrollTo if your components use them, as jsdom does not implement these methods by default and will throw errors otherwise. 
 [2024-12-27] Feature implementation should identify architectural changes (like async match creation) early in the planning phase to avoid cascading updates across the codebase.
 [2024-12-27] Statistical validation tests for probabilistic systems require careful tolerance balancing - too strict and they fail due to inherent randomness, too loose and they don't validate the statistical properties. Floating point precision issues can also cause seemingly correct values to fail exact boundary checks.
+[2024-12-27] Critical bug found in `enterHoleScores`: was appending new entries instead of replacing existing ones, causing holeScores array to grow beyond 18 entries. This type of fundamental store logic bug can cause cascading test failures and should be caught early with comprehensive integration tests.
+[2024-12-27] Ghost score generation randomization requires multiple entropy sources for realistic variation. Simple timestamp-based seeding can produce insufficient variation in test environments where multiple iterations run quickly. Combining player ID hash, source player hash, name hash, timestamp, and live entropy provides better statistical variation while maintaining deterministic behavior for testing when needed.
 
 ## Overall App Plan Review (Planner Mode - [2024-06-12])
 

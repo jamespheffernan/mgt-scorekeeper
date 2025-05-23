@@ -287,14 +287,39 @@ export const useGameStore = create(
         
         players.forEach((player, idx) => {
           if (player.isGhost) {
-            const ghostScores = generateGhostScores(player.index, { holes: courseHoles }, 1000 + idx);
+            // Enhanced seeding with multiple entropy sources for better variation
+            const playerHash = player.id.split('').reduce((hash, char) => hash + char.charCodeAt(0), 0);
+            const timestampComponent = Date.now() % 10000; // Use last 4 digits of timestamp
+            
+            // Add more entropy sources for better variation
+            const sourcePlayerHash = player.sourcePlayerId ? 
+              player.sourcePlayerId.split('').reduce((hash, char) => hash + char.charCodeAt(0), 0) : 0;
+            const nameHash = player.name ? 
+              player.name.split('').reduce((hash, char) => hash + char.charCodeAt(0), 0) : 0;
+            const indexComponent = player.index * 37; // Multiply by prime for better distribution
+            
+            // Use Math.random() as additional entropy source for live play
+            const liveEntropy = Math.floor(Math.random() * 10000);
+            
+            // Combine all entropy sources with different weights
+            const randomSeed = 1000 + 
+              (idx * 100) +                  // Player position weight
+              (playerHash % 1000) +          // Player ID hash
+              (timestampComponent % 1000) +  // Timestamp component
+              (sourcePlayerHash % 100) +     // Source player hash
+              (nameHash % 100) +             // Name hash
+              (indexComponent % 100) +       // Handicap component
+              (liveEntropy % 1000);          // Live entropy
+            
+            const ghostScores = generateGhostScores(player.index, { holes: courseHoles }, randomSeed);
             ghostScoreMap[player.id] = ghostScores;
             
-            // Generate junk events for this ghost
-            const ghostJunk = generateGhostJunkEvents(player.index, ghostScores, { holes: courseHoles }, 2000 + idx);
+            // Generate junk events for this ghost with different seed offset
+            const junkSeed = randomSeed + 5000 + (idx * 333); // Different offset and multiplier
+            const ghostJunk = generateGhostJunkEvents(player.index, ghostScores, { holes: courseHoles }, junkSeed);
             ghostJunkMap[player.id] = ghostJunk;
             
-            console.log(`[GHOST-INIT] Generated ${ghostScores.length} scores and junk events for ghost ${player.name}`);
+            console.log(`[GHOST-INIT] Generated ${ghostScores.length} scores and junk events for ghost ${player.name} (seed: ${randomSeed})`);
           }
         });
         // --- END SAFEGUARD ---
@@ -755,9 +780,12 @@ export const useGameStore = create(
         };
         
         // 11. Update store
+        const updatedHoleScores = [...holeScores];
+        updatedHoleScores[hole - 1] = holeScore; // Replace the existing hole score entry
+        
         set({
           match: updatedMatchState,
-          holeScores: [...holeScores, holeScore],
+          holeScores: updatedHoleScores,
           ledger: [...ledger, finalLedgerRow],
           junkEvents: [...junkEvents, ...newJunkEvents],
           bigGameRows: updatedMatch.bigGame && bigGameRow ? [...bigGameRows, bigGameRow] : bigGameRows,
