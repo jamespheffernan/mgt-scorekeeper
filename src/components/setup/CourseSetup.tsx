@@ -4,6 +4,7 @@ import { Course, TeeOption } from '../../db/courseModel';
 import { millbrookDb } from '../../db/millbrookDb';
 import { getFullName } from '../../utils/nameUtils';
 import PlayerName from '../../components/PlayerName';
+import './CourseSetup.css';
 
 interface CourseSetupProps {
   selectedPlayers: Player[];
@@ -14,9 +15,12 @@ interface CourseSetupProps {
 export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetupProps) => {
   // State for courses and selections
   const [courses, setCourses] = useState<Course[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [playerTeeIds, setPlayerTeeIds] = useState<[string, string, string, string]>(['', '', '', '']);
+  const [showCourseDropdown, setShowCourseDropdown] = useState<boolean>(false);
   
   // Load available courses on mount
   useEffect(() => {
@@ -24,11 +28,13 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
       try {
         const allCourses = await millbrookDb.getAllCourses();
         setCourses(allCourses);
+        setFilteredCourses(allCourses);
         
         // If courses exist, select the first one
         if (allCourses.length > 0) {
           setSelectedCourseId(allCourses[0].id);
           setSelectedCourse(allCourses[0]);
+          setSearchQuery(allCourses[0].name);
           
           // Initialize tee selections with reasonable defaults based on gender
           const defaultTeeIds = selectedPlayers.map((player) => {
@@ -48,25 +54,55 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
     
     loadCourses();
   }, [selectedPlayers]);
-  
-  // Handle course selection change
-  const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const courseId = e.target.value;
-    setSelectedCourseId(courseId);
+
+  // Handle search query changes
+  useEffect(() => {
+    const performSearch = async () => {
+      try {
+        const searchResults = await millbrookDb.searchCourses(searchQuery);
+        setFilteredCourses(searchResults);
+      } catch (error) {
+        console.error('Error searching courses:', error);
+        setFilteredCourses(courses);
+      }
+    };
     
-    const course = courses.find(c => c.id === courseId) || null;
+    performSearch();
+  }, [searchQuery, courses]);
+  
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowCourseDropdown(true);
+  };
+
+  // Handle course selection from dropdown
+  const handleCourseSelect = (course: Course) => {
+    setSelectedCourseId(course.id);
     setSelectedCourse(course);
+    setSearchQuery(course.name);
+    setShowCourseDropdown(false);
     
     // Reset tee selections with new defaults
-    if (course) {
-      const newTeeIds = selectedPlayers.map((player) => {
-        const playerGender = determinePlayerGender(player);
-        const appropriateTee = findAppropriateTeesForGender(course, playerGender);
-        return appropriateTee?.id || course.teeOptions[0].id;
-      }) as [string, string, string, string];
-      
-      setPlayerTeeIds(newTeeIds);
-    }
+    const newTeeIds = selectedPlayers.map((player) => {
+      const playerGender = determinePlayerGender(player);
+      const appropriateTee = findAppropriateTeesForGender(course, playerGender);
+      return appropriateTee?.id || course.teeOptions[0].id;
+    }) as [string, string, string, string];
+    
+    setPlayerTeeIds(newTeeIds);
+  };
+
+  // Handle focus on search input
+  const handleSearchFocus = () => {
+    setShowCourseDropdown(true);
+  };
+
+  // Handle blur on search input (with delay to allow for clicks)
+  const handleSearchBlur = () => {
+    setTimeout(() => {
+      setShowCourseDropdown(false);
+    }, 200);
   };
   
   // Handle tee selection change for a player
@@ -129,17 +165,38 @@ export const CourseSetup = ({ selectedPlayers, onComplete, onBack }: CourseSetup
       <div className="course-selection">
         <label>
           Select Course
-          <select
-            value={selectedCourseId}
-            onChange={handleCourseChange}
-            className="course-select"
-          >
-            {courses.map(course => (
-              <option key={course.id} value={course.id}>
-                {course.name}
-              </option>
-            ))}
-          </select>
+          <div className="course-search-container">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
+              className="course-search-input"
+              placeholder="Search courses by name or location..."
+            />
+            {showCourseDropdown && filteredCourses.length > 0 && (
+              <div className="course-dropdown">
+                {filteredCourses.map(course => (
+                  <div
+                    key={course.id}
+                    className={`course-option ${course.id === selectedCourseId ? 'selected' : ''}`}
+                    onClick={() => handleCourseSelect(course)}
+                  >
+                    <div className="course-name">{course.name}</div>
+                    <div className="course-location">{course.location}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {showCourseDropdown && filteredCourses.length === 0 && searchQuery && (
+              <div className="course-dropdown">
+                <div className="course-option no-results">
+                  No courses found matching "{searchQuery}"
+                </div>
+              </div>
+            )}
+          </div>
         </label>
       </div>
       
