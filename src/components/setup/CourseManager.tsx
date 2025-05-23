@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
+import { TeeEditor } from './TeeEditor';
 import { CourseCreationWizard } from './CourseCreationWizard';
 
 // CourseForm component
@@ -204,6 +205,7 @@ export const CourseManager: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [isEditingHoles, setIsEditingHoles] = useState(false);
+  const [isEditingTee, setIsEditingTee] = useState(false);
   const [isUsingWizard, setIsUsingWizard] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -348,9 +350,37 @@ export const CourseManager: React.FC = () => {
     }
   };
 
+  // Save updated tee from tee editor
+  const handleSaveTee = async (updatedTee: TeeOption) => {
+    try {
+      if (!selectedCourse) return;
+      
+      const updatedCourse: Course = {
+        ...selectedCourse,
+        teeOptions: selectedCourse.teeOptions.map(tee => 
+          tee.id === updatedTee.id ? updatedTee : tee
+        )
+      };
+      
+      await millbrookDb.saveCourse(updatedCourse);
+      setSelectedCourse(updatedCourse);
+      setSelectedTee(updatedTee);
+      setIsEditingTee(false);
+      await loadCourses();
+    } catch (error) {
+      console.error('Error saving tee data:', error);
+      alert('Failed to save tee data. Please try again.');
+    }
+  };
+
   // Cancel hole editing
   const handleCancelHoleEdit = () => {
     setIsEditingHoles(false);
+  };
+
+  // Cancel tee editing
+  const handleCancelTeeEdit = () => {
+    setIsEditingTee(false);
   };
 
   // Handle tee selection
@@ -533,6 +563,15 @@ export const CourseManager: React.FC = () => {
     />;
   }
 
+  // If editing tee, show the tee editor
+  if (isEditingTee && selectedTee) {
+    return <TeeEditor 
+      tee={selectedTee} 
+      onSave={handleSaveTee} 
+      onCancel={handleCancelTeeEdit} 
+    />;
+  }
+
   // If using wizard, show the course creation wizard
   if (isUsingWizard) {
     return <CourseCreationWizard 
@@ -660,13 +699,21 @@ export const CourseManager: React.FC = () => {
         <div className="tee-details-panel">
           <div className="panel-header">
             <h3>Tee Details</h3>
-            {selectedTee && selectedCourse && !isEditingHoles && (
-              <button 
-                className="edit-holes-button"
-                onClick={() => setIsEditingHoles(true)}
-              >
-                Edit Holes
-              </button>
+            {selectedTee && selectedCourse && !isEditingHoles && !isEditingTee && (
+              <div className="panel-actions">
+                <button 
+                  className="edit-button"
+                  onClick={() => setIsEditingTee(true)}
+                >
+                  Edit Tee
+                </button>
+                <button 
+                  className="edit-holes-button"
+                  onClick={() => setIsEditingHoles(true)}
+                >
+                  Edit Holes
+                </button>
+              </div>
             )}
           </div>
           
