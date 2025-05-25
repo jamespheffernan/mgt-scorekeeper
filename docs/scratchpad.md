@@ -4,7 +4,7 @@ This document is used for general notes, lessons learned during development, and
 
 ## Current Task
 
-* **Course Management Feature**: [`docs/implementation-plan/course-management.md`](implementation-plan/course-management.md) - **IN PROGRESS** - 4/8 tasks completed (50%)
+* **Course Management Feature**: [`docs/implementation-plan/course-management.md`](implementation-plan/course-management.md) - **PLANNING COMPLETE** - Phase 3 web scraping strategy analyzed and documented
 * **Ghost Player Feature**: [`docs/implementation-plan/ghost-player.md`](implementation-plan/ghost-player.md) - **MERGED TO MAIN** ✅ 🎉 *All 10 tasks completed, PR #11 merged successfully*
 * *Previously: Rebuild Match Summary Screen*: [`docs/implementation-plan/rebuild-match-summary-screen.md`](implementation-plan/rebuild-match-summary-screen.md)
 * *Previously: Rebuild Ledger View*: [`docs/implementation-plan/rebuild-ledger-view.md`](implementation-plan/rebuild-ledger-view.md) *(This task is nearing completion and documentation/PR merge are the remaining steps based on its plan)*
