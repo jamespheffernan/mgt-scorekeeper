@@ -32,6 +32,7 @@ export interface ScorecardData {
   tees?: ScorecardTee[];
   totalPar?: number;
   totalYardage?: number;
+  confidence?: number; // Overall extraction confidence (0-1)
 }
 
 export interface ScorecardHole {

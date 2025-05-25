@@ -1,5 +1,6 @@
 import { createWorker, PSM } from 'tesseract.js';
 import type { OCRProcessingState, OCRResult, OCRWord, PhotoImportSettings } from '../types/ocr';
+import { scorecardParser } from './scorecardParser';
 
 export class OCRService {
   private worker: Tesseract.Worker | null = null;
@@ -57,16 +58,21 @@ export class OCRService {
       // Recognize text
       const { data } = await this.worker.recognize(processedImage);
 
-      onProgress?.({ isProcessing: true, progress: 90, status: 'Processing results...' });
+      onProgress?.({ isProcessing: true, progress: 70, status: 'Extracting structured data...' });
 
-      // For now, create basic word structure from the raw text
-      // TODO: In Task 3.2, we'll implement proper structured data extraction
+      // Extract basic words with confidence filtering
       const words: OCRWord[] = this.extractBasicWords(data.text, settings.confidenceThreshold);
+
+      // Parse structured scorecard data
+      const extractedData = scorecardParser.parseScorecard(data.text, words);
+
+      onProgress?.({ isProcessing: true, progress: 90, status: 'Processing results...' });
 
       const result: OCRResult = {
         rawText: data.text,
         confidence: data.confidence,
-        words: words
+        words: words,
+        extractedData: extractedData
       };
 
       onProgress?.({ isProcessing: false, progress: 100, status: 'OCR completed successfully' });

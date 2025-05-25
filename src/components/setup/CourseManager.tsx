@@ -6,6 +6,7 @@ import { TeeEditor } from './TeeEditor';
 import { CourseCreationWizard } from './CourseCreationWizard';
 import { PhotoImportDialog } from './PhotoImportDialog';
 import type { OCRResult } from '../../types/ocr';
+import { scorecardParser } from '../../utils/scorecardParser';
 
 // CourseForm component
 interface CourseFormProps {
@@ -574,13 +575,103 @@ export const CourseManager: React.FC = () => {
     try {
       console.log('OCR Result received:', result);
       
-      // For Task 3.1, we just display the raw text
-      // In Task 3.2, we'll implement structured data extraction
-      
-      if (result.rawText.trim()) {
-        // Show the raw text to the user
+      if (result.extractedData) {
+        // Display structured scorecard data
+        const data = result.extractedData;
+        const validation = scorecardParser.validateScorecardData(data);
+        
+        let message = `📊 Scorecard Data Extracted!\n\n`;
+        
+        // Course Information
+        if (data.courseName) {
+          message += `🏌️ Course: ${data.courseName}\n`;
+        }
+        if (data.courseLocation) {
+          message += `📍 Location: ${data.courseLocation}\n`;
+        }
+        if (data.date) {
+          message += `📅 Date: ${data.date}\n`;
+        }
+        
+        // Hole Data Summary
+        if (data.holes && data.holes.length > 0) {
+          message += `\n⛳ Holes Found: ${data.holes.length}\n`;
+          if (data.totalPar) {
+            message += `📊 Total Par: ${data.totalPar}\n`;
+          }
+          if (data.totalYardage) {
+            message += `📏 Total Yardage: ${data.totalYardage}\n`;
+          }
+          
+          // Show first few holes as examples
+          message += `\nSample Holes:\n`;
+          data.holes.slice(0, 3).forEach(hole => {
+            message += `  Hole ${hole.number}: `;
+            if (hole.par) message += `Par ${hole.par} `;
+            if (hole.yardage) message += `${hole.yardage}yds `;
+            if (hole.handicap) message += `HCP ${hole.handicap}`;
+            message += `\n`;
+          });
+          if (data.holes.length > 3) {
+            message += `  ... and ${data.holes.length - 3} more holes\n`;
+          }
+        }
+        
+        // Tee Information
+        if (data.tees && data.tees.length > 0) {
+          message += `\n🎯 Tees Found: ${data.tees.length}\n`;
+          data.tees.forEach((tee, index) => {
+            message += `  ${tee.name || tee.color || `Tee ${index + 1}`}: `;
+            if (tee.rating) message += `Rating ${tee.rating} `;
+            if (tee.slope) message += `Slope ${tee.slope} `;
+            if (tee.yardage) message += `${tee.yardage}yds`;
+            message += `\n`;
+          });
+        }
+        
+        // Confidence and Validation
+        if (data.confidence) {
+          message += `\n🎯 Extraction Confidence: ${Math.round(data.confidence * 100)}%\n`;
+        }
+        
+        if (validation.warnings.length > 0) {
+          message += `\n⚠️ Warnings:\n`;
+          validation.warnings.forEach(warning => {
+            message += `  • ${warning}\n`;
+          });
+        }
+        
+        if (validation.errors.length > 0) {
+          message += `\n❌ Errors:\n`;
+          validation.errors.forEach(error => {
+            message += `  • ${error}\n`;
+          });
+        }
+        
+        message += `\n📝 Raw Text (${result.rawText.length} characters)\n`;
+        message += `🔍 OCR Confidence: ${Math.round(result.confidence)}%\n`;
+        message += `\nIn the next phase, you'll be able to review and correct this data before importing it as a new course.`;
+        
+        const shouldViewDetails = confirm(message + `\n\nWould you like to see the detailed extraction results in the console?`);
+        
+        if (shouldViewDetails) {
+          console.log('=== STRUCTURED SCORECARD DATA ===');
+          console.log('Course Information:', {
+            name: data.courseName,
+            location: data.courseLocation,
+            date: data.date
+          });
+          console.log('Holes Data:', data.holes);
+          console.log('Tees Data:', data.tees);
+          console.log('Validation Results:', validation);
+          console.log('Raw OCR Text:', result.rawText);
+          console.log('OCR Words:', result.words);
+        }
+        
+      } else if (result.rawText.trim()) {
+        // Fallback to raw text display if no structured data
         const shouldProceed = confirm(
-          `OCR processing completed! Extracted text:\n\n${result.rawText.substring(0, 500)}${result.rawText.length > 500 ? '...' : ''}\n\nIn the next phase, this data will be automatically parsed into course information. For now, you can copy this text and use it manually.\n\nWould you like to see the full extracted text in the console?`
+          `OCR processing completed but no structured data was extracted.\n\nRaw text (${result.rawText.length} characters):\n\n${result.rawText.substring(0, 500)}${result.rawText.length > 500 ? '...' : ''}\n\nThis might happen with unclear images or non-standard scorecard layouts.\n\nWould you like to see the full extracted text in the console?`
         );
         
         if (shouldProceed) {
