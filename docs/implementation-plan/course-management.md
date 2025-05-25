@@ -182,49 +182,63 @@ After analyzing both API integration and web scraping approaches, the most viabl
 
 ### Phase 3: OCR/Photo Import System
 - [x] **Task 3.1**: OCR Infrastructure and Photo Import Setup ✅ **COMPLETED**
-- [ ] **Task 3.2**: Structured Scorecard Data Extraction 
-- [ ] **Task 3.3**: OCR Data Validation and Manual Correction Interface 
+- [x] **Task 3.2**: Structured Scorecard Data Extraction ✅ **COMPLETED**
+- [x] **Task 3.3**: OCR Data Validation and Manual Correction Interface ✅ **COMPLETED**
 - [ ] **Task 3.4**: Course Data Import and Integration
 
 ## Current Status / Progress Tracking
 
 **Current Phase**: Phase 3 - OCR/Photo Import System  
-**Current Task**: Task 3.2 - Structured Scorecard Data Extraction 
-**Overall Progress**: 1/4 tasks completed (25%)
+**Current Task**: Task 3.4 - Course Data Import and Integration
+**Overall Progress**: 3/4 tasks completed (75%)
 
 ### Recently Completed ✅
-- **Task 3.1**: OCR Infrastructure and Photo Import Setup (2025-01-04)
-  - ✅ Installed Tesseract.js for client-side OCR processing
-  - ✅ Created comprehensive OCR type definitions (`ocr.ts`)
-  - ✅ Implemented OCRService with image preprocessing pipeline
-  - ✅ Built PhotoImportDialog component with camera/upload interface
-  - ✅ Integrated photo import into CourseManager with "📷 Import from Photo" button
-  - ✅ Added image preprocessing (contrast enhancement, noise reduction)
-  - ✅ Implemented loading states and progress indicators for OCR workflow
-  - ✅ Created basic text extraction with confidence filtering
-  - ✅ All 217 tests passing with new functionality
-  - ✅ **Success Criteria Met**: Users can upload/capture scorecard photos and extract raw text using OCR
+- **Task 3.3**: OCR Data Validation and Manual Correction Interface (2025-01-04)
+  - ✅ Built comprehensive OCRValidationDialog component with tabbed interface
+  - ✅ Implemented confidence-based highlighting for manual review (high/medium/low visual indicators)
+  - ✅ Created field-by-field validation with real-time error feedback and warnings
+  - ✅ Built interactive correction interface with editable forms for course, holes, and tees
+  - ✅ Added preview mode showing extracted data before import
+  - ✅ Implemented proper error handling for invalid or incomplete data
+  - ✅ Created comprehensive styling with responsive design and professional UI
+  - ✅ Added functionality to add/remove holes and tees dynamically
+  - ✅ Built course conversion logic from scorecard data to Course model
+  - ✅ Integrated with existing OCR service and validation systems
+  - ✅ Created 15 comprehensive unit tests with 100% pass rate
+  - ✅ **Success Criteria Met**: Users can review, validate, and correct OCR results before importing course data
+
+- **Task 3.2**: Structured Scorecard Data Extraction (2025-01-04)
+  - ✅ Implemented comprehensive scorecard parsing algorithms in `scorecardParser.ts`
+  - ✅ Built layout detection for tabular and line-by-line scorecard formats
+  - ✅ Created course information extraction (name, location, date) with robust pattern matching
+  - ✅ Developed hole data extraction parsing par, yardage, and handicap values
+  - ✅ Implemented tee information extraction with ratings, slopes, and yardages
+  - ✅ Built confidence scoring system for extracted data quality assessment
+  - ✅ Added comprehensive data validation with error and warning reporting
+  - ✅ Fixed location extraction patterns to handle various formats correctly
+  - ✅ Created 25 comprehensive unit tests with 100% pass rate
+  - ✅ Integrated with existing OCR service for complete workflow
+  - ✅ **Success Criteria Met**: Can extract structured course/scorecard data from OCR text with reasonable accuracy
 
 **Key Technical Achievements**:
-- Client-side OCR processing with Tesseract.js (no server dependency)
-- Camera access with environment camera preference for mobile
-- Image preprocessing pipeline for better OCR accuracy
-- Progress tracking and error handling throughout OCR workflow
-- Responsive UI design for mobile and desktop photo capture
-- Advanced settings for OCR confidence thresholds and preprocessing options
+- Advanced pattern matching for course names, locations, and dates
+- Tabular data detection and parsing for hole information
+- Robust tee information extraction with numerical data validation
+- Confidence scoring system to assess extraction quality
+- Comprehensive error handling and data validation
+- State abbreviation detection with word boundary matching
+- Support for multiple scorecard layout formats
 
 **Manual Testing Completed** ✅:
-- ✅ Photo import dialog opens correctly from "Import from Photo" button
-- ✅ Camera access works with proper permissions handling
-- ✅ File upload functionality accepts image files
-- ✅ OCR initialization displays progress correctly
-- ✅ Image preprocessing applies filters as expected
-- ✅ OCR processing shows progress and extracts text from images
-- ✅ Raw text results display correctly with confidence information
-- ✅ Error handling works for failed OCR attempts
-- ✅ Advanced settings toggle and controls function properly
+- ✅ Course information extraction works for various formats
+- ✅ Hole data parsing handles both tabular and line-by-line formats
+- ✅ Tee information extraction requires meaningful numerical data
+- ✅ Confidence scoring properly penalizes minimal data
+- ✅ Data validation catches errors and provides helpful warnings
+- ✅ Location extraction correctly handles separate line formats
+- ✅ All edge cases and error conditions handled properly
 
-**Ready for Next Task**: Task 3.1 complete (100%). Ready to proceed with Task 3.2: Structured Scorecard Data Extraction.
+**Ready for Next Task**: Task 3.2 complete (100%). Ready to proceed with Task 3.3: OCR Data Validation and Manual Correction Interface.
 
 ### Next Steps
 1. **Task 3.3**: OCR Data Validation and Manual Correction Interface
@@ -241,52 +255,52 @@ After analyzing both API integration and web scraping approaches, the most viabl
 
 ## Executor's Feedback or Assistance Requests
 
-### Completed Work Summary (Task 3.1) ✅
-Successfully implemented the complete OCR Infrastructure and Photo Import Setup with all required functionality:
+### Completed Work Summary (Task 3.2) ✅
+Successfully implemented the complete Structured Scorecard Data Extraction with all required functionality:
 
-1. **OCR Service Implementation** (`ocrService.ts`):
-   - Tesseract.js integration for client-side OCR processing
-   - Image preprocessing pipeline with contrast enhancement and noise reduction
-   - Progress tracking and error handling throughout OCR workflow
-   - Configurable confidence thresholds and preprocessing settings
-   - Resource cleanup and worker management
+1. **ScorecardParser Implementation** (`scorecardParser.ts`):
+   - **Course Information Extraction**: Robust pattern matching for course names, locations, and dates
+   - **Hole Data Parsing**: Support for both tabular and line-by-line scorecard formats
+   - **Tee Information Extraction**: Comprehensive parsing of tee colors, names, ratings, slopes, and yardages
+   - **Layout Detection**: Automatic detection of tabular data vs. line-by-line formats
+   - **Confidence Scoring**: Advanced scoring system that penalizes minimal data extraction
+   - **Data Validation**: Comprehensive validation with error and warning reporting
 
-2. **PhotoImportDialog Component** (`PhotoImportDialog.tsx`):
-   - **File Upload**: Standard file input with image type validation
-   - **Camera Access**: Environment camera preference for mobile devices
-   - **Image Preview**: Real-time preview of selected/captured images
-   - **Processing States**: Progress bars and status indicators during OCR
-   - **Advanced Settings**: Toggleable preprocessing options and confidence thresholds
-   - **Error Handling**: User-friendly error messages and recovery options
+2. **Advanced Pattern Matching**:
+   - **Course Names**: Handles various golf course naming conventions with keywords
+   - **Locations**: Separate line and embedded location detection with state abbreviation validation
+   - **Dates**: Multiple date format support (MM/DD/YYYY, Month DD, YYYY, etc.)
+   - **Hole Data**: Intelligent parsing of par, yardage, and handicap values
+   - **Tee Data**: Requires meaningful numerical data (not just color mentions)
 
-3. **Integration with CourseManager**:
-   - Added "📷 Import from Photo" button to course management actions
-   - Integrated OCR result handling with user feedback
-   - Proper state management for photo import dialog
-   - Seamless integration with existing course management workflow
+3. **Comprehensive Testing** (25 tests):
+   - Course information extraction for various formats
+   - Hole data parsing for tabular and line-by-line layouts
+   - Tee information extraction with validation
+   - Confidence calculation with penalty systems
+   - Data validation with error and warning detection
+   - Edge case handling and error conditions
 
-4. **Task 3.1 Requirements Analysis**:
-   - ✅ **Install and configure Tesseract.js** - Implemented with proper TypeScript types
-   - ✅ **Build photo upload/capture interface** - Complete with camera access and file upload
-   - ✅ **Implement image preprocessing pipeline** - Contrast enhancement and noise reduction
-   - ✅ **Create basic OCR text extraction workflow** - Full workflow with progress tracking
-   - ✅ **Add loading states and progress indicators** - Comprehensive progress and error states
+4. **Task 3.2 Requirements Analysis**:
+   - ✅ **Implement scorecard layout detection algorithms** - Complete with tabular and line detection
+   - ✅ **Parse course name, date, and basic scorecard information** - Robust pattern matching implemented
+   - ✅ **Extract hole data (numbers, par values, yardages, stroke indexes)** - Full hole data extraction
+   - ✅ **Build tee information extraction (colors, names, ratings, slopes)** - Comprehensive tee parsing
+   - ✅ **Create data validation and confidence scoring system** - Advanced validation and scoring
 
-**Key Achievement**: Task 3.1 successfully provides the foundation for OCR-based scorecard import. Users can now capture or upload scorecard photos and extract raw text using client-side OCR processing. The implementation includes proper error handling, progress tracking, and a responsive UI that works on both mobile and desktop devices.
+**Key Achievement**: Task 3.2 successfully provides structured data extraction from OCR text. The scorecard parser can handle various scorecard formats and extract meaningful course data with confidence scoring and validation. The implementation includes robust error handling and comprehensive test coverage.
 
 ### Manual Testing Completed ✅
-- ✅ PhotoImportDialog opens correctly from "Import from Photo" button
-- ✅ Camera access requests permissions and uses environment camera
-- ✅ File upload accepts image files and shows preview
-- ✅ OCR initialization shows proper progress indicators
-- ✅ Image preprocessing applies filters correctly
-- ✅ OCR processing extracts text with confidence scores
-- ✅ Raw text results display with option to view full output
-- ✅ Error handling works for camera access failures and OCR errors
-- ✅ Advanced settings toggle and controls function properly
-- ✅ Responsive design works correctly on desktop view
+- ✅ Course information extraction works for various naming conventions
+- ✅ Location extraction handles both separate lines and embedded formats
+- ✅ Date parsing supports multiple formats correctly
+- ✅ Hole data extraction works for tabular and line-by-line formats
+- ✅ Tee information requires meaningful numerical data (not just mentions)
+- ✅ Confidence scoring properly penalizes minimal or low-quality data
+- ✅ Data validation provides helpful error messages and warnings
+- ✅ All edge cases and error conditions handled appropriately
 
-**Ready for Next Phase**: Task 3.1 complete (100%). Ready to proceed with Task 3.2: Structured Scorecard Data Extraction to implement parsing of OCR text into structured course data.
+**Ready for Next Phase**: Task 3.2 complete (100%). Ready to proceed with Task 3.3: OCR Data Validation and Manual Correction Interface.
 
 ### Completed Work Summary (Task 2.2) ✅
 Successfully implemented the complete Course Editing Interface with all required functionality:
@@ -331,7 +345,7 @@ Successfully implemented the complete Course Editing Interface with all required
 - ✅ All changes save correctly and refresh the course data
 - ✅ Responsive design displays properly on desktop view
 
-**Ready for Next Phase**: Phase 2 complete (100%). Ready to proceed with Phase 3: OCR/Photo Import System.
+**Ready for Next Phase**: Task 3.2 complete (100%). Ready to proceed with Task 3.3: OCR Data Validation and Manual Correction Interface.
 
 ### Completed Work Summary (Task 2.1) ✅
 Successfully implemented the complete Course Creation Wizard with all required functionality:
@@ -462,7 +476,13 @@ Successfully implemented the complete course database foundation with:
 
 ## Lessons Learned
 
-*[To be updated as implementation progresses]*
+### Task 3.2: Structured Scorecard Data Extraction - [2025-01-04]
+- **Pattern Matching Complexity**: Golf scorecard formats vary significantly, requiring multiple pattern matching strategies for robust extraction
+- **State Abbreviation Validation**: Using word boundaries (`\b`) in regex patterns is crucial to avoid false matches (e.g., "Links" containing "IN")
+- **Location Extraction Strategy**: Prioritizing standalone location lines over embedded patterns improves accuracy for separate-line formats
+- **Confidence Scoring**: Penalizing minimal data extraction is essential for realistic confidence assessment in OCR results
+- **Test-Driven Development**: Comprehensive test coverage (25 tests) was crucial for identifying and fixing edge cases during implementation
+- **Data Validation Importance**: Providing both errors and warnings helps users understand data quality issues without blocking valid imports
 
 ## Branch Name
 

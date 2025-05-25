@@ -5,6 +5,7 @@ import { HoleEditor } from './HoleEditor';
 import { TeeEditor } from './TeeEditor';
 import { CourseCreationWizard } from './CourseCreationWizard';
 import { PhotoImportDialog } from './PhotoImportDialog';
+import { OCRValidationDialog } from './OCRValidationDialog';
 import type { OCRResult } from '../../types/ocr';
 import { scorecardParser } from '../../utils/scorecardParser';
 
@@ -210,10 +211,10 @@ export const CourseManager: React.FC = () => {
   const [isEditingHoles, setIsEditingHoles] = useState(false);
   const [isEditingTee, setIsEditingTee] = useState(false);
   const [isUsingWizard, setIsUsingWizard] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Photo import state
   const [isPhotoImportOpen, setIsPhotoImportOpen] = useState(false);
+  const [isOCRValidationOpen, setIsOCRValidationOpen] = useState(false);
+  const [currentOCRResult, setCurrentOCRResult] = useState<OCRResult | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Form state
   const [courseForm, setCourseForm] = useState<{
@@ -576,98 +577,9 @@ export const CourseManager: React.FC = () => {
       console.log('OCR Result received:', result);
       
       if (result.extractedData) {
-        // Display structured scorecard data
-        const data = result.extractedData;
-        const validation = scorecardParser.validateScorecardData(data);
-        
-        let message = `📊 Scorecard Data Extracted!\n\n`;
-        
-        // Course Information
-        if (data.courseName) {
-          message += `🏌️ Course: ${data.courseName}\n`;
-        }
-        if (data.courseLocation) {
-          message += `📍 Location: ${data.courseLocation}\n`;
-        }
-        if (data.date) {
-          message += `📅 Date: ${data.date}\n`;
-        }
-        
-        // Hole Data Summary
-        if (data.holes && data.holes.length > 0) {
-          message += `\n⛳ Holes Found: ${data.holes.length}\n`;
-          if (data.totalPar) {
-            message += `📊 Total Par: ${data.totalPar}\n`;
-          }
-          if (data.totalYardage) {
-            message += `📏 Total Yardage: ${data.totalYardage}\n`;
-          }
-          
-          // Show first few holes as examples
-          message += `\nSample Holes:\n`;
-          data.holes.slice(0, 3).forEach(hole => {
-            message += `  Hole ${hole.number}: `;
-            if (hole.par) message += `Par ${hole.par} `;
-            if (hole.yardage) message += `${hole.yardage}yds `;
-            if (hole.handicap) message += `HCP ${hole.handicap}`;
-            message += `\n`;
-          });
-          if (data.holes.length > 3) {
-            message += `  ... and ${data.holes.length - 3} more holes\n`;
-          }
-        }
-        
-        // Tee Information
-        if (data.tees && data.tees.length > 0) {
-          message += `\n🎯 Tees Found: ${data.tees.length}\n`;
-          data.tees.forEach((tee, index) => {
-            message += `  ${tee.name || tee.color || `Tee ${index + 1}`}: `;
-            if (tee.rating) message += `Rating ${tee.rating} `;
-            if (tee.slope) message += `Slope ${tee.slope} `;
-            if (tee.yardage) message += `${tee.yardage}yds`;
-            message += `\n`;
-          });
-        }
-        
-        // Confidence and Validation
-        if (data.confidence) {
-          message += `\n🎯 Extraction Confidence: ${Math.round(data.confidence * 100)}%\n`;
-        }
-        
-        if (validation.warnings.length > 0) {
-          message += `\n⚠️ Warnings:\n`;
-          validation.warnings.forEach(warning => {
-            message += `  • ${warning}\n`;
-          });
-        }
-        
-        if (validation.errors.length > 0) {
-          message += `\n❌ Errors:\n`;
-          validation.errors.forEach(error => {
-            message += `  • ${error}\n`;
-          });
-        }
-        
-        message += `\n📝 Raw Text (${result.rawText.length} characters)\n`;
-        message += `🔍 OCR Confidence: ${Math.round(result.confidence)}%\n`;
-        message += `\nIn the next phase, you'll be able to review and correct this data before importing it as a new course.`;
-        
-        const shouldViewDetails = confirm(message + `\n\nWould you like to see the detailed extraction results in the console?`);
-        
-        if (shouldViewDetails) {
-          console.log('=== STRUCTURED SCORECARD DATA ===');
-          console.log('Course Information:', {
-            name: data.courseName,
-            location: data.courseLocation,
-            date: data.date
-          });
-          console.log('Holes Data:', data.holes);
-          console.log('Tees Data:', data.tees);
-          console.log('Validation Results:', validation);
-          console.log('Raw OCR Text:', result.rawText);
-          console.log('OCR Words:', result.words);
-        }
-        
+        // Open validation dialog for review and correction
+        setCurrentOCRResult(result);
+        setIsOCRValidationOpen(true);
       } else if (result.rawText.trim()) {
         // Fallback to raw text display if no structured data
         const shouldProceed = confirm(
@@ -687,6 +599,24 @@ export const CourseManager: React.FC = () => {
       console.error('Error processing OCR result:', error);
       alert('Failed to process OCR result. Please try again.');
     }
+  };
+
+  // Handle course import from OCR validation
+  const handleOCRCourseImport = async (course: Course) => {
+    try {
+      await millbrookDb.saveCourse(course);
+      await loadCourses();
+      alert(`Successfully imported course: ${course.name}`);
+    } catch (error) {
+      console.error('Error importing course:', error);
+      alert('Failed to import course. Please try again.');
+    }
+  };
+
+  // Handle OCR validation dialog close
+  const handleOCRValidationClose = () => {
+    setIsOCRValidationOpen(false);
+    setCurrentOCRResult(null);
   };
 
   // If editing holes, show the hole editor
@@ -884,6 +814,14 @@ export const CourseManager: React.FC = () => {
         isOpen={isPhotoImportOpen}
         onClose={handlePhotoImportClose}
         onResult={handleOCRResult}
+      />
+
+      {/* OCR Validation Dialog */}
+      <OCRValidationDialog
+        isOpen={isOCRValidationOpen}
+        ocrResult={currentOCRResult}
+        onClose={handleOCRValidationClose}
+        onImport={handleOCRCourseImport}
       />
     </div>
   );
