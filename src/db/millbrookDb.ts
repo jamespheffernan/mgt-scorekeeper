@@ -5,7 +5,7 @@ import {
   GameState,
   GameHistory
 } from './API-GameState';
-import { Course } from './courseModel';
+import { Course, CourseImportRecord } from './courseModel';
 import { MILLBROOK_COURSE_DATA } from './millbrookCourseData';
 import { MatchRoster } from '../types/player';
 
@@ -20,6 +20,7 @@ class MillbrookDatabase extends Dexie {
   courses!: Table<Course, string>;
   gameHistory!: Table<GameHistory, string>;
   matchState!: Table<{id: string, roster?: MatchRoster}, string>;
+  courseImportHistory!: Table<CourseImportRecord, string>;
 
   constructor() {
     super('millbrookDb');
@@ -30,11 +31,27 @@ class MillbrookDatabase extends Dexie {
       gameStates: 'match.id'
     });
 
-    // Add courses table in version 2
     this.version(2).stores({
-      courses: 'id, name, location'
-    }).upgrade(tx => {
-      // Add Millbrook Golf & Tennis Club course data on upgrade
+      players: 'id, name, index',
+      matches: 'id, date, state',
+      gameStates: 'match.id',
+      courses: 'id, name, location',
+      gameHistory: 'id, date, playerNames',
+      matchState: 'id'
+    });
+
+    this.version(3).stores({
+      players: 'id, name, index',
+      matches: 'id, date, state',
+      gameStates: 'match.id',
+      courses: 'id, name, location',
+      gameHistory: 'id, date, playerNames',
+      matchState: 'id',
+      courseImportHistory: 'id, timestamp, courseId, source'
+    });
+
+    // Add Millbrook Golf & Tennis Club course data on upgrade
+    this.version(2).upgrade(tx => {
       return tx.table('courses').add(MILLBROOK_COURSE_DATA);
     });
     
@@ -361,6 +378,58 @@ class MillbrookDatabase extends Dexie {
     const coursesCount = await this.courses.count();
     if (coursesCount === 0) {
       await this.courses.add(MILLBROOK_COURSE_DATA);
+    }
+  }
+
+  // Course import history methods
+  async saveCourseImportRecord(record: CourseImportRecord): Promise<void> {
+    try {
+      await this.courseImportHistory.add(record);
+    } catch (error) {
+      console.error('Error saving course import record:', error);
+      throw error;
+    }
+  }
+
+  async getCourseImportHistory(courseId?: string): Promise<CourseImportRecord[]> {
+    try {
+      if (courseId) {
+        return await this.courseImportHistory
+          .where('courseId')
+          .equals(courseId)
+          .reverse()
+          .sortBy('timestamp');
+      } else {
+        return await this.courseImportHistory
+          .orderBy('timestamp')
+          .reverse()
+          .toArray();
+      }
+    } catch (error) {
+      console.error('Error fetching course import history:', error);
+      return [];
+    }
+  }
+
+  async getRecentImports(limit: number = 10): Promise<CourseImportRecord[]> {
+    try {
+      return await this.courseImportHistory
+        .orderBy('timestamp')
+        .reverse()
+        .limit(limit)
+        .toArray();
+    } catch (error) {
+      console.error('Error fetching recent imports:', error);
+      return [];
+    }
+  }
+
+  async deleteCourseImportRecord(recordId: string): Promise<void> {
+    try {
+      await this.courseImportHistory.delete(recordId);
+    } catch (error) {
+      console.error('Error deleting course import record:', error);
+      throw error;
     }
   }
 }

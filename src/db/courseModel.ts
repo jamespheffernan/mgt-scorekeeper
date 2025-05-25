@@ -41,4 +41,21 @@ export interface Course {
 export interface CourseWithStats extends Course {
   timesPlayed: number;   // Number of times this course has been played
   averageScore?: number; // Average score on this course
+}
+
+/**
+ * Import history record for tracking course imports
+ */
+export interface CourseImportRecord {
+  id: string;
+  timestamp: Date;
+  courseId: string;
+  courseName: string;
+  source: 'OCR Photo Import' | 'JSON File Import' | 'API Import' | 'Manual Entry';
+  action: 'new' | 'replaced' | 'kept-both' | 'merged';
+  confidence?: number; // For OCR imports
+  extractedData?: boolean; // Whether structured data was extracted
+  errors?: string[]; // Any errors during import
+  warnings?: string[]; // Any warnings during import
+  originalData?: any; // Original import data for audit
 } 

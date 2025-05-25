@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { millbrookDb } from '../../db/millbrookDb';
-import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
+import { Course, TeeOption, HoleInfo, CourseImportRecord } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
 import { TeeEditor } from './TeeEditor';
 import { CourseCreationWizard } from './CourseCreationWizard';
@@ -504,37 +504,82 @@ export const CourseManager: React.FC = () => {
           // Check if it's a single course or an array of courses
           const coursesToImport = Array.isArray(importedData) ? importedData : [importedData];
           
-          // Validate course data
-          const validCourses = coursesToImport.filter(course => {
-            return (
-              course.id && 
-              course.name && 
-              course.location && 
-              Array.isArray(course.teeOptions) &&
-              course.teeOptions.length > 0
+          // Get existing courses for duplicate detection
+          const existingCourses = await millbrookDb.getAllCourses();
+          
+          // Validate course data and track imports
+          const validCourses = [];
+          const importRecords: CourseImportRecord[] = [];
+          let importCount = 0;
+          let duplicateCount = 0;
+          
+          for (const course of coursesToImport) {
+            // Basic validation
+            if (!(course.id && course.name && course.location && Array.isArray(course.teeOptions) && course.teeOptions.length > 0)) {
+              console.warn('Skipping invalid course data:', course);
+              continue;
+            }
+            
+            // Check for duplicates
+            const duplicateCandidate = existingCourses?.find(existing => 
+              existing.name.toLowerCase().trim() === course.name.toLowerCase().trim() &&
+              existing.location?.toLowerCase().trim() === course.location?.toLowerCase().trim()
             );
-          });
+            
+            let finalCourse = course;
+            let action: 'new' | 'replaced' | 'kept-both' = 'new';
+            
+            if (duplicateCandidate) {
+              duplicateCount++;
+              // For batch imports, we'll keep both and rename the new one
+              finalCourse = {
+                ...course,
+                id: crypto.randomUUID(),
+                name: `${course.name} (Imported ${new Date().toLocaleDateString()})`,
+                teeOptions: course.teeOptions.map((tee: TeeOption) => ({
+                  ...tee,
+                  id: crypto.randomUUID()
+                })),
+                dateAdded: new Date()
+              };
+              action = 'kept-both';
+            } else {
+              // Generate new IDs for the course and tee options to avoid conflicts
+              finalCourse = {
+                ...course,
+                id: crypto.randomUUID(),
+                teeOptions: course.teeOptions.map((tee: TeeOption) => ({
+                  ...tee,
+                  id: crypto.randomUUID()
+                })),
+                dateAdded: new Date()
+              };
+            }
+            
+            validCourses.push(finalCourse);
+            
+            // Create import record
+            const importRecord: CourseImportRecord = {
+              id: crypto.randomUUID(),
+              timestamp: new Date(),
+              courseId: finalCourse.id,
+              courseName: finalCourse.name,
+              source: 'JSON File Import',
+              action: action,
+              originalData: course // Store original for audit
+            };
+            importRecords.push(importRecord);
+          }
           
           if (validCourses.length === 0) {
             alert('No valid course data found in the imported file.');
             return;
           }
           
-          // Import courses
-          let importCount = 0;
-          for (const course of validCourses) {
-            // Generate new IDs for the course and tee options to avoid conflicts
-            const newCourse: Course = {
-              ...course,
-              id: crypto.randomUUID(),
-              teeOptions: course.teeOptions.map((tee: TeeOption) => ({
-                ...tee,
-                id: crypto.randomUUID()
-              })),
-              dateAdded: new Date()
-            };
-            
-            await millbrookDb.saveCourse(newCourse);
+          // Import courses and save records
+          for (let i = 0; i < validCourses.length; i++) {
+            await millbrookDb.saveCourse(validCourses[i]);
+            await millbrookDb.saveCourseImportRecord(importRecords[i]);
             importCount++;
           }
           
@@ -547,7 +592,13 @@ export const CourseManager: React.FC = () => {
             fileInputRef.current.value = '';
           }
           
-          alert(`Successfully imported ${importCount} course(s).`);
+          // Show detailed result message
+          let resultMessage = `Successfully imported ${importCount} course(s).`;
+          if (duplicateCount > 0) {
+            resultMessage += `\n${duplicateCount} duplicate(s) were renamed to avoid conflicts.`;
+          }
+          alert(resultMessage);
+          
         } catch (parseError) {
           console.error('Error parsing JSON:', parseError);
           alert('Failed to parse the imported file. Make sure it contains valid JSON.');
@@ -604,9 +655,72 @@ export const CourseManager: React.FC = () => {
   // Handle course import from OCR validation
   const handleOCRCourseImport = async (course: Course) => {
     try {
-      await millbrookDb.saveCourse(course);
+      // Check for duplicate courses first
+      const existingCourses = await millbrookDb.getAllCourses();
+      const duplicateCandidate = existingCourses?.find(existing => 
+        existing.name.toLowerCase().trim() === course.name.toLowerCase().trim() &&
+        existing.location?.toLowerCase().trim() === course.location?.toLowerCase().trim()
+      );
+
+      let importedCourse = course;
+      let message = '';
+
+      if (duplicateCandidate) {
+        // Show duplicate detection dialog
+        const userChoice = confirm(
+          `A course with the same name and location already exists:\n\n` +
+          `Existing: "${duplicateCandidate.name}" at "${duplicateCandidate.location}"\n` +
+          `New: "${course.name}" at "${course.location}"\n\n` +
+          `Would you like to:\n` +
+          `• Click OK to REPLACE the existing course\n` +
+          `• Click Cancel to KEEP BOTH courses (new course will be renamed)`
+        );
+
+        if (userChoice) {
+          // Replace existing course - use existing ID and preserve metadata
+          importedCourse = {
+            ...course,
+            id: duplicateCandidate.id,
+            dateAdded: duplicateCandidate.dateAdded,
+            lastPlayed: duplicateCandidate.lastPlayed,
+            timesPlayed: duplicateCandidate.timesPlayed || 0
+          };
+          message = `Successfully replaced existing course: ${course.name}`;
+        } else {
+          // Keep both - rename new course
+          importedCourse = {
+            ...course,
+            name: `${course.name} (Imported ${new Date().toLocaleDateString()})`
+          };
+          message = `Successfully imported course as: ${importedCourse.name}`;
+        }
+      } else {
+        message = `Successfully imported course: ${course.name}`;
+      }
+
+      // Track import for audit trail
+      const importRecord: CourseImportRecord = {
+        id: crypto.randomUUID(),
+        timestamp: new Date(),
+        courseId: importedCourse.id,
+        courseName: importedCourse.name,
+        source: 'OCR Photo Import',
+        action: duplicateCandidate ? (importedCourse.id === duplicateCandidate.id ? 'replaced' : 'kept-both') : 'new',
+        confidence: currentOCRResult?.confidence || 0,
+        extractedData: !!currentOCRResult?.extractedData
+      };
+
+      // Save course and record import
+      await millbrookDb.saveCourse(importedCourse);
+      await millbrookDb.saveCourseImportRecord(importRecord);
+      
       await loadCourses();
-      alert(`Successfully imported course: ${course.name}`);
+      alert(message);
+
+      // Close validation dialog
+      setIsOCRValidationOpen(false);
+      setCurrentOCRResult(null);
+      
     } catch (error) {
       console.error('Error importing course:', error);
       alert('Failed to import course. Please try again.');
