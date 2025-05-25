@@ -1,0 +1,379 @@
+/* Photo Import Dialog Styles */
+.photo-import-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.photo-import-dialog {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.photo-import-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.photo-import-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 5px;
+  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+}
+
+.close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.photo-import-content {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Control Buttons */
+.import-controls {
+  margin-bottom: 20px;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.control-button {
+  padding: 12px 20px;
+  border: 2px solid #007bff;
+  background: white;
+  color: #007bff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 140px;
+}
+
+.control-button:hover:not(:disabled) {
+  background: #007bff;
+  color: white;
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control-button.upload {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.control-button.upload:hover:not(:disabled) {
+  background: #28a745;
+  color: white;
+}
+
+.control-button.camera {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+.control-button.camera:hover:not(:disabled) {
+  background: #17a2b8;
+  color: white;
+}
+
+.control-button.capture {
+  border-color: #fd7e14;
+  color: #fd7e14;
+}
+
+.control-button.capture:hover:not(:disabled) {
+  background: #fd7e14;
+  color: white;
+}
+
+.control-button.cancel {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.control-button.cancel:hover:not(:disabled) {
+  background: #6c757d;
+  color: white;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 12px;
+}
+
+/* Camera Interface */
+.camera-container {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.camera-video {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.capture-canvas {
+  display: none;
+}
+
+/* Image Preview */
+.preview-container {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.preview-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Processing Status */
+.processing-status {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #28a745);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.status-text {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Error Messages */
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.error-message p {
+  margin: 0;
+}
+
+/* Settings Section */
+.settings-section {
+  margin: 20px 0;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 20px;
+}
+
+.settings-toggle {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-toggle:hover {
+  text-decoration: underline;
+}
+
+.advanced-settings {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-item input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.setting-item input[type="range"] {
+  width: 100px;
+  margin-left: 12px;
+}
+
+/* Dialog Actions */
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.action-button.cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.action-button.cancel:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.action-button.process {
+  background: #007bff;
+  color: white;
+}
+
+.action-button.process:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .photo-import-overlay {
+    padding: 10px;
+  }
+
+  .photo-import-dialog {
+    max-height: 95vh;
+  }
+
+  .photo-import-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .photo-import-content {
+    padding: 15px;
+  }
+
+  .control-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .control-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .camera-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .setting-item input[type="range"] {
+    width: 100%;
+    margin-left: 0;
+  }
+} 

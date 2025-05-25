@@ -4,6 +4,8 @@ import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
 import { TeeEditor } from './TeeEditor';
 import { CourseCreationWizard } from './CourseCreationWizard';
+import { PhotoImportDialog } from './PhotoImportDialog';
+import type { OCRResult } from '../../types/ocr';
 
 // CourseForm component
 interface CourseFormProps {
@@ -208,6 +210,9 @@ export const CourseManager: React.FC = () => {
   const [isEditingTee, setIsEditingTee] = useState(false);
   const [isUsingWizard, setIsUsingWizard] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Photo import state
+  const [isPhotoImportOpen, setIsPhotoImportOpen] = useState(false);
   
   // Form state
   const [courseForm, setCourseForm] = useState<{
@@ -554,6 +559,45 @@ export const CourseManager: React.FC = () => {
     }
   };
 
+  // Handle photo import button click
+  const handlePhotoImportClick = () => {
+    setIsPhotoImportOpen(true);
+  };
+
+  // Handle photo import dialog close
+  const handlePhotoImportClose = () => {
+    setIsPhotoImportOpen(false);
+  };
+
+  // Handle OCR result from photo import
+  const handleOCRResult = async (result: OCRResult) => {
+    try {
+      console.log('OCR Result received:', result);
+      
+      // For Task 3.1, we just display the raw text
+      // In Task 3.2, we'll implement structured data extraction
+      
+      if (result.rawText.trim()) {
+        // Show the raw text to the user
+        const shouldProceed = confirm(
+          `OCR processing completed! Extracted text:\n\n${result.rawText.substring(0, 500)}${result.rawText.length > 500 ? '...' : ''}\n\nIn the next phase, this data will be automatically parsed into course information. For now, you can copy this text and use it manually.\n\nWould you like to see the full extracted text in the console?`
+        );
+        
+        if (shouldProceed) {
+          console.log('Full OCR Text:', result.rawText);
+          console.log('OCR Confidence:', result.confidence);
+          console.log('OCR Words:', result.words);
+        }
+      } else {
+        alert('No text was detected in the image. Please try a clearer image or adjust the camera angle.');
+      }
+      
+    } catch (error) {
+      console.error('Error processing OCR result:', error);
+      alert('Failed to process OCR result. Please try again.');
+    }
+  };
+
   // If editing holes, show the hole editor
   if (isEditingHoles && selectedTee && selectedCourse) {
     return <HoleEditor 
@@ -591,6 +635,12 @@ export const CourseManager: React.FC = () => {
         </button>
         <button className="add-button" onClick={() => setIsAddingCourse(true)}>
           Quick Add Course
+        </button>
+        <button 
+          className="import-photo-button"
+          onClick={handlePhotoImportClick}
+        >
+          📷 Import from Photo
         </button>
         <button 
           className="export-button"
@@ -737,6 +787,13 @@ export const CourseManager: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Photo Import Dialog */}
+      <PhotoImportDialog
+        isOpen={isPhotoImportOpen}
+        onClose={handlePhotoImportClose}
+        onResult={handleOCRResult}
+      />
     </div>
   );
 }; 
