@@ -181,7 +181,7 @@ After analyzing both API integration and web scraping approaches, the most viabl
 - [x] **Task 2.2**: Course Editing Interface ✅ **COMPLETED**
 
 ### Phase 3: OCR/Photo Import System
-- [ ] **Task 3.1**: OCR Infrastructure and Photo Import Setup 
+- [x] **Task 3.1**: OCR Infrastructure and Photo Import Setup ✅ **COMPLETED**
 - [ ] **Task 3.2**: Structured Scorecard Data Extraction 
 - [ ] **Task 3.3**: OCR Data Validation and Manual Correction Interface 
 - [ ] **Task 3.4**: Course Data Import and Integration
@@ -189,63 +189,50 @@ After analyzing both API integration and web scraping approaches, the most viabl
 ## Current Status / Progress Tracking
 
 **Current Phase**: Phase 3 - OCR/Photo Import System  
-**Current Task**: Task 3.1 - OCR Infrastructure and Photo Import Setup 
-**Overall Progress**: 0/4 tasks completed (0%)
+**Current Task**: Task 3.2 - Structured Scorecard Data Extraction 
+**Overall Progress**: 1/4 tasks completed (25%)
 
 ### Recently Completed ✅
-- **Task 2.2**: Course Editing Interface (2024-12-28)
-  - Created comprehensive TeeEditor component for editing tee information
-  - Form validation for tee name, color, gender, course rating, and slope rating
-  - Explanatory help text for course and slope ratings
-  - Enhanced HoleEditor with bulk operations for efficient editing
-  - Bulk operations: Set par/yardage for all/front9/back9 holes
-  - Auto-assign stroke indexes based on difficulty algorithm
-  - Visual bulk operation controls with confirmation dialogs
-  - Integrated "Edit Tee" button in course manager tee details panel
-  - Full responsive CSS styling for mobile and desktop
-  - All 217 tests passing with proper integration
+- **Task 3.1**: OCR Infrastructure and Photo Import Setup (2025-01-04)
+  - ✅ Installed Tesseract.js for client-side OCR processing
+  - ✅ Created comprehensive OCR type definitions (`ocr.ts`)
+  - ✅ Implemented OCRService with image preprocessing pipeline
+  - ✅ Built PhotoImportDialog component with camera/upload interface
+  - ✅ Integrated photo import into CourseManager with "📷 Import from Photo" button
+  - ✅ Added image preprocessing (contrast enhancement, noise reduction)
+  - ✅ Implemented loading states and progress indicators for OCR workflow
+  - ✅ Created basic text extraction with confidence filtering
+  - ✅ All 217 tests passing with new functionality
+  - ✅ **Success Criteria Met**: Users can upload/capture scorecard photos and extract raw text using OCR
 
-- **Task 2.1**: Course Creation Wizard (2024-12-28)
-  - Created comprehensive 4-step course creation wizard
-  - Step 1: Template selection (standard par 72, executive par 71, custom)
-  - Step 2: Basic course information (name, location with validation)
-  - Step 3: Tee configuration (add/edit/remove tees with form validation)
-  - Step 4: Hole-by-hole data entry with visual grid and defaults
-  - Full integration with courseValidation and courseFormats
-  - Complete responsive CSS styling for mobile and desktop
-  - Wizard completion saves to millbrookDb and refreshes course list
-  - All 217 tests passing with proper integration
+**Key Technical Achievements**:
+- Client-side OCR processing with Tesseract.js (no server dependency)
+- Camera access with environment camera preference for mobile
+- Image preprocessing pipeline for better OCR accuracy
+- Progress tracking and error handling throughout OCR workflow
+- Responsive UI design for mobile and desktop photo capture
+- Advanced settings for OCR confidence thresholds and preprocessing options
 
-- **Task 1.3**: Course Management UI Foundation (2024-12-28)
-  - Created comprehensive CourseManager component with full CRUD operations
-  - Implemented course list view with real-time search and filtering by name/location
-  - Added course details view with clickable tee selection functionality
-  - Integrated course deletion with confirmation dialog
-  - Enhanced UI with professional styling and responsive design
-  - Added import/export functionality for individual courses and bulk operations
-  - All 205 tests passing with proper route integration
+**Manual Testing Completed** ✅:
+- ✅ Photo import dialog opens correctly from "Import from Photo" button
+- ✅ Camera access works with proper permissions handling
+- ✅ File upload functionality accepts image files
+- ✅ OCR initialization displays progress correctly
+- ✅ Image preprocessing applies filters as expected
+- ✅ OCR processing shows progress and extracts text from images
+- ✅ Raw text results display correctly with confidence information
+- ✅ Error handling works for failed OCR attempts
+- ✅ Advanced settings toggle and controls function properly
 
-- **Task 1.2**: Enhanced Course Selection in Game Setup (2024-12-28)
-  - Replaced simple dropdown with searchable course picker
-  - Implemented real-time search by course name and location using millbrookDb.searchCourses()
-  - Added responsive dropdown with course selection and visual feedback
-  - Created comprehensive CSS styling for mobile and desktop
-  - Maintained backward compatibility with existing game state
-  - All 217 tests still passing
-
-- **Task 1.1**: Enhanced Course Database Layer (2024-12-27)
-  - Created comprehensive course validation system with 23 validation tests
-  - Enhanced millbrookDb with search, filtering, and usage tracking (18 database tests)
-  - Implemented flexible JSON import/export formats (27 format tests)
-  - Added course templates for quick course creation
-  - All 68 tests passing with proper IndexedDB mocking
+**Ready for Next Task**: Task 3.1 complete (100%). Ready to proceed with Task 3.2: Structured Scorecard Data Extraction.
 
 ### Next Steps
-1. **Task 1.3**: Implement course management UI foundation
-   - Create CourseManager component for course CRUD operations
-   - Add course list view with search and filtering
-   - Implement course details view
-   - Add course deletion with confirmation
+1. **Task 3.3**: OCR Data Validation and Manual Correction Interface
+   - Build interactive correction interface for uncertain OCR results
+   - Implement confidence-based highlighting for manual review
+   - Add field-by-field validation with visual feedback
+   - Create preview mode showing extracted data before import
+   - Implement error handling for invalid or incomplete data
 
 ### Technical Debt & Improvements
 - Consider adding course data caching for performance
@@ -253,6 +240,53 @@ After analyzing both API integration and web scraping approaches, the most viabl
 - Add course sharing between users (future enhancement)
 
 ## Executor's Feedback or Assistance Requests
+
+### Completed Work Summary (Task 3.1) ✅
+Successfully implemented the complete OCR Infrastructure and Photo Import Setup with all required functionality:
+
+1. **OCR Service Implementation** (`ocrService.ts`):
+   - Tesseract.js integration for client-side OCR processing
+   - Image preprocessing pipeline with contrast enhancement and noise reduction
+   - Progress tracking and error handling throughout OCR workflow
+   - Configurable confidence thresholds and preprocessing settings
+   - Resource cleanup and worker management
+
+2. **PhotoImportDialog Component** (`PhotoImportDialog.tsx`):
+   - **File Upload**: Standard file input with image type validation
+   - **Camera Access**: Environment camera preference for mobile devices
+   - **Image Preview**: Real-time preview of selected/captured images
+   - **Processing States**: Progress bars and status indicators during OCR
+   - **Advanced Settings**: Toggleable preprocessing options and confidence thresholds
+   - **Error Handling**: User-friendly error messages and recovery options
+
+3. **Integration with CourseManager**:
+   - Added "📷 Import from Photo" button to course management actions
+   - Integrated OCR result handling with user feedback
+   - Proper state management for photo import dialog
+   - Seamless integration with existing course management workflow
+
+4. **Task 3.1 Requirements Analysis**:
+   - ✅ **Install and configure Tesseract.js** - Implemented with proper TypeScript types
+   - ✅ **Build photo upload/capture interface** - Complete with camera access and file upload
+   - ✅ **Implement image preprocessing pipeline** - Contrast enhancement and noise reduction
+   - ✅ **Create basic OCR text extraction workflow** - Full workflow with progress tracking
+   - ✅ **Add loading states and progress indicators** - Comprehensive progress and error states
+
+**Key Achievement**: Task 3.1 successfully provides the foundation for OCR-based scorecard import. Users can now capture or upload scorecard photos and extract raw text using client-side OCR processing. The implementation includes proper error handling, progress tracking, and a responsive UI that works on both mobile and desktop devices.
+
+### Manual Testing Completed ✅
+- ✅ PhotoImportDialog opens correctly from "Import from Photo" button
+- ✅ Camera access requests permissions and uses environment camera
+- ✅ File upload accepts image files and shows preview
+- ✅ OCR initialization shows proper progress indicators
+- ✅ Image preprocessing applies filters correctly
+- ✅ OCR processing extracts text with confidence scores
+- ✅ Raw text results display with option to view full output
+- ✅ Error handling works for camera access failures and OCR errors
+- ✅ Advanced settings toggle and controls function properly
+- ✅ Responsive design works correctly on desktop view
+
+**Ready for Next Phase**: Task 3.1 complete (100%). Ready to proceed with Task 3.2: Structured Scorecard Data Extraction to implement parsing of OCR text into structured course data.
 
 ### Completed Work Summary (Task 2.2) ✅
 Successfully implemented the complete Course Editing Interface with all required functionality:
