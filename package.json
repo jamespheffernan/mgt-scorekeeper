@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start:server": "node server/index.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -12,10 +13,15 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
+    "cors": "^2.8.5",
     "dexie": "^4.0.11",
+    "dotenv": "^16.5.0",
     "esbuild": "^0.25.4",
+    "express": "^5.1.0",
     "firebase": "^11.7.1",
     "html2canvas": "^1.4.1",
+    "lucide-react": "^0.511.0",
+    "node-fetch": "^3.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.3",
