@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search } from 'lucide-react';
+import { millbrookDb } from '../../db/millbrookDb';
+import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 
 // TypeScript interfaces for OCR results
 interface OcrHole {
@@ -42,6 +44,12 @@ interface ParsedScorecardData {
   };
 }
 
+interface CourseMatchResult {
+  course: Course;
+  similarity: number;
+  matchType: 'exact' | 'partial' | 'location';
+}
+
 interface GolfScorecardOcrFeatureProps {
   className?: string;
 }
@@ -59,10 +67,151 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
   const [rawOcrData, setRawOcrData] = useState<any>(null);
   const [parsedData, setParsedData] = useState<ParsedScorecardData | null>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  
+  // Course integration state
+  const [existingCourses, setExistingCourses] = useState<Course[]>([]);
+  const [courseMatches, setCourseMatches] = useState<CourseMatchResult[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [showCourseIntegration, setShowCourseIntegration] = useState<boolean>(false);
+  const [isCreatingCourse, setIsCreatingCourse] = useState<boolean>(false);
 
   // File size validation (10MB limit)
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
   const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+
+  // Load existing courses on component mount
+  useEffect(() => {
+    loadExistingCourses();
+  }, []);
+
+  // Load existing courses from database
+  const loadExistingCourses = async () => {
+    try {
+      const courses = await millbrookDb.getAllCourses();
+      setExistingCourses(courses);
+    } catch (error) {
+      console.error('Error loading existing courses:', error);
+    }
+  };
+
+  // Find matching courses based on OCR data
+  const findCourseMatches = (ocrData: ParsedScorecardData): CourseMatchResult[] => {
+    if (!ocrData.courseName || existingCourses.length === 0) {
+      return [];
+    }
+
+    const matches: CourseMatchResult[] = [];
+    const lowerOcrName = ocrData.courseName.toLowerCase();
+
+    for (const course of existingCourses) {
+      const lowerCourseName = course.name.toLowerCase();
+      const lowerLocation = course.location?.toLowerCase() || '';
+
+      // Exact name match
+      if (lowerCourseName === lowerOcrName) {
+        matches.push({
+          course,
+          similarity: 1.0,
+          matchType: 'exact'
+        });
+        continue;
+      }
+
+      // Partial name match
+      if (lowerCourseName.includes(lowerOcrName) || lowerOcrName.includes(lowerCourseName)) {
+        const similarity = Math.max(
+          lowerCourseName.length / lowerOcrName.length,
+          lowerOcrName.length / lowerCourseName.length
+        ) * 0.8; // Reduce score for partial matches
+        
+        matches.push({
+          course,
+          similarity,
+          matchType: 'partial'
+        });
+        continue;
+      }
+
+      // Location-based match (if OCR name contains location words)
+      if (lowerLocation && (lowerOcrName.includes(lowerLocation) || lowerLocation.includes(lowerOcrName))) {
+        matches.push({
+          course,
+          similarity: 0.6,
+          matchType: 'location'
+        });
+      }
+    }
+
+    // Sort by similarity score
+    return matches.sort((a, b) => b.similarity - a.similarity);
+  };
+
+  // Convert OCR data to Course format
+  const convertOcrToCourse = (ocrData: ParsedScorecardData): Omit<Course, 'id'> => {
+    // Create hole info from OCR holes
+    const holes: HoleInfo[] = [];
+    for (let i = 1; i <= 18; i++) {
+      const ocrHole = ocrData.holes.find(h => h.hole_number === i);
+      if (ocrHole) {
+        holes.push({
+          number: i,
+          par: ocrHole.par || 4, // Default to par 4 if not specified
+          yardage: ocrHole.yardage || 350, // Default yardage
+          strokeIndex: ocrHole.stroke_index || i // Default stroke index
+        });
+      } else {
+        // Create default hole if missing
+        holes.push({
+          number: i,
+          par: 4,
+          yardage: 350,
+          strokeIndex: i
+        });
+      }
+    }
+
+    // Create default tee option
+    const defaultTee: Omit<TeeOption, 'id'> = {
+      name: 'Default',
+      color: 'White',
+      gender: 'Any',
+      rating: 72.0,
+      slope: 113,
+      holes
+    };
+
+    return {
+      name: ocrData.courseName || 'Imported Course',
+      location: 'Unknown Location',
+      teeOptions: [{ ...defaultTee, id: crypto.randomUUID() }],
+      dateAdded: new Date(),
+      lastPlayed: ocrData.playedDate ? new Date(ocrData.playedDate) : undefined
+    };
+  };
+
+  // Create new course from OCR data
+  const createCourseFromOcr = async () => {
+    if (!parsedData) return;
+
+    setIsCreatingCourse(true);
+    try {
+      const courseData = convertOcrToCourse(parsedData);
+      const newCourse: Course = {
+        ...courseData,
+        id: crypto.randomUUID()
+      };
+
+      await millbrookDb.saveCourse(newCourse);
+      await loadExistingCourses(); // Refresh course list
+      setSelectedCourseId(newCourse.id);
+      setSuccessMessage(`Course "${newCourse.name}" created successfully!`);
+    } catch (error) {
+      console.error('Error creating course:', error);
+      setErrorMessage('Failed to create course from OCR data');
+    } finally {
+      setIsCreatingCourse(false);
+    }
+  };
 
   // Validation function for OCR results
   const validateOcrData = (data: any): ValidationResult => {
@@ -211,6 +360,9 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     setRawOcrData(null);
     setParsedData(null);
     setValidationResult(null);
+    setShowCourseIntegration(false);
+    setCourseMatches([]);
+    setSelectedCourseId(null);
 
     // Validate file type
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -256,6 +408,9 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     setRawOcrData(null);
     setParsedData(null);
     setValidationResult(null);
+    setShowCourseIntegration(false);
+    setCourseMatches([]);
+    setSelectedCourseId(null);
 
     try {
       // Enhanced prompt for golf scorecard recognition
@@ -332,6 +487,19 @@ Please be as accurate as possible and only include information that is clearly v
         const parsed = parseOcrData(validation.data);
         setParsedData(parsed);
         
+        // Find course matches if course name is available
+        if (parsed.courseName) {
+          const matches = findCourseMatches(parsed);
+          setCourseMatches(matches);
+          
+          // Auto-select exact match if found
+          if (matches.length > 0 && matches[0].matchType === 'exact') {
+            setSelectedCourseId(matches[0].course.id);
+          }
+          
+          setShowCourseIntegration(true);
+        }
+        
         // Create success message with summary
         const { summary } = parsed;
         let message = 'Scorecard processed successfully!';
@@ -372,6 +540,9 @@ Please be as accurate as possible and only include information that is clearly v
     setRawOcrData(null);
     setParsedData(null);
     setValidationResult(null);
+    setShowCourseIntegration(false);
+    setCourseMatches([]);
+    setSelectedCourseId(null);
     
     // Clear file input
     const fileInput = document.getElementById('scorecard-file-input') as HTMLInputElement;
@@ -473,6 +644,118 @@ Please be as accurate as possible and only include information that is clearly v
           <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
             <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
             <div className="text-green-700 text-sm">{successMessage}</div>
+          </div>
+        )}
+
+        {/* Course Integration Section */}
+        {showCourseIntegration && parsedData && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              Course Integration
+            </h3>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="mb-4">
+                <h4 className="font-medium text-blue-800 mb-2">
+                  Detected Course: "{parsedData.courseName}"
+                </h4>
+                
+                {courseMatches.length > 0 ? (
+                  <div className="mb-4">
+                    <div className="text-sm text-blue-700 mb-3 flex items-center gap-2">
+                      <Search className="w-4 h-4" />
+                      Found {courseMatches.length} potential match{courseMatches.length !== 1 ? 'es' : ''} in your course database:
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {courseMatches.map((match) => (
+                        <label key={match.course.id} className="flex items-center gap-3 p-3 bg-white rounded border hover:bg-blue-50 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="courseSelection"
+                            value={match.course.id}
+                            checked={selectedCourseId === match.course.id}
+                            onChange={(e) => setSelectedCourseId(e.target.value)}
+                            className="text-blue-600 focus:ring-blue-500"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-800">{match.course.name}</div>
+                            <div className="text-sm text-gray-600">{match.course.location}</div>
+                            <div className="text-xs text-gray-500">
+                              {Math.round(match.similarity * 100)}% match ({match.matchType})
+                              {match.course.teeOptions?.length && ` • ${match.course.teeOptions.length} tee option${match.course.teeOptions.length !== 1 ? 's' : ''}`}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <div className="text-sm text-yellow-700">
+                      No matching courses found in your database for "{parsedData.courseName}".
+                    </div>
+                  </div>
+                )}
+                
+                {/* Create new course option */}
+                <div className="border-t border-blue-200 pt-4">
+                  <div className="text-sm text-blue-700 mb-3">
+                    Or create a new course from this scorecard data:
+                  </div>
+                  
+                  <label className="flex items-center gap-3 p-3 bg-white rounded border hover:bg-blue-50 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="courseSelection"
+                      value="create-new"
+                      checked={selectedCourseId === 'create-new'}
+                      onChange={(e) => setSelectedCourseId(e.target.value)}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Plus className="w-4 h-4 text-green-600" />
+                      <span className="font-medium text-gray-800">Create New Course: "{parsedData.courseName}"</span>
+                    </div>
+                  </label>
+                  
+                  {selectedCourseId === 'create-new' && (
+                    <div className="mt-3 ml-7">
+                      <button
+                        onClick={createCourseFromOcr}
+                        disabled={isCreatingCourse}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded font-medium hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                      >
+                        {isCreatingCourse ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4" />
+                        )}
+                        {isCreatingCourse ? 'Creating...' : 'Create Course'}
+                      </button>
+                      <div className="text-xs text-gray-600 mt-2">
+                        This will create a new course with {parsedData.holes.length} holes and default settings.
+                        You can edit the course details later in the Course Manager.
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Course integration summary */}
+                {selectedCourseId && selectedCourseId !== 'create-new' && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
+                    <div className="text-sm text-green-700 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Selected course: {courseMatches.find(m => m.course.id === selectedCourseId)?.course.name}
+                    </div>
+                    <div className="text-xs text-green-600 mt-1">
+                      OCR data will be associated with this existing course.
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
