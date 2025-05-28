@@ -74,13 +74,54 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     setSuccessMessage('');
 
     try {
+      // Enhanced prompt for golf scorecard recognition
+      const enhancedPrompt = `
+You are analyzing a golf scorecard image. Please extract all relevant information and return it as structured JSON data.
+
+IMPORTANT INSTRUCTIONS:
+1. Look for the golf course name at the top of the scorecard
+2. Find the date the round was played (if visible)
+3. Identify all 18 holes with their details:
+   - Hole number (1-18)
+   - Par value for each hole
+   - Stroke Index (handicap ranking, usually 1-18)
+   - Yardage (if visible)
+4. Look for player names and their scores if filled in
+5. Pay attention to front 9 (holes 1-9) and back 9 (holes 10-18) sections
+6. Look for totals, handicaps, and net scores if present
+
+EXPECTED JSON STRUCTURE:
+{
+  "course_name": "Name of the golf course",
+  "played_on_date": "YYYY-MM-DD format if date is visible",
+  "holes": [
+    {
+      "hole_number": 1,
+      "par": 4,
+      "stroke_index": 5,
+      "yardage": 350
+    }
+    // ... for all 18 holes
+  ],
+  "players": [
+    {
+      "name": "Player Name",
+      "handicap": 12,
+      "scores": [4, 3, 5, ...] // scores for each hole if filled in
+    }
+  ]
+}
+
+Please be as accurate as possible and only include information that is clearly visible in the image. If something is not visible or unclear, omit that field rather than guessing.
+      `.trim();
+
       const response = await fetch('http://localhost:3001/api/process-scorecard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: 'Extract the golf scorecard information from this image and return it as structured JSON data.',
+          prompt: enhancedPrompt,
           imageBase64,
           mimeType: selectedFile.type,
         }),
