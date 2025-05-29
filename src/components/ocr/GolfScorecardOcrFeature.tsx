@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search, Edit3, Save, X } from 'lucide-react';
+import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search, Edit3, Save, X, RefreshCw, Wifi, Clock } from 'lucide-react';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 
@@ -62,6 +62,31 @@ interface GolfScorecardOcrFeatureProps {
   className?: string;
 }
 
+// New interfaces for error handling and retry mechanisms
+interface RetryConfig {
+  maxAttempts: number;
+  baseDelay: number; // milliseconds
+  maxDelay: number; // milliseconds
+  backoffMultiplier: number;
+}
+
+interface ProcessingError {
+  type: 'network' | 'timeout' | 'server' | 'validation' | 'parse' | 'unknown';
+  message: string;
+  retryable: boolean;
+  statusCode?: number;
+  attempt?: number;
+  maxAttempts?: number;
+}
+
+interface RetryState {
+  isRetrying: boolean;
+  currentAttempt: number;
+  maxAttempts: number;
+  nextRetryIn: number; // seconds
+  lastError: ProcessingError | null;
+}
+
 export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = ({ 
   className = '' 
 }) => {
@@ -88,6 +113,28 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
   const [editableData, setEditableData] = useState<EditableOcrData | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
+  // New state for error handling and retry mechanisms
+  const [processingError, setProcessingError] = useState<ProcessingError | null>(null);
+  const [retryState, setRetryState] = useState<RetryState>({
+    isRetrying: false,
+    currentAttempt: 0,
+    maxAttempts: 0,
+    nextRetryIn: 0,
+    lastError: null
+  });
+  const [retryTimeoutId, setRetryTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  // Retry configuration
+  const RETRY_CONFIG: RetryConfig = {
+    maxAttempts: 3,
+    baseDelay: 1000, // 1 second
+    maxDelay: 10000, // 10 seconds
+    backoffMultiplier: 2
+  };
+
+  // Request timeout configuration
+  const REQUEST_TIMEOUT = 30000; // 30 seconds
+
   // File size validation (10MB limit)
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
   const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
@@ -96,6 +143,149 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
   useEffect(() => {
     loadExistingCourses();
   }, []);
+
+  // Cleanup retry timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutId) {
+        clearTimeout(retryTimeoutId);
+      }
+    };
+  }, [retryTimeoutId]);
+
+  // Utility functions for error handling and retry mechanisms
+  const classifyError = (error: Error, statusCode?: number): ProcessingError => {
+    // Network connectivity errors
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      return {
+        type: 'network',
+        message: 'Network connection failed. Please check your internet connection.',
+        retryable: true
+      };
+    }
+
+    // Timeout errors
+    if (error.name === 'AbortError' || error.message.includes('timeout')) {
+      return {
+        type: 'timeout',
+        message: 'Request timed out. The server took too long to respond.',
+        retryable: true
+      };
+    }
+
+    // Server errors (5xx) - retryable
+    if (statusCode && statusCode >= 500) {
+      return {
+        type: 'server',
+        message: `Server error (${statusCode}). The server is currently experiencing issues.`,
+        retryable: true,
+        statusCode
+      };
+    }
+
+    // Client errors (4xx) - mostly not retryable
+    if (statusCode && statusCode >= 400 && statusCode < 500) {
+      const retryable = statusCode === 429; // Rate limiting is retryable
+      return {
+        type: statusCode === 429 ? 'server' : 'validation',
+        message: statusCode === 429 
+          ? 'Rate limit exceeded. Please wait before trying again.'
+          : `Request failed (${statusCode}). Please check your input and try again.`,
+        retryable,
+        statusCode
+      };
+    }
+
+    // Parse errors
+    if (error.message.includes('JSON') || error.message.includes('parse')) {
+      return {
+        type: 'parse',
+        message: 'Failed to parse server response. The server may be experiencing issues.',
+        retryable: true
+      };
+    }
+
+    // Unknown errors
+    return {
+      type: 'unknown',
+      message: error.message || 'An unexpected error occurred.',
+      retryable: false
+    };
+  };
+
+  const calculateRetryDelay = (attempt: number): number => {
+    const delay = Math.min(
+      RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffMultiplier, attempt - 1),
+      RETRY_CONFIG.maxDelay
+    );
+    
+    // Add some jitter to prevent thundering herd
+    const jitter = Math.random() * 0.1 * delay;
+    return Math.floor(delay + jitter);
+  };
+
+  const startRetryCountdown = (delayMs: number, attempt: number, error: ProcessingError) => {
+    let remainingSeconds = Math.ceil(delayMs / 1000);
+    
+    setRetryState({
+      isRetrying: true,
+      currentAttempt: attempt,
+      maxAttempts: RETRY_CONFIG.maxAttempts,
+      nextRetryIn: remainingSeconds,
+      lastError: error
+    });
+
+    // Update countdown every second
+    const countdownInterval = setInterval(() => {
+      remainingSeconds--;
+      setRetryState(prev => ({
+        ...prev,
+        nextRetryIn: remainingSeconds
+      }));
+
+      if (remainingSeconds <= 0) {
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+
+    // Start the actual retry after delay
+    const timeoutId = setTimeout(() => {
+      clearInterval(countdownInterval);
+      processOcrWithRetry(attempt);
+    }, delayMs);
+
+    setRetryTimeoutId(timeoutId);
+  };
+
+  const resetRetryState = () => {
+    setRetryState({
+      isRetrying: false,
+      currentAttempt: 0,
+      maxAttempts: 0,
+      nextRetryIn: 0,
+      lastError: null
+    });
+    setProcessingError(null);
+    
+    if (retryTimeoutId) {
+      clearTimeout(retryTimeoutId);
+      setRetryTimeoutId(null);
+    }
+  };
+
+  const cancelRetry = () => {
+    if (retryTimeoutId) {
+      clearTimeout(retryTimeoutId);
+      setRetryTimeoutId(null);
+    }
+    
+    setRetryState(prev => ({
+      ...prev,
+      isRetrying: false
+    }));
+    
+    setIsLoading(false);
+  };
 
   // Load existing courses from database
   const loadExistingCourses = async () => {
@@ -207,6 +397,8 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     if (!parsedData) return;
 
     setIsCreatingCourse(true);
+    setErrorMessage(''); // Clear any previous errors
+    
     try {
       const courseData = convertOcrToCourse(parsedData);
       const newCourse: Course = {
@@ -220,7 +412,19 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
       setSuccessMessage(`Course "${newCourse.name}" created successfully!`);
     } catch (error) {
       console.error('Error creating course:', error);
-      setErrorMessage('Failed to create course from OCR data');
+      
+      // Enhanced error handling for course creation
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      if (errorMessage.includes('quota') || errorMessage.includes('storage')) {
+        setErrorMessage('Failed to create course: Storage quota exceeded. Please free up space and try again.');
+      } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+        setErrorMessage('Failed to create course: Network error. Please check your connection and try again.');
+      } else if (errorMessage.includes('permission') || errorMessage.includes('access')) {
+        setErrorMessage('Failed to create course: Permission denied. Please check your access rights.');
+      } else {
+        setErrorMessage(`Failed to create course: ${errorMessage}`);
+      }
     } finally {
       setIsCreatingCourse(false);
     }
@@ -362,6 +566,171 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     };
   };
 
+  // Fetch with timeout wrapper
+  const fetchWithTimeout = async (url: string, options: RequestInit, timeoutMs: number): Promise<Response> => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if ((error as Error).name === 'AbortError') {
+        throw new Error(`Request timed out after ${timeoutMs / 1000} seconds`);
+      }
+      throw error;
+    }
+  };
+
+  // Core OCR processing function with retry logic
+  const processOcrWithRetry = async (attempt: number = 1): Promise<void> => {
+    if (!selectedFile || !imageBase64) {
+      setErrorMessage('Please select an image first.');
+      return;
+    }
+
+    let response: Response | undefined;
+
+    try {
+      // Enhanced prompt for golf scorecard recognition
+      const enhancedPrompt = `
+You are analyzing a golf scorecard image. Please extract all relevant information and return it as structured JSON data.
+
+IMPORTANT INSTRUCTIONS:
+1. Look for the golf course name at the top of the scorecard
+2. Find the date the round was played (if visible)
+3. Identify all 18 holes with their details:
+   - Hole number (1-18)
+   - Par value for each hole
+   - Stroke Index (handicap ranking, usually 1-18)
+   - Yardage (if visible)
+4. Look for player names and their scores if filled in
+5. Pay attention to front 9 (holes 1-9) and back 9 (holes 10-18) sections
+6. Look for totals, handicaps, and net scores if present
+
+EXPECTED JSON STRUCTURE:
+{
+  "course_name": "Name of the golf course",
+  "played_on_date": "YYYY-MM-DD format if date is visible",
+  "holes": [
+    {
+      "hole_number": 1,
+      "par": 4,
+      "stroke_index": 5,
+      "yardage": 350
+    }
+    // ... for all 18 holes
+  ],
+  "players": [
+    {
+      "name": "Player Name",
+      "handicap": 12,
+      "scores": [4, 3, 5, ...] // scores for each hole if filled in
+    }
+  ]
+}
+
+Please be as accurate as possible and only include information that is clearly visible in the image. If something is not visible or unclear, omit that field rather than guessing.
+      `.trim();
+
+      response = await fetchWithTimeout(
+        'http://localhost:3001/api/process-scorecard',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: enhancedPrompt,
+            imageBase64,
+            mimeType: selectedFile.type,
+          }),
+        },
+        REQUEST_TIMEOUT
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const rawData = await response.json();
+      setRawOcrData(rawData);
+
+      // Validate the OCR data
+      const validation = validateOcrData(rawData);
+      setValidationResult(validation);
+
+      if (!validation.isValid) {
+        throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      // Parse and normalize the data
+      if (validation.data) {
+        const parsed = parseOcrData(validation.data);
+        setParsedData(parsed);
+        
+        // Find course matches if course name is available
+        if (parsed.courseName) {
+          const matches = findCourseMatches(parsed);
+          setCourseMatches(matches);
+          
+          // Auto-select exact match if found
+          if (matches.length > 0 && matches[0].matchType === 'exact') {
+            setSelectedCourseId(matches[0].course.id);
+          }
+          
+          setShowCourseIntegration(true);
+        }
+        
+        // Create success message with summary
+        const { summary } = parsed;
+        let message = 'Scorecard processed successfully!';
+        if (summary.holesCount > 0) {
+          message += ` Found ${summary.holesCount} holes`;
+        }
+        if (summary.playersCount > 0) {
+          message += `, ${summary.playersCount} players`;
+        }
+        if (validation.warnings.length > 0) {
+          message += ` (${validation.warnings.length} warnings)`;
+        }
+        
+        setSuccessMessage(message);
+        resetRetryState(); // Clear any retry state on success
+      } else {
+        throw new Error('No valid data found in OCR response');
+      }
+
+    } catch (error) {
+      console.error(`OCR processing attempt ${attempt} failed:`, error);
+      
+      const processingError = classifyError(error as Error, response?.status);
+      processingError.attempt = attempt;
+      processingError.maxAttempts = RETRY_CONFIG.maxAttempts;
+
+      // Check if we should retry
+      if (processingError.retryable && attempt < RETRY_CONFIG.maxAttempts) {
+        const delayMs = calculateRetryDelay(attempt);
+        console.log(`Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxAttempts})`);
+        
+        startRetryCountdown(delayMs, attempt + 1, processingError);
+      } else {
+        // No more retries or not retryable
+        setProcessingError(processingError);
+        setErrorMessage(
+          `${processingError.message}${attempt > 1 ? ` (Failed after ${attempt} attempts)` : ''}`
+        );
+        setIsLoading(false);
+        resetRetryState();
+      }
+    }
+  };
+
   // Handle file selection
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -424,123 +793,9 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     setShowCourseIntegration(false);
     setCourseMatches([]);
     setSelectedCourseId(null);
+    resetRetryState();
 
-    try {
-      // Enhanced prompt for golf scorecard recognition
-      const enhancedPrompt = `
-You are analyzing a golf scorecard image. Please extract all relevant information and return it as structured JSON data.
-
-IMPORTANT INSTRUCTIONS:
-1. Look for the golf course name at the top of the scorecard
-2. Find the date the round was played (if visible)
-3. Identify all 18 holes with their details:
-   - Hole number (1-18)
-   - Par value for each hole
-   - Stroke Index (handicap ranking, usually 1-18)
-   - Yardage (if visible)
-4. Look for player names and their scores if filled in
-5. Pay attention to front 9 (holes 1-9) and back 9 (holes 10-18) sections
-6. Look for totals, handicaps, and net scores if present
-
-EXPECTED JSON STRUCTURE:
-{
-  "course_name": "Name of the golf course",
-  "played_on_date": "YYYY-MM-DD format if date is visible",
-  "holes": [
-    {
-      "hole_number": 1,
-      "par": 4,
-      "stroke_index": 5,
-      "yardage": 350
-    }
-    // ... for all 18 holes
-  ],
-  "players": [
-    {
-      "name": "Player Name",
-      "handicap": 12,
-      "scores": [4, 3, 5, ...] // scores for each hole if filled in
-    }
-  ]
-}
-
-Please be as accurate as possible and only include information that is clearly visible in the image. If something is not visible or unclear, omit that field rather than guessing.
-      `.trim();
-
-      const response = await fetch('http://localhost:3001/api/process-scorecard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: enhancedPrompt,
-          imageBase64,
-          mimeType: selectedFile.type,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const rawData = await response.json();
-      setRawOcrData(rawData);
-
-      // Validate the OCR data
-      const validation = validateOcrData(rawData);
-      setValidationResult(validation);
-
-      if (!validation.isValid) {
-        setErrorMessage(`Validation failed: ${validation.errors.join(', ')}`);
-        return;
-      }
-
-      // Parse and normalize the data
-      if (validation.data) {
-        const parsed = parseOcrData(validation.data);
-        setParsedData(parsed);
-        
-        // Find course matches if course name is available
-        if (parsed.courseName) {
-          const matches = findCourseMatches(parsed);
-          setCourseMatches(matches);
-          
-          // Auto-select exact match if found
-          if (matches.length > 0 && matches[0].matchType === 'exact') {
-            setSelectedCourseId(matches[0].course.id);
-          }
-          
-          setShowCourseIntegration(true);
-        }
-        
-        // Create success message with summary
-        const { summary } = parsed;
-        let message = 'Scorecard processed successfully!';
-        if (summary.holesCount > 0) {
-          message += ` Found ${summary.holesCount} holes`;
-        }
-        if (summary.playersCount > 0) {
-          message += `, ${summary.playersCount} players`;
-        }
-        if (validation.warnings.length > 0) {
-          message += ` (${validation.warnings.length} warnings)`;
-        }
-        
-        setSuccessMessage(message);
-      } else {
-        setErrorMessage('No valid data found in OCR response');
-      }
-
-    } catch (error) {
-      console.error('Error processing scorecard:', error);
-      setErrorMessage(
-        error instanceof Error 
-          ? `Failed to process scorecard: ${error.message}` 
-          : 'An unexpected error occurred while processing the scorecard.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    await processOcrWithRetry();
   };
 
   // Clear selection and reset state
@@ -556,6 +811,7 @@ Please be as accurate as possible and only include information that is clearly v
     setShowCourseIntegration(false);
     setCourseMatches([]);
     setSelectedCourseId(null);
+    resetRetryState(); // Clear retry state
     
     // Clear file input
     const fileInput = document.getElementById('scorecard-file-input') as HTMLInputElement;
@@ -712,6 +968,24 @@ Please be as accurate as possible and only include information that is clearly v
     updateEditableData({ players: updatedPlayers });
   };
 
+  // Manual retry function
+  const handleManualRetry = async () => {
+    if (!selectedFile || !imageBase64) {
+      setErrorMessage('Please select an image first.');
+      return;
+    }
+
+    // Cancel any pending automatic retry
+    cancelRetry();
+    
+    setIsLoading(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+    resetRetryState();
+
+    await processOcrWithRetry();
+  };
+
   return (
     <div className={`golf-scorecard-ocr-feature ${className}`}>
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -787,11 +1061,93 @@ Please be as accurate as possible and only include information that is clearly v
           )}
         </div>
 
-        {/* Error Message */}
-        {errorMessage && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <div className="text-red-700 text-sm">{errorMessage}</div>
+        {/* Enhanced Error Message with Retry Status */}
+        {(errorMessage || processingError || retryState.isRetrying) && (
+          <div className="mb-4">
+            {/* Retry Status - Show during automatic retry countdown */}
+            {retryState.isRetrying && (
+              <div className="mb-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+                  <span className="font-medium text-blue-800">
+                    Retrying in {retryState.nextRetryIn} seconds...
+                  </span>
+                </div>
+                <div className="text-sm text-blue-700 mb-3">
+                  Attempt {retryState.currentAttempt} of {retryState.maxAttempts}
+                  {retryState.lastError && ` • ${retryState.lastError.message}`}
+                </div>
+                <button
+                  onClick={cancelRetry}
+                  className="flex items-center gap-1 px-3 py-1 bg-gray-500 text-white rounded text-sm font-medium hover:bg-gray-600 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  Cancel Retry
+                </button>
+              </div>
+            )}
+
+            {/* Error Message with Retry Options */}
+            {errorMessage && !retryState.isRetrying && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-2 mb-3">
+                  {processingError?.type === 'network' ? (
+                    <Wifi className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  ) : processingError?.type === 'timeout' ? (
+                    <Clock className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <div className="text-red-700 text-sm font-medium mb-1">
+                      {processingError?.type === 'network' ? 'Network Error' :
+                       processingError?.type === 'timeout' ? 'Timeout Error' :
+                       processingError?.type === 'server' ? 'Server Error' :
+                       processingError?.type === 'validation' ? 'Validation Error' :
+                       processingError?.type === 'parse' ? 'Parse Error' : 'Processing Error'}
+                    </div>
+                    <div className="text-red-700 text-sm">{errorMessage}</div>
+                    
+                    {processingError && processingError.attempt && processingError.attempt > 1 && (
+                      <div className="text-red-600 text-xs mt-2">
+                        Failed after {processingError.attempt} attempt{processingError.attempt > 1 ? 's' : ''}
+                        {processingError.statusCode && ` (HTTP ${processingError.statusCode})`}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Retry Actions */}
+                {processingError?.retryable && selectedFile && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+                    <button
+                      onClick={handleManualRetry}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700 disabled:bg-gray-400 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Try Again
+                    </button>
+                    <span className="text-xs text-red-600">
+                      {processingError?.type === 'network' ? 'Check your internet connection and try again' :
+                       processingError?.type === 'timeout' ? 'Server response was slow, trying again may help' :
+                       processingError?.type === 'server' ? 'Server may be temporarily unavailable' :
+                       'Click to retry the request'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Non-retryable error guidance */}
+                {processingError && !processingError.retryable && (
+                  <div className="pt-2 border-t border-red-200">
+                    <div className="text-xs text-red-600">
+                      {processingError?.type === 'validation' ? 'Please check your image and try a different scorecard' :
+                       'This error cannot be automatically resolved. Please try with a different image.'}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
