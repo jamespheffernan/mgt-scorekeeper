@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search, Edit3, Save, X, RefreshCw, Wifi, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search, Edit3, Save, X, RefreshCw, Wifi, Clock, Zap, HardDrive } from 'lucide-react';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 
@@ -87,6 +87,40 @@ interface RetryState {
   lastError: ProcessingError | null;
 }
 
+// New interfaces for performance optimization
+interface ImageCompressionOptions {
+  maxWidth: number;
+  maxHeight: number;
+  quality: number; // 0-1
+  format: 'image/jpeg' | 'image/webp';
+}
+
+interface CacheEntry {
+  key: string;
+  data: {
+    rawOcrData: any;
+    parsedData: ParsedScorecardData;
+    validationResult: ValidationResult;
+  };
+  timestamp: number;
+  size: number; // in bytes
+}
+
+interface PerformanceMetrics {
+  imageCompressionTime: number;
+  requestDuration: number;
+  responseSize: number;
+  cacheHit: boolean;
+  originalImageSize: number;
+  compressedImageSize: number;
+}
+
+interface LoadingProgress {
+  stage: 'compressing' | 'uploading' | 'processing' | 'validating' | 'complete';
+  progress: number; // 0-100
+  message: string;
+}
+
 export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = ({ 
   className = '' 
 }) => {
@@ -124,6 +158,33 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
   });
   const [retryTimeoutId, setRetryTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
+  // New state for performance optimization
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
+  const [compressedImageBase64, setCompressedImageBase64] = useState<string>('');
+  const [showPerformanceInfo, setShowPerformanceInfo] = useState<boolean>(false);
+  
+  // Refs for performance optimization
+  const imageCompressionWorker = useRef<Worker | null>(null);
+  const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Performance optimization configurations
+  const COMPRESSION_OPTIONS: ImageCompressionOptions = {
+    maxWidth: 1920,
+    maxHeight: 1080,
+    quality: 0.8,
+    format: 'image/jpeg'
+  };
+
+  const CACHE_CONFIG = {
+    maxEntries: 50,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxTotalSize: 50 * 1024 * 1024 // 50MB
+  };
+
+  const DEBOUNCE_DELAY = 300; // milliseconds
+
   // Retry configuration
   const RETRY_CONFIG: RetryConfig = {
     maxAttempts: 3,
@@ -152,6 +213,24 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
       }
     };
   }, [retryTimeoutId]);
+
+  // Cleanup performance optimization resources on unmount
+  useEffect(() => {
+    return () => {
+      // Clear debounce timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      
+      // Clear cache
+      cacheRef.current.clear();
+      
+      // Cleanup object URLs
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   // Utility functions for error handling and retry mechanisms
   const classifyError = (error: Error, statusCode?: number): ProcessingError => {
@@ -251,7 +330,7 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     // Start the actual retry after delay
     const timeoutId = setTimeout(() => {
       clearInterval(countdownInterval);
-      processOcrWithRetry(attempt);
+      processOcrOptimized(attempt);
     }, delayMs);
 
     setRetryTimeoutId(timeoutId);
@@ -281,7 +360,8 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     
     setRetryState(prev => ({
       ...prev,
-      isRetrying: false
+      isRetrying: false,
+      nextRetryIn: 0
     }));
     
     setIsLoading(false);
@@ -587,146 +667,176 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     }
   };
 
-  // Core OCR processing function with retry logic
-  const processOcrWithRetry = async (attempt: number = 1): Promise<void> => {
-    if (!selectedFile || !imageBase64) {
-      setErrorMessage('Please select an image first.');
-      return;
+  const calculateCompressionRatio = (original: number, compressed: number): number => {
+    return Math.round(((original - compressed) / original) * 100);
+  };
+
+  // Memoized functions for performance optimization
+  const memoizedFindCourseMatches = useMemo(() => {
+    return (ocrData: ParsedScorecardData): CourseMatchResult[] => {
+      return findCourseMatches(ocrData);
+    };
+  }, [existingCourses]);
+
+  const memoizedValidateOcrData = useCallback((data: any): ValidationResult => {
+    return validateOcrData(data);
+  }, []);
+
+  const memoizedParseOcrData = useCallback((validatedData: OcrScorecardData): ParsedScorecardData => {
+    return parseOcrData(validatedData);
+  }, []);
+
+  // Debounced cache cleanup
+  const debouncedCacheCleanup = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
     }
+    
+    debounceTimeoutRef.current = setTimeout(() => {
+      cleanupCache();
+    }, DEBOUNCE_DELAY);
+  }, []);
 
-    let response: Response | undefined;
-
+  // Performance-optimized OCR processing with all optimizations
+  const processOcrOptimized = async (attempt: number = 1): Promise<void> => {
     try {
-      // Enhanced prompt for golf scorecard recognition
-      const enhancedPrompt = `
-You are analyzing a golf scorecard image. Please extract all relevant information and return it as structured JSON data.
-
-IMPORTANT INSTRUCTIONS:
-1. Look for the golf course name at the top of the scorecard
-2. Find the date the round was played (if visible)
-3. Identify all 18 holes with their details:
-   - Hole number (1-18)
-   - Par value for each hole
-   - Stroke Index (handicap ranking, usually 1-18)
-   - Yardage (if visible)
-4. Look for player names and their scores if filled in
-5. Pay attention to front 9 (holes 1-9) and back 9 (holes 10-18) sections
-6. Look for totals, handicaps, and net scores if present
-
-EXPECTED JSON STRUCTURE:
-{
-  "course_name": "Name of the golf course",
-  "played_on_date": "YYYY-MM-DD format if date is visible",
-  "holes": [
-    {
-      "hole_number": 1,
-      "par": 4,
-      "stroke_index": 5,
-      "yardage": 350
-    }
-    // ... for all 18 holes
-  ],
-  "players": [
-    {
-      "name": "Player Name",
-      "handicap": 12,
-      "scores": [4, 3, 5, ...] // scores for each hole if filled in
-    }
-  ]
-}
-
-Please be as accurate as possible and only include information that is clearly visible in the image. If something is not visible or unclear, omit that field rather than guessing.
-      `.trim();
-
-      response = await fetchWithTimeout(
-        'http://localhost:3001/api/process-scorecard',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: enhancedPrompt,
-            imageBase64,
-            mimeType: selectedFile.type,
-          }),
-        },
-        REQUEST_TIMEOUT
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const rawData = await response.json();
-      setRawOcrData(rawData);
-
-      // Validate the OCR data
-      const validation = validateOcrData(rawData);
-      setValidationResult(validation);
-
-      if (!validation.isValid) {
-        throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
-      }
-
-      // Parse and normalize the data
-      if (validation.data) {
-        const parsed = parseOcrData(validation.data);
-        setParsedData(parsed);
+      updateLoadingProgress('processing', 30, 'Checking cache...');
+      
+      // Use compressed image for better performance
+      const imageDataToUse = compressedImageBase64 || imageBase64;
+      const cachedResult = await getCachedResult(imageDataToUse);
+      
+      if (cachedResult) {
+        // Cache hit - instant response
+        updateLoadingProgress('processing', 90, 'Loading cached result...');
         
-        // Find course matches if course name is available
-        if (parsed.courseName) {
-          const matches = findCourseMatches(parsed);
+        setRawOcrData(cachedResult.data.rawOcrData);
+        setParsedData(cachedResult.data.parsedData);
+        setValidationResult(cachedResult.data.validationResult);
+        
+        // Update performance metrics
+        setPerformanceMetrics(prev => prev ? {
+          ...prev,
+          cacheHit: true,
+          requestDuration: 0,
+          responseSize: JSON.stringify(cachedResult.data).length
+        } : null);
+        
+        updateLoadingProgress('complete', 100, 'Cached result loaded successfully!');
+        setSuccessMessage('Scorecard processed successfully (from cache)!');
+        setIsLoading(false);
+        
+        // Use memoized course matching
+        if (cachedResult.data.parsedData) {
+          const matches = memoizedFindCourseMatches(cachedResult.data.parsedData);
           setCourseMatches(matches);
           
-          // Auto-select exact match if found
-          if (matches.length > 0 && matches[0].matchType === 'exact') {
-            setSelectedCourseId(matches[0].course.id);
+          const exactMatch = matches.find(match => match.matchType === 'exact');
+          if (exactMatch) {
+            setSelectedCourseId(exactMatch.course.id);
           }
           
           setShowCourseIntegration(true);
         }
         
-        // Create success message with summary
-        const { summary } = parsed;
-        let message = 'Scorecard processed successfully!';
-        if (summary.holesCount > 0) {
-          message += ` Found ${summary.holesCount} holes`;
-        }
-        if (summary.playersCount > 0) {
-          message += `, ${summary.playersCount} players`;
-        }
-        if (validation.warnings.length > 0) {
-          message += ` (${validation.warnings.length} warnings)`;
-        }
-        
-        setSuccessMessage(message);
-        resetRetryState(); // Clear any retry state on success
-      } else {
-        throw new Error('No valid data found in OCR response');
+        setTimeout(() => setLoadingProgress(null), 2000);
+        return;
       }
 
-    } catch (error) {
-      console.error(`OCR processing attempt ${attempt} failed:`, error);
+      // No cache - proceed with optimized API request
+      updateLoadingProgress('uploading', 50, 'Sending optimized request...');
+      const requestStartTime = performance.now();
       
-      const processingError = classifyError(error as Error, response?.status);
-      processingError.attempt = attempt;
-      processingError.maxAttempts = RETRY_CONFIG.maxAttempts;
+      const response = await fetchWithTimeout('/api/process-scorecard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageDataToUse,
+          filename: selectedFile?.name || 'scorecard.jpg',
+          compressed: !!compressedImageBase64
+        }),
+      }, REQUEST_TIMEOUT);
 
-      // Check if we should retry
-      if (processingError.retryable && attempt < RETRY_CONFIG.maxAttempts) {
+      updateLoadingProgress('processing', 70, 'Processing response...');
+      const requestDuration = performance.now() - requestStartTime;
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = new Error(errorText);
+        throw { ...error, statusCode: response.status };
+      }
+
+      const responseData = await response.json();
+      const responseSize = JSON.stringify(responseData).length;
+      
+      updateLoadingProgress('validating', 85, 'Validating extracted data...');
+
+      // Use memoized validation and parsing for better performance
+      const validationResult = memoizedValidateOcrData(responseData);
+      if (!validationResult.isValid) {
+        throw new Error(`Invalid OCR data: ${validationResult.errors.join(', ')}`);
+      }
+
+      const parsedData = memoizedParseOcrData(validationResult.data!);
+      
+      // Update performance metrics
+      setPerformanceMetrics(prev => prev ? {
+        ...prev,
+        requestDuration,
+        responseSize,
+        cacheHit: false
+      } : null);
+
+      // Cache the successful result with debounced cleanup
+      await setCachedResult(imageDataToUse, {
+        rawOcrData: responseData,
+        parsedData,
+        validationResult
+      });
+      debouncedCacheCleanup();
+
+      // Update state
+      setRawOcrData(responseData);
+      setParsedData(parsedData);
+      setValidationResult(validationResult);
+      
+      updateLoadingProgress('complete', 100, 'Processing complete!');
+      setSuccessMessage('Scorecard processed successfully!');
+      setIsLoading(false);
+      resetRetryState();
+
+      // Use memoized course matching
+      const matches = memoizedFindCourseMatches(parsedData);
+      setCourseMatches(matches);
+      
+      const exactMatch = matches.find(match => match.matchType === 'exact');
+      if (exactMatch) {
+        setSelectedCourseId(exactMatch.course.id);
+      }
+      
+      setShowCourseIntegration(true);
+      setTimeout(() => setLoadingProgress(null), 2000);
+
+    } catch (error: any) {
+      console.error('OCR processing error:', error);
+      
+      const classifiedError = classifyError(error, error.statusCode);
+      
+      setProcessingError({
+        ...classifiedError,
+        attempt,
+        maxAttempts: RETRY_CONFIG.maxAttempts
+      });
+      
+      setErrorMessage(classifiedError.message);
+      setIsLoading(false);
+      setLoadingProgress(null);
+
+      if (classifiedError.retryable && attempt < RETRY_CONFIG.maxAttempts) {
         const delayMs = calculateRetryDelay(attempt);
-        console.log(`Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxAttempts})`);
-        
-        startRetryCountdown(delayMs, attempt + 1, processingError);
-      } else {
-        // No more retries or not retryable
-        setProcessingError(processingError);
-        setErrorMessage(
-          `${processingError.message}${attempt > 1 ? ` (Failed after ${attempt} attempts)` : ''}`
-        );
-        setIsLoading(false);
-        resetRetryState();
+        startRetryCountdown(delayMs, attempt, classifiedError);
       }
     }
   };
@@ -745,6 +855,9 @@ Please be as accurate as possible and only include information that is clearly v
     setShowCourseIntegration(false);
     setCourseMatches([]);
     setSelectedCourseId(null);
+    setPerformanceMetrics(null);
+    setLoadingProgress(null);
+    setCompressedImageBase64('');
 
     // Validate file type
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -764,14 +877,37 @@ Please be as accurate as possible and only include information that is clearly v
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
 
-    // Convert to base64
+    // Convert to base64 and compress image
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const result = e.target?.result as string;
       if (result) {
         // Remove data URL prefix to get just the base64 string
         const base64 = result.split(',')[1];
         setImageBase64(base64);
+
+        // Compress image for better performance
+        try {
+          updateLoadingProgress('compressing', 10, 'Compressing image...');
+          const compression = await compressImage(file);
+          setCompressedImageBase64(compression.compressedBase64);
+          
+          // Initialize performance metrics
+          setPerformanceMetrics({
+            imageCompressionTime: compression.compressionTime,
+            requestDuration: 0,
+            responseSize: 0,
+            cacheHit: false,
+            originalImageSize: compression.originalSize,
+            compressedImageSize: compression.compressedSize
+          });
+          
+          updateLoadingProgress('complete', 100, 'Image ready for processing');
+          setTimeout(() => setLoadingProgress(null), 2000);
+        } catch (error) {
+          console.warn('Image compression failed, using original:', error);
+          setCompressedImageBase64(base64);
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -795,7 +931,7 @@ Please be as accurate as possible and only include information that is clearly v
     setSelectedCourseId(null);
     resetRetryState();
 
-    await processOcrWithRetry();
+    await processOcrOptimized();
   };
 
   // Clear selection and reset state
@@ -812,6 +948,12 @@ Please be as accurate as possible and only include information that is clearly v
     setCourseMatches([]);
     setSelectedCourseId(null);
     resetRetryState(); // Clear retry state
+    
+    // Clear performance optimization state
+    setPerformanceMetrics(null);
+    setLoadingProgress(null);
+    setCompressedImageBase64('');
+    setShowPerformanceInfo(false);
     
     // Clear file input
     const fileInput = document.getElementById('scorecard-file-input') as HTMLInputElement;
@@ -970,20 +1112,153 @@ Please be as accurate as possible and only include information that is clearly v
 
   // Manual retry function
   const handleManualRetry = async () => {
-    if (!selectedFile || !imageBase64) {
-      setErrorMessage('Please select an image first.');
-      return;
-    }
-
-    // Cancel any pending automatic retry
-    cancelRetry();
+    if (!selectedFile) return;
     
     setIsLoading(true);
     setErrorMessage('');
-    setSuccessMessage('');
+    setProcessingError(null);
     resetRetryState();
 
-    await processOcrWithRetry();
+    await processOcrOptimized();
+  };
+
+  // Performance optimization utility functions
+  const generateImageHash = async (imageData: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(imageData);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const compressImage = async (file: File): Promise<{ compressedBase64: string; compressionTime: number; originalSize: number; compressedSize: number }> => {
+    const startTime = performance.now();
+    
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new (window as any).Image();
+      
+      img.onload = () => {
+        // Calculate dimensions while maintaining aspect ratio
+        let { width, height } = img;
+        const aspectRatio = width / height;
+        
+        if (width > COMPRESSION_OPTIONS.maxWidth) {
+          width = COMPRESSION_OPTIONS.maxWidth;
+          height = width / aspectRatio;
+        }
+        
+        if (height > COMPRESSION_OPTIONS.maxHeight) {
+          height = COMPRESSION_OPTIONS.maxHeight;
+          width = height * aspectRatio;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Image compression failed'));
+              return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              const compressedBase64 = result.split(',')[1];
+              const compressionTime = performance.now() - startTime;
+              
+              resolve({
+                compressedBase64,
+                compressionTime,
+                originalSize: file.size,
+                compressedSize: blob.size
+              });
+            };
+            reader.onerror = () => reject(new Error('Failed to read compressed image'));
+            reader.readAsDataURL(blob);
+          },
+          COMPRESSION_OPTIONS.format,
+          COMPRESSION_OPTIONS.quality
+        );
+      };
+      
+      img.onerror = () => reject(new Error('Failed to load image for compression'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const getCacheKey = async (imageData: string): Promise<string> => {
+    const hash = await generateImageHash(imageData);
+    return `ocr_${hash}`;
+  };
+
+  const getCachedResult = async (imageData: string): Promise<CacheEntry | null> => {
+    const key = await getCacheKey(imageData);
+    const entry = cacheRef.current.get(key);
+    
+    if (!entry) return null;
+    
+    // Check if entry is expired
+    if (Date.now() - entry.timestamp > CACHE_CONFIG.maxAge) {
+      cacheRef.current.delete(key);
+      return null;
+    }
+    
+    return entry;
+  };
+
+  const setCachedResult = async (imageData: string, data: CacheEntry['data']): Promise<void> => {
+    const key = await getCacheKey(imageData);
+    const entry: CacheEntry = {
+      key,
+      data,
+      timestamp: Date.now(),
+      size: JSON.stringify(data).length
+    };
+    
+    // Add to cache
+    cacheRef.current.set(key, entry);
+    
+    // Clean up cache if needed
+    cleanupCache();
+  };
+
+  const cleanupCache = () => {
+    const entries = Array.from(cacheRef.current.entries());
+    
+    // Sort by timestamp (oldest first)
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    
+    let totalSize = entries.reduce((sum, [, entry]) => sum + entry.size, 0);
+    
+    // Remove oldest entries if over limits
+    while (
+      (cacheRef.current.size > CACHE_CONFIG.maxEntries || 
+       totalSize > CACHE_CONFIG.maxTotalSize) &&
+      entries.length > 0
+    ) {
+      const [key, entry] = entries.shift()!;
+      cacheRef.current.delete(key);
+      totalSize -= entry.size;
+    }
+  };
+
+  const updateLoadingProgress = (stage: LoadingProgress['stage'], progress: number, message: string) => {
+    setLoadingProgress({ stage, progress, message });
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (
@@ -1059,7 +1334,111 @@ Please be as accurate as possible and only include information that is clearly v
               Clear
             </button>
           )}
+
+          {performanceMetrics && (
+            <button
+              onClick={() => setShowPerformanceInfo(!showPerformanceInfo)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            >
+              <Zap className="w-4 h-4" />
+              Performance
+            </button>
+          )}
         </div>
+
+        {/* Loading Progress */}
+        {loadingProgress && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+              <span className="font-medium text-blue-800 capitalize">
+                {loadingProgress.stage}
+              </span>
+              <span className="text-blue-700 text-sm">
+                {loadingProgress.progress}%
+              </span>
+            </div>
+            
+            <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${loadingProgress.progress}%` }}
+              />
+            </div>
+            
+            <div className="text-sm text-blue-700">
+              {loadingProgress.message}
+            </div>
+          </div>
+        )}
+
+        {/* Performance Information */}
+        {showPerformanceInfo && performanceMetrics && (
+          <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-5 h-5 text-gray-600" />
+              <h3 className="font-medium text-gray-800">Performance Metrics</h3>
+              {performanceMetrics.cacheHit && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  <HardDrive className="w-3 h-3" />
+                  Cache Hit
+                </span>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-gray-600 mb-1">Image Processing</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Original Size:</span>
+                    <span className="font-mono">{formatFileSize(performanceMetrics.originalImageSize)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Compressed Size:</span>
+                    <span className="font-mono">{formatFileSize(performanceMetrics.compressedImageSize)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Compression:</span>
+                    <span className="font-mono text-green-600">
+                      {calculateCompressionRatio(performanceMetrics.originalImageSize, performanceMetrics.compressedImageSize)}% reduction
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Compression Time:</span>
+                    <span className="font-mono">{performanceMetrics.imageCompressionTime.toFixed(0)}ms</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-gray-600 mb-1">API Performance</div>
+                <div className="space-y-1">
+                  {!performanceMetrics.cacheHit ? (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Request Time:</span>
+                        <span className="font-mono">{performanceMetrics.requestDuration.toFixed(0)}ms</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Response Size:</span>
+                        <span className="font-mono">{formatFileSize(performanceMetrics.responseSize)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-green-600 font-medium">
+                      Instant cache retrieval
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Cache Entries:</span>
+                    <span className="font-mono">{cacheRef.current.size}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Error Message with Retry Status */}
         {(errorMessage || processingError || retryState.isRetrying) && (
