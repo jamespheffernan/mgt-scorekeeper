@@ -234,8 +234,8 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
 
   // Utility functions for error handling and retry mechanisms
   const classifyError = (error: Error, statusCode?: number): ProcessingError => {
-    // Network connectivity errors
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    // Network errors
+    if (!navigator.onLine || error.message?.includes('fetch') || error.message?.includes('network')) {
       return {
         type: 'network',
         message: 'Network connection failed. Please check your internet connection.',
@@ -244,7 +244,7 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     }
 
     // Timeout errors
-    if (error.name === 'AbortError' || error.message.includes('timeout')) {
+    if (error.name === 'AbortError' || error.message?.includes('timeout')) {
       return {
         type: 'timeout',
         message: 'Request timed out. The server took too long to respond.',
@@ -276,7 +276,7 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
     }
 
     // Parse errors
-    if (error.message.includes('JSON') || error.message.includes('parse')) {
+    if (error.message?.includes('JSON') || error.message?.includes('parse')) {
       return {
         type: 'parse',
         message: 'Failed to parse server response. The server may be experiencing issues.',
@@ -747,7 +747,7 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
       updateLoadingProgress('uploading', 50, 'Sending optimized request...');
       const requestStartTime = performance.now();
       
-      const response = await fetchWithTimeout('/api/process-scorecard', {
+      const response = await fetchWithTimeout('http://localhost:3001/api/process-scorecard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
