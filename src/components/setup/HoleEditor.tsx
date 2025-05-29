@@ -82,9 +82,85 @@ export const HoleEditor: React.FC<HoleEditorProps> = ({ tee, onSave, onCancel })
     onSave(updatedTee);
   };
   
+  // Bulk operations
+  const bulkSetPar = (par: number, holeRange: string) => {
+    if (!confirm(`Set par ${par} for ${holeRange}?`)) return;
+    
+    const newHoles = [...holes];
+    newHoles.forEach((hole, index) => {
+      if (holeRange === 'all' || 
+          (holeRange === 'front9' && hole.number <= 9) ||
+          (holeRange === 'back9' && hole.number > 9)) {
+        newHoles[index].par = par;
+      }
+    });
+    setHoles(newHoles);
+  };
+
+  const bulkSetYardage = (yardage: number, holeRange: string) => {
+    if (!confirm(`Set ${yardage} yards for ${holeRange}?`)) return;
+    
+    const newHoles = [...holes];
+    newHoles.forEach((hole, index) => {
+      if (holeRange === 'all' || 
+          (holeRange === 'front9' && hole.number <= 9) ||
+          (holeRange === 'back9' && hole.number > 9)) {
+        newHoles[index].yardage = yardage;
+      }
+    });
+    setHoles(newHoles);
+  };
+
+  const autoAssignStrokeIndex = () => {
+    if (!confirm('Auto-assign stroke indexes based on difficulty (longest par 4s and all par 5s get lower indexes)?')) return;
+    
+    const newHoles = [...holes];
+    
+    // Sort holes by difficulty (par 5s first, then par 4s by yardage, then par 3s)
+    const sortedIndexes = newHoles
+      .map((hole, index) => ({ hole, index }))
+      .sort((a, b) => {
+        if (a.hole.par !== b.hole.par) {
+          if (a.hole.par === 5) return -1;
+          if (b.hole.par === 5) return 1;
+          if (a.hole.par === 4 && b.hole.par === 3) return -1;
+          if (a.hole.par === 3 && b.hole.par === 4) return 1;
+        }
+        return b.hole.yardage - a.hole.yardage; // Longer holes get lower stroke index
+      });
+    
+    sortedIndexes.forEach((item, rank) => {
+      newHoles[item.index].strokeIndex = rank + 1;
+    });
+    
+    setHoles(newHoles);
+  };
+
   return (
     <div className="hole-editor">
       <h2>Edit Holes - {tee.name} ({tee.color})</h2>
+      
+      <div className="bulk-operations">
+        <h3>Bulk Operations</h3>
+        <div className="bulk-controls">
+          <div className="bulk-group">
+            <label>Set Par:</label>
+            <button onClick={() => bulkSetPar(3, 'all')} className="bulk-button">All Par 3</button>
+            <button onClick={() => bulkSetPar(4, 'all')} className="bulk-button">All Par 4</button>
+            <button onClick={() => bulkSetPar(5, 'all')} className="bulk-button">All Par 5</button>
+          </div>
+          <div className="bulk-group">
+            <label>Set Yardage:</label>
+            <button onClick={() => bulkSetYardage(150, 'front9')} className="bulk-button">Front 9: 150</button>
+            <button onClick={() => bulkSetYardage(400, 'all')} className="bulk-button">All: 400</button>
+            <button onClick={() => bulkSetYardage(500, 'back9')} className="bulk-button">Back 9: 500</button>
+          </div>
+          <div className="bulk-group">
+            <label>Stroke Index:</label>
+            <button onClick={autoAssignStrokeIndex} className="bulk-button">Auto-Assign by Difficulty</button>
+          </div>
+        </div>
+      </div>
       
       <div className="hole-editor-table">
         <table>

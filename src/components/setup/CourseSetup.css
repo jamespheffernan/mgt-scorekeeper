@@ -1,0 +1,166 @@
+/* Course Setup Component Styles */
+
+.course-selection {
+  margin-bottom: 2rem;
+}
+
+.course-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.course-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.course-search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.course-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.course-option {
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.course-option:hover {
+  background-color: #f8f9fa;
+}
+
+.course-option.selected {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+.course-option.no-results {
+  color: #6c757d;
+  cursor: default;
+  font-style: italic;
+}
+
+.course-option.no-results:hover {
+  background-color: white;
+}
+
+.course-name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.course-location {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.tee-selection {
+  margin-bottom: 2rem;
+}
+
+.player-tee-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.player-name {
+  font-weight: 500;
+  flex: 1;
+}
+
+.tee-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tee-selector select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.tee-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+}
+
+.setup-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.back-button,
+.continue-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.back-button:hover {
+  background-color: #5a6268;
+}
+
+.continue-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.continue-button:hover {
+  background-color: #0056b3;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .player-tee-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .tee-selector {
+    justify-content: space-between;
+  }
+  
+  .setup-buttons {
+    flex-direction: column;
+  }
+} 

@@ -31,6 +31,7 @@ import { runAllMigrations } from './utils/migrateFirestorePlayers';
 import AdminDebugPage from './components/admin/AdminDebugPage';
 import LedgerView2 from './components/ledger/LedgerView2';
 import MatchSummaryView2 from './components/ledger/MatchSummaryView2';
+import { CourseManager } from './components/setup/CourseManager';
 
 // Uncomment these for testing/development
 /*
@@ -203,6 +204,14 @@ function App() {
               <Route 
                 path="/admin-debug" 
                 element={<AdminDebugPage />} 
+              />
+              <Route 
+                path="/course-manager" 
+                element={
+                  <ProtectedRoute>
+                    <CourseManager />
+                  </ProtectedRoute>
+                } 
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

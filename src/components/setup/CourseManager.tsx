@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { millbrookDb } from '../../db/millbrookDb';
-import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
+import { Course, TeeOption, HoleInfo, CourseImportRecord } from '../../db/courseModel';
 import { HoleEditor } from './HoleEditor';
+import { TeeEditor } from './TeeEditor';
+import { CourseCreationWizard } from './CourseCreationWizard';
+import { PhotoImportDialog } from './PhotoImportDialog';
+import { OCRValidationDialog } from './OCRValidationDialog';
+import type { OCRResult } from '../../types/ocr';
+import { scorecardParser } from '../../utils/scorecardParser';
 
 // CourseForm component
 interface CourseFormProps {
@@ -86,9 +92,11 @@ const CourseForm: React.FC<CourseFormProps> = ({ course, onSave, onCancel, onDel
 // CourseDetails component
 interface CourseDetailsProps {
   course: Course;
+  onTeeSelect?: (tee: TeeOption) => void;
+  selectedTee?: TeeOption | null;
 }
 
-const CourseDetails: React.FC<CourseDetailsProps> = ({ course }) => {
+const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onTeeSelect, selectedTee }) => {
   return (
     <div className="course-details">
       <div className="detail-group">
@@ -105,8 +113,17 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course }) => {
         <label>Tee Options:</label>
         <div className="tee-list">
           {course.teeOptions.map(tee => (
-            <div key={tee.id} className="tee-pill" style={{ backgroundColor: tee.color.toLowerCase() }}>
-              {tee.name}
+            <div 
+              key={tee.id} 
+              className={`tee-item ${selectedTee?.id === tee.id ? 'selected' : ''}`}
+              onClick={() => onTeeSelect?.(tee)}
+              style={{ cursor: onTeeSelect ? 'pointer' : 'default' }}
+            >
+              <div 
+                className="tee-color-indicator" 
+                style={{ backgroundColor: tee.color.toLowerCase() }}
+              ></div>
+              <span className="tee-name">{tee.name}</span>
             </div>
           ))}
         </div>
@@ -192,6 +209,12 @@ export const CourseManager: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [isEditingHoles, setIsEditingHoles] = useState(false);
+  const [isEditingTee, setIsEditingTee] = useState(false);
+  const [isUsingWizard, setIsUsingWizard] = useState(false);
+  const [isPhotoImportOpen, setIsPhotoImportOpen] = useState(false);
+  const [isOCRValidationOpen, setIsOCRValidationOpen] = useState(false);
+  const [currentOCRResult, setCurrentOCRResult] = useState<OCRResult | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Form state
   const [courseForm, setCourseForm] = useState<{
@@ -334,9 +357,61 @@ export const CourseManager: React.FC = () => {
     }
   };
 
+  // Save updated tee from tee editor
+  const handleSaveTee = async (updatedTee: TeeOption) => {
+    try {
+      if (!selectedCourse) return;
+      
+      const updatedCourse: Course = {
+        ...selectedCourse,
+        teeOptions: selectedCourse.teeOptions.map(tee => 
+          tee.id === updatedTee.id ? updatedTee : tee
+        )
+      };
+      
+      await millbrookDb.saveCourse(updatedCourse);
+      setSelectedCourse(updatedCourse);
+      setSelectedTee(updatedTee);
+      setIsEditingTee(false);
+      await loadCourses();
+    } catch (error) {
+      console.error('Error saving tee data:', error);
+      alert('Failed to save tee data. Please try again.');
+    }
+  };
+
   // Cancel hole editing
   const handleCancelHoleEdit = () => {
     setIsEditingHoles(false);
+  };
+
+  // Cancel tee editing
+  const handleCancelTeeEdit = () => {
+    setIsEditingTee(false);
+  };
+
+  // Handle tee selection
+  const handleTeeSelect = (tee: TeeOption) => {
+    setSelectedTee(tee);
+  };
+
+  // Handle wizard completion
+  const handleWizardComplete = async (course: Course) => {
+    try {
+      await millbrookDb.saveCourse(course);
+      setIsUsingWizard(false);
+      setSelectedCourse(course);
+      await loadCourses();
+      alert(`Course "${course.name}" created successfully!`);
+    } catch (error) {
+      console.error('Error saving course from wizard:', error);
+      alert('Failed to save course. Please try again.');
+    }
+  };
+
+  // Handle wizard cancel
+  const handleWizardCancel = () => {
+    setIsUsingWizard(false);
   };
 
   // Export selected course as JSON
@@ -429,37 +504,82 @@ export const CourseManager: React.FC = () => {
           // Check if it's a single course or an array of courses
           const coursesToImport = Array.isArray(importedData) ? importedData : [importedData];
           
-          // Validate course data
-          const validCourses = coursesToImport.filter(course => {
-            return (
-              course.id && 
-              course.name && 
-              course.location && 
-              Array.isArray(course.teeOptions) &&
-              course.teeOptions.length > 0
+          // Get existing courses for duplicate detection
+          const existingCourses = await millbrookDb.getAllCourses();
+          
+          // Validate course data and track imports
+          const validCourses = [];
+          const importRecords: CourseImportRecord[] = [];
+          let importCount = 0;
+          let duplicateCount = 0;
+          
+          for (const course of coursesToImport) {
+            // Basic validation
+            if (!(course.id && course.name && course.location && Array.isArray(course.teeOptions) && course.teeOptions.length > 0)) {
+              console.warn('Skipping invalid course data:', course);
+              continue;
+            }
+            
+            // Check for duplicates
+            const duplicateCandidate = existingCourses?.find(existing => 
+              existing.name.toLowerCase().trim() === course.name.toLowerCase().trim() &&
+              existing.location?.toLowerCase().trim() === course.location?.toLowerCase().trim()
             );
-          });
+            
+            let finalCourse = course;
+            let action: 'new' | 'replaced' | 'kept-both' = 'new';
+            
+            if (duplicateCandidate) {
+              duplicateCount++;
+              // For batch imports, we'll keep both and rename the new one
+              finalCourse = {
+                ...course,
+                id: crypto.randomUUID(),
+                name: `${course.name} (Imported ${new Date().toLocaleDateString()})`,
+                teeOptions: course.teeOptions.map((tee: TeeOption) => ({
+                  ...tee,
+                  id: crypto.randomUUID()
+                })),
+                dateAdded: new Date()
+              };
+              action = 'kept-both';
+            } else {
+              // Generate new IDs for the course and tee options to avoid conflicts
+              finalCourse = {
+                ...course,
+                id: crypto.randomUUID(),
+                teeOptions: course.teeOptions.map((tee: TeeOption) => ({
+                  ...tee,
+                  id: crypto.randomUUID()
+                })),
+                dateAdded: new Date()
+              };
+            }
+            
+            validCourses.push(finalCourse);
+            
+            // Create import record
+            const importRecord: CourseImportRecord = {
+              id: crypto.randomUUID(),
+              timestamp: new Date(),
+              courseId: finalCourse.id,
+              courseName: finalCourse.name,
+              source: 'JSON File Import',
+              action: action,
+              originalData: course // Store original for audit
+            };
+            importRecords.push(importRecord);
+          }
           
           if (validCourses.length === 0) {
             alert('No valid course data found in the imported file.');
             return;
           }
           
-          // Import courses
-          let importCount = 0;
-          for (const course of validCourses) {
-            // Generate new IDs for the course and tee options to avoid conflicts
-            const newCourse: Course = {
-              ...course,
-              id: crypto.randomUUID(),
-              teeOptions: course.teeOptions.map((tee: TeeOption) => ({
-                ...tee,
-                id: crypto.randomUUID()
-              })),
-              dateAdded: new Date()
-            };
-            
-            await millbrookDb.saveCourse(newCourse);
+          // Import courses and save records
+          for (let i = 0; i < validCourses.length; i++) {
+            await millbrookDb.saveCourse(validCourses[i]);
+            await millbrookDb.saveCourseImportRecord(importRecords[i]);
             importCount++;
           }
           
@@ -472,7 +592,13 @@ export const CourseManager: React.FC = () => {
             fileInputRef.current.value = '';
           }
           
-          alert(`Successfully imported ${importCount} course(s).`);
+          // Show detailed result message
+          let resultMessage = `Successfully imported ${importCount} course(s).`;
+          if (duplicateCount > 0) {
+            resultMessage += `\n${duplicateCount} duplicate(s) were renamed to avoid conflicts.`;
+          }
+          alert(resultMessage);
+          
         } catch (parseError) {
           console.error('Error parsing JSON:', parseError);
           alert('Failed to parse the imported file. Make sure it contains valid JSON.');
@@ -486,6 +612,127 @@ export const CourseManager: React.FC = () => {
     }
   };
 
+  // Handle photo import button click
+  const handlePhotoImportClick = () => {
+    setIsPhotoImportOpen(true);
+  };
+
+  // Handle photo import dialog close
+  const handlePhotoImportClose = () => {
+    setIsPhotoImportOpen(false);
+  };
+
+  // Handle OCR result from photo import
+  const handleOCRResult = async (result: OCRResult) => {
+    try {
+      console.log('OCR Result received:', result);
+      
+      if (result.extractedData) {
+        // Open validation dialog for review and correction
+        setCurrentOCRResult(result);
+        setIsOCRValidationOpen(true);
+      } else if (result.rawText.trim()) {
+        // Fallback to raw text display if no structured data
+        const shouldProceed = confirm(
+          `OCR processing completed but no structured data was extracted.\n\nRaw text (${result.rawText.length} characters):\n\n${result.rawText.substring(0, 500)}${result.rawText.length > 500 ? '...' : ''}\n\nThis might happen with unclear images or non-standard scorecard layouts.\n\nWould you like to see the full extracted text in the console?`
+        );
+        
+        if (shouldProceed) {
+          console.log('Full OCR Text:', result.rawText);
+          console.log('OCR Confidence:', result.confidence);
+          console.log('OCR Words:', result.words);
+        }
+      } else {
+        alert('No text was detected in the image. Please try a clearer image or adjust the camera angle.');
+      }
+      
+    } catch (error) {
+      console.error('Error processing OCR result:', error);
+      alert('Failed to process OCR result. Please try again.');
+    }
+  };
+
+  // Handle course import from OCR validation
+  const handleOCRCourseImport = async (course: Course) => {
+    try {
+      // Check for duplicate courses first
+      const existingCourses = await millbrookDb.getAllCourses();
+      const duplicateCandidate = existingCourses?.find(existing => 
+        existing.name.toLowerCase().trim() === course.name.toLowerCase().trim() &&
+        existing.location?.toLowerCase().trim() === course.location?.toLowerCase().trim()
+      );
+
+      let importedCourse = course;
+      let message = '';
+
+      if (duplicateCandidate) {
+        // Show duplicate detection dialog
+        const userChoice = confirm(
+          `A course with the same name and location already exists:\n\n` +
+          `Existing: "${duplicateCandidate.name}" at "${duplicateCandidate.location}"\n` +
+          `New: "${course.name}" at "${course.location}"\n\n` +
+          `Would you like to:\n` +
+          `• Click OK to REPLACE the existing course\n` +
+          `• Click Cancel to KEEP BOTH courses (new course will be renamed)`
+        );
+
+        if (userChoice) {
+          // Replace existing course - use existing ID and preserve metadata
+          importedCourse = {
+            ...course,
+            id: duplicateCandidate.id,
+            dateAdded: duplicateCandidate.dateAdded,
+            lastPlayed: duplicateCandidate.lastPlayed,
+            timesPlayed: duplicateCandidate.timesPlayed || 0
+          };
+          message = `Successfully replaced existing course: ${course.name}`;
+        } else {
+          // Keep both - rename new course
+          importedCourse = {
+            ...course,
+            name: `${course.name} (Imported ${new Date().toLocaleDateString()})`
+          };
+          message = `Successfully imported course as: ${importedCourse.name}`;
+        }
+      } else {
+        message = `Successfully imported course: ${course.name}`;
+      }
+
+      // Track import for audit trail
+      const importRecord: CourseImportRecord = {
+        id: crypto.randomUUID(),
+        timestamp: new Date(),
+        courseId: importedCourse.id,
+        courseName: importedCourse.name,
+        source: 'OCR Photo Import',
+        action: duplicateCandidate ? (importedCourse.id === duplicateCandidate.id ? 'replaced' : 'kept-both') : 'new',
+        confidence: currentOCRResult?.confidence || 0,
+        extractedData: !!currentOCRResult?.extractedData
+      };
+
+      // Save course and record import
+      await millbrookDb.saveCourse(importedCourse);
+      await millbrookDb.saveCourseImportRecord(importRecord);
+      
+      await loadCourses();
+      alert(message);
+
+      // Close validation dialog
+      setIsOCRValidationOpen(false);
+      setCurrentOCRResult(null);
+      
+    } catch (error) {
+      console.error('Error importing course:', error);
+      alert('Failed to import course. Please try again.');
+    }
+  };
+
+  // Handle OCR validation dialog close
+  const handleOCRValidationClose = () => {
+    setIsOCRValidationOpen(false);
+    setCurrentOCRResult(null);
+  };
+
   // If editing holes, show the hole editor
   if (isEditingHoles && selectedTee && selectedCourse) {
     return <HoleEditor 
@@ -495,14 +742,40 @@ export const CourseManager: React.FC = () => {
     />;
   }
 
+  // If editing tee, show the tee editor
+  if (isEditingTee && selectedTee) {
+    return <TeeEditor 
+      tee={selectedTee} 
+      onSave={handleSaveTee} 
+      onCancel={handleCancelTeeEdit} 
+    />;
+  }
+
+  // If using wizard, show the course creation wizard
+  if (isUsingWizard) {
+    return <CourseCreationWizard 
+      onComplete={handleWizardComplete}
+      onCancel={handleWizardCancel}
+    />;
+  }
+
   return (
     <div className="course-manager">
       <h2>Course Manager</h2>
       <p>Add, edit, and manage golf courses for your games.</p>
       
       <div className="course-manager-actions">
+        <button className="add-button" onClick={() => setIsUsingWizard(true)}>
+          Create Course (Wizard)
+        </button>
         <button className="add-button" onClick={() => setIsAddingCourse(true)}>
-          Add New Course
+          Quick Add Course
+        </button>
+        <button 
+          className="import-photo-button"
+          onClick={handlePhotoImportClick}
+        >
+          📷 Import from Photo
         </button>
         <button 
           className="export-button"
@@ -532,19 +805,40 @@ export const CourseManager: React.FC = () => {
             <h3>Courses</h3>
           </div>
           
+          {courses.length > 0 && (
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search courses by name or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          )}
+          
           {courses.length === 0 ? (
             <div className="empty-state">No courses available. Add a new course to get started.</div>
           ) : (
             <div className="course-list">
-              {courses.map(course => (
-                <div
-                  key={course.id}
-                  className={`course-item ${selectedCourse?.id === course.id ? 'selected' : ''}`}
-                  onClick={() => handleCourseSelect(course.id)}
-                >
-                  {course.name} ({course.location})
-                </div>
-              ))}
+              {courses
+                .filter(course => {
+                  if (!searchQuery.trim()) return true;
+                  const query = searchQuery.toLowerCase();
+                  return (
+                    course.name.toLowerCase().includes(query) ||
+                    course.location?.toLowerCase().includes(query)
+                  );
+                })
+                .map(course => (
+                  <div
+                    key={course.id}
+                    className={`course-item ${selectedCourse?.id === course.id ? 'selected' : ''}`}
+                    onClick={() => handleCourseSelect(course.id)}
+                  >
+                    {course.name} ({course.location})
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -577,7 +871,11 @@ export const CourseManager: React.FC = () => {
               onDelete={handleDeleteCourse}
             />
           ) : selectedCourse ? (
-            <CourseDetails course={selectedCourse} />
+            <CourseDetails 
+              course={selectedCourse} 
+              onTeeSelect={handleTeeSelect}
+              selectedTee={selectedTee}
+            />
           ) : (
             <div className="empty-state">Select a course to view details.</div>
           )}
@@ -586,13 +884,21 @@ export const CourseManager: React.FC = () => {
         <div className="tee-details-panel">
           <div className="panel-header">
             <h3>Tee Details</h3>
-            {selectedTee && selectedCourse && !isEditingHoles && (
-              <button 
-                className="edit-holes-button"
-                onClick={() => setIsEditingHoles(true)}
-              >
-                Edit Holes
-              </button>
+            {selectedTee && selectedCourse && !isEditingHoles && !isEditingTee && (
+              <div className="panel-actions">
+                <button 
+                  className="edit-button"
+                  onClick={() => setIsEditingTee(true)}
+                >
+                  Edit Tee
+                </button>
+                <button 
+                  className="edit-holes-button"
+                  onClick={() => setIsEditingHoles(true)}
+                >
+                  Edit Holes
+                </button>
+              </div>
             )}
           </div>
           
@@ -616,6 +922,21 @@ export const CourseManager: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Photo Import Dialog */}
+      <PhotoImportDialog
+        isOpen={isPhotoImportOpen}
+        onClose={handlePhotoImportClose}
+        onResult={handleOCRResult}
+      />
+
+      {/* OCR Validation Dialog */}
+      <OCRValidationDialog
+        isOpen={isOCRValidationOpen}
+        ocrResult={currentOCRResult}
+        onClose={handleOCRValidationClose}
+        onImport={handleOCRCourseImport}
+      />
     </div>
   );
 }; 
