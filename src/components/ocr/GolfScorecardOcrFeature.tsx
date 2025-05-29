@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search } from 'lucide-react';
+import { Upload, Image, AlertCircle, CheckCircle2, Loader2, Info, Database, Plus, Search, Edit3, Save, X } from 'lucide-react';
 import { millbrookDb } from '../../db/millbrookDb';
 import { Course, TeeOption, HoleInfo } from '../../db/courseModel';
 
@@ -50,6 +50,14 @@ interface CourseMatchResult {
   matchType: 'exact' | 'partial' | 'location';
 }
 
+// New interface for editable data
+interface EditableOcrData {
+  courseName: string;
+  playedDate: string;
+  holes: OcrHole[];
+  players: OcrPlayer[];
+}
+
 interface GolfScorecardOcrFeatureProps {
   className?: string;
 }
@@ -74,6 +82,11 @@ export const GolfScorecardOcrFeature: React.FC<GolfScorecardOcrFeatureProps> = (
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [showCourseIntegration, setShowCourseIntegration] = useState<boolean>(false);
   const [isCreatingCourse, setIsCreatingCourse] = useState<boolean>(false);
+
+  // New state for user feedback and correction capabilities
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [editableData, setEditableData] = useState<EditableOcrData | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
   // File size validation (10MB limit)
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -556,6 +569,149 @@ Please be as accurate as possible and only include information that is clearly v
     }
   };
 
+  // New functions for user feedback and correction capabilities
+  const enterEditMode = () => {
+    if (!parsedData) return;
+    
+    const editable: EditableOcrData = {
+      courseName: parsedData.courseName || '',
+      playedDate: parsedData.playedDate || '',
+      holes: [...parsedData.holes],
+      players: parsedData.players.map(player => ({
+        ...player,
+        scores: player.scores ? [...player.scores] : []
+      }))
+    };
+    
+    setEditableData(editable);
+    setIsEditMode(true);
+    setHasUnsavedChanges(false);
+  };
+
+  const exitEditMode = () => {
+    setIsEditMode(false);
+    setEditableData(null);
+    setHasUnsavedChanges(false);
+  };
+
+  const saveEditedData = () => {
+    if (!editableData) return;
+    
+    // Update parsed data with edited values
+    const updatedParsedData: ParsedScorecardData = {
+      courseName: editableData.courseName || null,
+      playedDate: editableData.playedDate || null,
+      holes: editableData.holes,
+      players: editableData.players,
+      summary: {
+        holesCount: editableData.holes.length,
+        playersCount: editableData.players.length,
+        hasCompleteHoleData: editableData.holes.every(h => h.par && h.yardage && h.stroke_index),
+        hasPlayerScores: editableData.players.some(p => p.scores && p.scores.length > 0)
+      }
+    };
+    
+    setParsedData(updatedParsedData);
+    
+    // Re-validate the edited data
+    const revalidated = validateOcrData({
+      course_name: editableData.courseName,
+      played_on_date: editableData.playedDate,
+      holes: editableData.holes,
+      players: editableData.players
+    });
+    setValidationResult(revalidated);
+    
+    // Update course matches if course name changed
+    if (parsedData && editableData.courseName !== parsedData.courseName) {
+      const matches = findCourseMatches(updatedParsedData);
+      setCourseMatches(matches);
+      
+      // Auto-select exact match if found
+      const exactMatch = matches.find(match => match.matchType === 'exact');
+      if (exactMatch) {
+        setSelectedCourseId(exactMatch.course.id);
+      } else {
+        setSelectedCourseId(null);
+      }
+    }
+    
+    setSuccessMessage('Changes saved successfully!');
+    exitEditMode();
+  };
+
+  const updateEditableData = (updates: Partial<EditableOcrData>) => {
+    if (!editableData) return;
+    
+    setEditableData(prev => ({
+      ...prev!,
+      ...updates
+    }));
+    setHasUnsavedChanges(true);
+  };
+
+  const updateHole = (holeIndex: number, updates: Partial<OcrHole>) => {
+    if (!editableData) return;
+    
+    const updatedHoles = [...editableData.holes];
+    updatedHoles[holeIndex] = { ...updatedHoles[holeIndex], ...updates };
+    
+    updateEditableData({ holes: updatedHoles });
+  };
+
+  const updatePlayer = (playerIndex: number, updates: Partial<OcrPlayer>) => {
+    if (!editableData) return;
+    
+    const updatedPlayers = [...editableData.players];
+    updatedPlayers[playerIndex] = { ...updatedPlayers[playerIndex], ...updates };
+    
+    updateEditableData({ players: updatedPlayers });
+  };
+
+  const addHole = () => {
+    if (!editableData) return;
+    
+    const nextHoleNumber = Math.max(...editableData.holes.map(h => h.hole_number), 0) + 1;
+    const newHole: OcrHole = {
+      hole_number: nextHoleNumber,
+      par: 4,
+      stroke_index: nextHoleNumber,
+      yardage: 350
+    };
+    
+    updateEditableData({ 
+      holes: [...editableData.holes, newHole] 
+    });
+  };
+
+  const removeHole = (holeIndex: number) => {
+    if (!editableData) return;
+    
+    const updatedHoles = editableData.holes.filter((_, index) => index !== holeIndex);
+    updateEditableData({ holes: updatedHoles });
+  };
+
+  const addPlayer = () => {
+    if (!editableData) return;
+    
+    const newPlayer: OcrPlayer = {
+      name: 'New Player',
+      handicap: 0,
+      scores: []
+    };
+    
+    updateEditableData({ 
+      players: [...editableData.players, newPlayer] 
+    });
+  };
+
+  const removePlayer = (playerIndex: number) => {
+    if (!editableData) return;
+    
+    const updatedPlayers = editableData.players.filter((_, index) => index !== playerIndex);
+    updateEditableData({ players: updatedPlayers });
+  };
+
   return (
     <div className={`golf-scorecard-ocr-feature ${className}`}>
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -818,14 +974,80 @@ Please be as accurate as possible and only include information that is clearly v
         {/* Parsed Data Summary */}
         {parsedData && (
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-3">Extracted Information</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-700">Extracted Information</h3>
+              
+              {/* Edit/Save/Cancel buttons */}
+              <div className="flex items-center gap-2">
+                {!isEditMode ? (
+                  <button
+                    onClick={enterEditMode}
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    Edit
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={saveEditedData}
+                      disabled={!hasUnsavedChanges}
+                      className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                    >
+                      <Save className="w-4 h-4" />
+                      Save
+                    </button>
+                    <button
+                      onClick={exitEditMode}
+                      className="flex items-center gap-2 px-3 py-1 bg-gray-500 text-white rounded text-sm font-medium hover:bg-gray-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Unsaved changes warning */}
+            {hasUnsavedChanges && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm text-yellow-700">You have unsaved changes</span>
+              </div>
+            )}
             
-            {/* Course Information */}
+            {/* Course Information - Editable */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <h4 className="font-medium text-blue-800 mb-2">Course Information</h4>
-              <div className="text-sm text-blue-700 space-y-1">
-                <div><span className="font-medium">Course:</span> {parsedData.courseName || 'Not specified'}</div>
-                <div><span className="font-medium">Date:</span> {parsedData.playedDate || 'Not specified'}</div>
+              <div className="text-sm text-blue-700 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium min-w-[60px]">Course:</span>
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={editableData?.courseName || ''}
+                      onChange={(e) => updateEditableData({ courseName: e.target.value })}
+                      className="flex-1 px-2 py-1 border border-blue-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Course name"
+                    />
+                  ) : (
+                    <span>{parsedData.courseName || 'Not specified'}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium min-w-[60px]">Date:</span>
+                  {isEditMode ? (
+                    <input
+                      type="date"
+                      value={editableData?.playedDate || ''}
+                      onChange={(e) => updateEditableData({ playedDate: e.target.value })}
+                      className="px-2 py-1 border border-blue-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <span>{parsedData.playedDate || 'Not specified'}</span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -834,32 +1056,118 @@ Please be as accurate as possible and only include information that is clearly v
               <h4 className="font-medium text-gray-800 mb-2">Summary</h4>
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
                 <div>
-                  <span className="font-medium">Holes:</span> {parsedData.summary.holesCount}
-                  {parsedData.summary.hasCompleteHoleData && (
+                  <span className="font-medium">Holes:</span> {isEditMode ? editableData?.holes.length || 0 : parsedData.summary.holesCount}
+                  {(isEditMode ? (editableData?.holes?.every(h => h.par && h.yardage && h.stroke_index) || false) : parsedData.summary.hasCompleteHoleData) && (
                     <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Complete</span>
                   )}
                 </div>
                 <div>
-                  <span className="font-medium">Players:</span> {parsedData.summary.playersCount}
-                  {parsedData.summary.hasPlayerScores && (
+                  <span className="font-medium">Players:</span> {isEditMode ? editableData?.players.length || 0 : parsedData.summary.playersCount}
+                  {(isEditMode ? (editableData?.players?.some(p => p.scores && p.scores.length > 0) || false) : parsedData.summary.hasPlayerScores) && (
                     <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">With Scores</span>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Holes Data */}
-            {parsedData.holes.length > 0 && (
+            {/* Holes Data - Editable */}
+            {(isEditMode ? (editableData?.holes?.length || 0) : parsedData.holes.length) > 0 && (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-                <h4 className="font-medium text-gray-800 mb-3">Holes ({parsedData.holes.length})</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-gray-800">
+                    Holes ({isEditMode ? (editableData?.holes?.length || 0) : parsedData.holes.length})
+                  </h4>
+                  {isEditMode && (
+                    <button
+                      onClick={addHole}
+                      className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700 transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add Hole
+                    </button>
+                  )}
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-64 overflow-y-auto">
-                  {parsedData.holes.map((hole) => (
-                    <div key={hole.hole_number} className="text-sm bg-white p-3 rounded border">
-                      <div className="font-medium text-gray-800">Hole {hole.hole_number}</div>
+                  {(isEditMode ? (editableData?.holes || []) : parsedData.holes).map((hole, index) => (
+                    <div key={`${hole.hole_number}-${index}`} className="text-sm bg-white p-3 rounded border">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-medium text-gray-800">
+                          {isEditMode ? (
+                            <input
+                              type="number"
+                              value={hole.hole_number}
+                              onChange={(e) => updateHole(index, { hole_number: parseInt(e.target.value) || 1 })}
+                              className="w-16 px-1 py-0.5 border border-gray-300 rounded text-sm text-center"
+                              min="1"
+                              max="18"
+                            />
+                          ) : (
+                            `Hole ${hole.hole_number}`
+                          )}
+                        </div>
+                        {isEditMode && (
+                          <button
+                            onClick={() => removeHole(index)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                            title="Remove hole"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      
                       <div className="text-gray-600 space-y-1">
-                        {hole.par && <div>Par: {hole.par}</div>}
-                        {hole.stroke_index && <div>SI: {hole.stroke_index}</div>}
-                        {hole.yardage && <div>Yardage: {hole.yardage}</div>}
+                        <div className="flex items-center gap-2">
+                          <span className="w-12 text-xs">Par:</span>
+                          {isEditMode ? (
+                            <input
+                              type="number"
+                              value={hole.par || ''}
+                              onChange={(e) => updateHole(index, { par: parseInt(e.target.value) || undefined })}
+                              className="w-16 px-1 py-0.5 border border-gray-300 rounded text-xs text-center"
+                              min="3"
+                              max="6"
+                              placeholder="4"
+                            />
+                          ) : (
+                            hole.par && <span className="text-xs">{hole.par}</span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="w-12 text-xs">SI:</span>
+                          {isEditMode ? (
+                            <input
+                              type="number"
+                              value={hole.stroke_index || ''}
+                              onChange={(e) => updateHole(index, { stroke_index: parseInt(e.target.value) || undefined })}
+                              className="w-16 px-1 py-0.5 border border-gray-300 rounded text-xs text-center"
+                              min="1"
+                              max="18"
+                              placeholder="1"
+                            />
+                          ) : (
+                            hole.stroke_index && <span className="text-xs">{hole.stroke_index}</span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="w-12 text-xs">Yards:</span>
+                          {isEditMode ? (
+                            <input
+                              type="number"
+                              value={hole.yardage || ''}
+                              onChange={(e) => updateHole(index, { yardage: parseInt(e.target.value) || undefined })}
+                              className="w-20 px-1 py-0.5 border border-gray-300 rounded text-xs text-center"
+                              min="50"
+                              max="700"
+                              placeholder="350"
+                            />
+                          ) : (
+                            hole.yardage && <span className="text-xs">{hole.yardage}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -867,23 +1175,99 @@ Please be as accurate as possible and only include information that is clearly v
               </div>
             )}
 
-            {/* Players Data */}
-            {parsedData.players.length > 0 && (
+            {/* Players Data - Editable */}
+            {(isEditMode ? (editableData?.players?.length || 0) : parsedData.players.length) > 0 && (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-800 mb-3">Players ({parsedData.players.length})</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-gray-800">
+                    Players ({isEditMode ? (editableData?.players?.length || 0) : parsedData.players.length})
+                  </h4>
+                  {isEditMode && (
+                    <button
+                      onClick={addPlayer}
+                      className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700 transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add Player
+                    </button>
+                  )}
+                </div>
+                
                 <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {parsedData.players.map((player, index) => (
+                  {(isEditMode ? (editableData?.players || []) : parsedData.players).map((player, index) => (
                     <div key={index} className="text-sm bg-white p-3 rounded border">
-                      <div className="font-medium text-gray-800">{player.name}</div>
-                      <div className="text-gray-600 space-y-1">
-                        {player.handicap !== undefined && <div>Handicap: {player.handicap}</div>}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-medium text-gray-800">
+                          {isEditMode ? (
+                            <input
+                              type="text"
+                              value={player.name}
+                              onChange={(e) => updatePlayer(index, { name: e.target.value })}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                              placeholder="Player name"
+                            />
+                          ) : (
+                            player.name
+                          )}
+                        </div>
+                        {isEditMode && (
+                          <button
+                            onClick={() => removePlayer(index)}
+                            className="text-red-500 hover:text-red-700 p-1 ml-2"
+                            title="Remove player"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="text-gray-600 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-16 text-xs">Handicap:</span>
+                          {isEditMode ? (
+                            <input
+                              type="number"
+                              value={player.handicap !== undefined ? player.handicap : ''}
+                              onChange={(e) => updatePlayer(index, { handicap: e.target.value ? parseInt(e.target.value) : undefined })}
+                              className="w-16 px-1 py-0.5 border border-gray-300 rounded text-xs text-center"
+                              min="0"
+                              max="54"
+                              placeholder="0"
+                            />
+                          ) : (
+                            player.handicap !== undefined && <span className="text-xs">{player.handicap}</span>
+                          )}
+                        </div>
+                        
                         {player.scores && player.scores.length > 0 && (
                           <div>
-                            <div>Scores: ({player.scores.length} holes)</div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {player.scores.slice(0, 9).join(', ')}
-                              {player.scores.length > 9 && ` ... +${player.scores.length - 9} more`}
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs">Scores: ({player.scores.length} holes)</span>
                             </div>
+                            {isEditMode ? (
+                              <div className="grid grid-cols-6 gap-1">
+                                {player.scores.map((score, scoreIndex) => (
+                                  <input
+                                    key={scoreIndex}
+                                    type="number"
+                                    value={score}
+                                    onChange={(e) => {
+                                      const newScores = [...player.scores!];
+                                      newScores[scoreIndex] = parseInt(e.target.value) || 0;
+                                      updatePlayer(index, { scores: newScores });
+                                    }}
+                                    className="w-8 px-1 py-0.5 border border-gray-300 rounded text-xs text-center"
+                                    min="1"
+                                    max="12"
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-500 mt-1">
+                                {player.scores.slice(0, 9).join(', ')}
+                                {player.scores.length > 9 && ` ... +${player.scores.length - 9} more`}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
