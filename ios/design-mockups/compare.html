@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Compare — Bottom-Zone Metaphors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#0c0c0e;color:#e8e6df;font-family:"Inter Tight",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:48px 24px 96px;min-height:100vh}
+  .wrap{max-width:1380px;margin:0 auto}
+  header{margin-bottom:36px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:22px}
+  h1{font-family:"Instrument Serif",serif;font-weight:400;font-style:italic;font-size:42px;letter-spacing:-.02em;line-height:1}
+  .sub{margin-top:12px;color:#bdbab0;max-width:780px;font-size:15px;line-height:1.5}
+  .sub b{color:#e8e6df}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:36px}
+  .col{display:flex;flex-direction:column;gap:14px}
+  .label{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px}
+  .label-name{font-family:"Instrument Serif",serif;font-style:italic;font-size:24px;line-height:1}
+  .label-tag{font-family:"Geist Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#7a786f}
+  .frame{border-radius:42px;padding:8px;background:linear-gradient(180deg,#1a1a1d 0%,#0e0e10 100%);border:1px solid rgba(255,255,255,.06);box-shadow:0 24px 50px -18px rgba(0,0,0,.6)}
+  .frame iframe{display:block;width:100%;height:780px;border:0;border-radius:34px;background:#000}
+  .pros{margin-top:6px;padding:12px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:12.5px;color:#cfccc0;line-height:1.5}
+  .pros b{color:#9b8458;text-transform:uppercase;letter-spacing:.12em;font-size:10.5px;display:block;margin-bottom:4px;font-weight:600}
+  .open{display:inline-block;margin-top:4px;font-family:"Geist Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9b8458;text-decoration:none;padding:6px 10px;border:1px solid rgba(155,132,88,.4);border-radius:4px}
+  .open:hover{background:rgba(155,132,88,.1)}
+  @media (max-width:1100px){.row{grid-template-columns:1fr;max-width:520px;margin:0 auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Bottom-zone metaphors — pick one</h1>
+    <p class="sub">Same hero and roster across all three. The difference is <b>how Submit, Double, Big Game, and Card/Ledger/Settle navigation collapse into one cohesive bottom area</b>. No bottom tab bar in any of these.</p>
+  </header>
+
+  <div class="row">
+    <div class="col">
+      <div class="label"><span class="label-name">Hole Timeline</span><span class="label-tag">Variant 1</span></div>
+      <div class="frame"><iframe src="variant-1-timeline.html"></iframe></div>
+      <div class="pros">
+        <b>How it works</b>
+        Horizontal strip of 18 pips under the header replaces the tab bar. Filled = scored, ringed = current, hollow = future, $ at end = settle. Tap any pip to jump. Bottom is a unified Match Strip: tally line + double bar + full-width Submit. Most “glance & navigate.”
+      </div>
+      <a class="open" href="variant-1-timeline.html" target="_blank">Open standalone →</a>
+    </div>
+
+    <div class="col">
+      <div class="label"><span class="label-name">Header Nav</span><span class="label-tag">Variant 2</span></div>
+      <div class="frame"><iframe src="variant-2-headernav.html"></iframe></div>
+      <div class="pros">
+        <b>How it works</b>
+        Card / Ledger / Settle become small text links inside the green header band. Tab bar dies. Same Match Strip at the bottom as Variant 1 (tally + double + Submit). Most conservative — easiest port to SwiftUI.
+      </div>
+      <a class="open" href="variant-2-headernav.html" target="_blank">Open standalone →</a>
+    </div>
+
+    <div class="col">
+      <div class="label"><span class="label-name">Round Document</span><span class="label-tag">Variant 3</span></div>
+      <div class="frame"><iframe src="variant-3-document.html"></iframe></div>
+      <div class="pros">
+        <b>How it works</b>
+        No tabs at all. The whole match is one scrollable document — past holes summarized at top, current hole sticky in the middle, italic settle preview at the bottom. Submit floats sticky at the screen edge. Big Game pill persists. Most “native scorecard,” biggest departure.
+      </div>
+      <a class="open" href="variant-3-document.html" target="_blank">Open standalone →</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

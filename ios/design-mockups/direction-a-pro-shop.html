@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390,initial-scale=1" />
+<title>Direction A — Pro Shop Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --loden:#1F3A2A;
+    --loden-deep:#152A1E;
+    --parchment:#F1E7CC;
+    --parchment-warm:#E8DCBC;
+    --paper:#FBF6E7;
+    --ink:#1E1B14;
+    --ink-soft:#4C4537;
+    --rule:#C2B48A;
+    --rule-soft:#D7CCA5;
+    --brass:#A0823F;
+    --brass-bright:#C9A85E;
+    --cordovan:#6B2118;
+    --cordovan-soft:#9A3826;
+    --navy:#1B3147;
+    --navy-soft:#2F5378;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:"Inter Tight",system-ui,sans-serif;color:var(--ink);background:#0c0c0e}
+  body{display:flex;justify-content:center;padding:0;min-height:100vh}
+  .phone{
+    width:390px;min-height:844px;
+    background:
+      radial-gradient(120% 60% at 50% 0%, rgba(160,130,63,.08) 0%, transparent 60%),
+      radial-gradient(80% 40% at 100% 100%, rgba(107,33,24,.05) 0%, transparent 60%),
+      var(--paper);
+    position:relative;overflow:hidden;
+  }
+  /* paper grain */
+  .phone::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.17  0 0 0 0 0.1  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;opacity:.85;
+  }
+  /* status bar */
+  .status{display:flex;justify-content:space-between;align-items:center;padding:14px 22px 0;font-family:"Inter Tight";font-weight:600;font-size:13px;color:var(--ink);position:relative;z-index:2}
+  .status .dots{display:flex;gap:4px;align-items:center}
+  .status .dots span{width:14px;height:6px;background:var(--ink);border-radius:2px}
+  /* wordmark */
+  .topbar{display:flex;justify-content:space-between;align-items:flex-end;padding:18px 22px 12px;position:relative;z-index:2}
+  .wordmark{font-family:"Fraunces",serif;font-style:italic;font-weight:500;font-size:22px;letter-spacing:-.01em;color:var(--loden-deep);line-height:1}
+  .wordmark small{display:block;font-family:"JetBrains Mono",monospace;font-style:normal;font-weight:500;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--brass);margin-top:6px}
+  .toolset{display:flex;gap:6px}
+  .tool{width:34px;height:34px;border-radius:50%;border:1px solid var(--rule);background:rgba(255,255,255,.4);display:grid;place-items:center;color:var(--ink-soft)}
+  .tool svg{width:14px;height:14px}
+  .double-rule{height:8px;margin:0 22px 14px;position:relative;z-index:2}
+  .double-rule::before,.double-rule::after{content:"";position:absolute;left:0;right:0;height:1px;background:var(--ink)}
+  .double-rule::before{top:0}
+  .double-rule::after{top:4px;height:2px;background:linear-gradient(90deg,transparent,var(--brass) 12%,var(--brass) 88%,transparent)}
+
+  /* hero ledger card */
+  .ledger{margin:0 18px 16px;background:#FFFDF5;border:1px solid var(--rule);border-radius:6px;padding:18px 18px 14px;position:relative;z-index:2;box-shadow:0 1px 0 rgba(160,130,63,.4),0 12px 24px -16px rgba(31,58,42,.25),inset 0 0 0 4px #FFFDF5,inset 0 0 0 5px rgba(160,130,63,.18)}
+  .ledger::before{content:"";position:absolute;top:7px;left:7px;right:7px;bottom:7px;border:1px solid rgba(160,130,63,.18);border-radius:2px;pointer-events:none}
+  .ledger-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;position:relative;z-index:1}
+  .hole-mark{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--brass);margin-bottom:6px}
+  .hole-num{font-family:"Fraunces",serif;font-weight:500;font-style:italic;font-size:64px;line-height:.9;color:var(--loden-deep);letter-spacing:-.02em}
+  .hole-meta{font-family:"Fraunces",serif;font-size:13px;color:var(--ink-soft);font-style:italic;margin-top:4px}
+  .hole-meta b{font-style:normal;font-weight:600;color:var(--ink)}
+  .balance{text-align:right}
+  .balance .lbl{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--brass);margin-bottom:4px}
+  .balance .amt{font-family:"Fraunces",serif;font-weight:600;font-style:italic;font-size:38px;color:var(--cordovan);line-height:.95;letter-spacing:-.02em}
+  .balance .row2{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink-soft);margin-top:6px;letter-spacing:.04em}
+  .balance .row2 b{color:var(--cordovan);font-weight:700}
+  .hairline{height:1px;background:linear-gradient(90deg,transparent,var(--rule) 8%,var(--rule) 92%,transparent);margin:10px 0}
+  .meta-row{display:flex;gap:12px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+  .meta-row span:nth-child(odd){color:var(--brass)}
+  .stamps{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .stamp{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px dashed var(--brass);border-radius:2px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);background:rgba(201,168,94,.08)}
+  .stamp.cordo{border-color:var(--cordovan-soft);color:var(--cordovan)}
+  .stamp.live{border-style:solid;background:var(--loden);color:var(--paper);border-color:var(--loden)}
+  .stamp svg{width:10px;height:10px}
+
+  /* player ledger rows */
+  .roster{margin:0 18px 16px;background:#FFFDF5;border:1px solid var(--rule);border-radius:6px;padding:6px 0;position:relative;z-index:2;box-shadow:0 1px 0 rgba(160,130,63,.4)}
+  .row{display:grid;grid-template-columns:34px 1fr 92px 56px;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--rule-soft);position:relative}
+  .row:last-child{border-bottom:none}
+  .row .seat{font-family:"Fraunces",serif;font-style:italic;font-weight:500;font-size:22px;color:var(--brass);line-height:1;text-align:center}
+  .who{min-width:0}
+  .name{font-family:"Fraunces",serif;font-style:italic;font-weight:600;font-size:18px;color:var(--ink);line-height:1.1;letter-spacing:-.01em;display:flex;align-items:center;gap:6px}
+  .team-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .team-dot.red{background:var(--cordovan)}
+  .team-dot.blue{background:var(--navy)}
+  .sub{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.06em;color:var(--ink-soft);margin-top:3px;text-transform:uppercase}
+  .sub b{color:var(--brass);font-weight:600}
+  .stepper{display:flex;align-items:center;gap:0;background:#F8F1DC;border:1px solid var(--rule);border-radius:3px;height:38px;overflow:hidden}
+  .stepper button{flex:0 0 28px;height:100%;background:transparent;border:none;border-right:1px solid var(--rule);color:var(--loden-deep);font-family:"Fraunces",serif;font-size:18px;font-weight:600;font-style:italic;cursor:pointer}
+  .stepper button:last-child{border-right:none;border-left:1px solid var(--rule)}
+  .stepper .val{flex:1;text-align:center;font-family:"Fraunces",serif;font-style:italic;font-weight:600;font-size:22px;color:var(--ink)}
+  .net{text-align:center}
+  .net .nv{font-family:"Fraunces",serif;font-style:italic;font-weight:600;font-size:30px;color:var(--loden);line-height:1}
+  .net .nv.under{color:var(--cordovan)}
+  .net .nl{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);margin-top:4px}
+  .junkstrip{grid-column:2 / -1;display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .seal{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:2px;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--rule);color:var(--ink-soft);background:#F8F1DC}
+  .seal.on{background:var(--loden);color:var(--paper);border-color:var(--loden)}
+  .seal.warn{background:var(--cordovan);color:var(--paper);border-color:var(--cordovan)}
+  .seal.brass{background:var(--brass);color:var(--paper);border-color:var(--brass)}
+  .seal svg{width:9px;height:9px}
+
+  /* footer ribbon */
+  .ribbon{margin:0 18px 12px;background:linear-gradient(180deg,var(--loden) 0%,var(--loden-deep) 100%);color:var(--paper);border-radius:6px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:14px;border:1px solid var(--loden-deep);box-shadow:0 8px 20px -10px rgba(31,58,42,.6);position:relative;z-index:2}
+  .ribbon::before{content:"";position:absolute;inset:4px;border:1px solid rgba(201,168,94,.4);border-radius:3px;pointer-events:none}
+  .ribbon-text{position:relative;z-index:1}
+  .ribbon-text .k{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--brass-bright);margin-bottom:3px}
+  .ribbon-text .v{font-family:"Fraunces",serif;font-style:italic;font-weight:500;font-size:18px;color:var(--paper)}
+  .ribbon-cta{position:relative;z-index:1;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--paper);display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--brass-bright);border-radius:3px;padding:10px 14px}
+  .ribbon-cta svg{width:12px;height:12px}
+
+  /* tab bar */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;background:#FFFDF5;border-top:1px solid var(--rule);padding:10px 12px 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;z-index:3}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px 4px;border-radius:4px;color:var(--ink-soft)}
+  .tab svg{width:18px;height:18px}
+  .tab span{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase}
+  .tab.active{color:var(--loden-deep)}
+  .tab.active span{color:var(--loden-deep)}
+  .tab.active::after{content:"";display:block;width:18px;height:2px;background:var(--brass);position:absolute;margin-top:46px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status">
+    <span>9:41</span>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="topbar">
+    <div class="wordmark">Millbrook<small>Est. — The Game</small></div>
+    <div class="toolset">
+      <div class="tool" title="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></div>
+      <div class="tool" title="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+    </div>
+  </div>
+  <div class="double-rule"></div>
+
+  <div class="ledger">
+    <div class="ledger-head">
+      <div>
+        <div class="hole-mark">Hole — Seventh</div>
+        <div class="hole-num">7</div>
+        <div class="hole-meta">Par <b>4</b> · SI <b>3</b> · <b>402</b> yds — White</div>
+      </div>
+      <div class="balance">
+        <div class="lbl">Side · Standing</div>
+        <div class="amt">+$26</div>
+        <div class="row2">Base $4 · Carry $6 · <b>Red</b> leads</div>
+      </div>
+    </div>
+    <div class="hairline"></div>
+    <div class="stamps">
+      <span class="stamp live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg>H6 saved</span>
+      <span class="stamp cordo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 14l5-5 5 5"/></svg>Call Red double</span>
+      <span class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 14l5-5 5 5"/></svg>Call Blue double</span>
+    </div>
+  </div>
+
+  <div class="roster">
+    <div class="row">
+      <div class="seat">i.</div>
+      <div class="who">
+        <div class="name"><span class="team-dot red"></span>James H.</div>
+        <div class="sub">White · idx <b>9.4</b> · 1 stroke</div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+      <div class="net"><div class="nv under">3</div><div class="nl">Net</div></div>
+      <div class="junkstrip">
+        <span class="seal on">Sand</span>
+        <span class="seal">Pickup</span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="seat">ii.</div>
+      <div class="who">
+        <div class="name"><span class="team-dot red"></span>Pat M.</div>
+        <div class="sub">White · idx <b>12.1</b> · 1 stroke</div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">5</div><button>+</button></div>
+      <div class="net"><div class="nv">4</div><div class="nl">Net</div></div>
+    </div>
+    <div class="row">
+      <div class="seat">iii.</div>
+      <div class="who">
+        <div class="name"><span class="team-dot blue"></span>Doug R.</div>
+        <div class="sub">Blue · idx <b>6.2</b> · 0 strokes</div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+      <div class="net"><div class="nv">4</div><div class="nl">Net</div></div>
+      <div class="junkstrip">
+        <span class="seal brass">Greenie</span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="seat">iv.</div>
+      <div class="who">
+        <div class="name"><span class="team-dot blue"></span>Mike L.</div>
+        <div class="sub">Blue · idx <b>14.8</b> · 2 strokes</div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">6</div><button>+</button></div>
+      <div class="net"><div class="nv">4</div><div class="nl">Net</div></div>
+      <div class="junkstrip">
+        <span class="seal warn">3-putt</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ribbon">
+    <div class="ribbon-text">
+      <div class="k">Big Game · Two best net</div>
+      <div class="v">Running 41 — through six</div>
+    </div>
+    <button class="ribbon-cta">
+      Submit
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      <span>Card</span>
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Ledger</span>
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 11h6"/></svg>
+      <span>Settle</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
