@@ -1,0 +1,177 @@
+@import 'tailwindcss';
+
+/* -----------------------------------------------------------------------------
+ * Type — three voices, all variable, all free.
+ *   Fraunces       — display serif, country-club gravitas
+ *   Geist Sans     — workhorse UI sans
+ *   JetBrains Mono — tabular figures for the money column
+ * ---------------------------------------------------------------------------*/
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/fraunces/v36/6NUh8FyLNQOQZAnv9bYwwZ0XK_dpW7-_QqWGsZpYydy.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/geist/v3/gyByhwUxId8gMEwcGFWNOITddY4.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v22/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOV.woff2') format('woff2');
+}
+
+/* -----------------------------------------------------------------------------
+ * Design tokens — Tailwind v4 reads these via @theme.
+ * Palette: fairway green / cream paper / brass / ink, plus team red & blue.
+ * ---------------------------------------------------------------------------*/
+
+@theme {
+  /* Surfaces */
+  --color-paper:        #fbf4e3;
+  --color-paper-deep:   #f3e9cd;
+  --color-card:         #fffaee;
+  --color-ink:          #0b1a14;
+  --color-ink-soft:     #3a4a42;
+  --color-ink-muted:    #6b7a72;
+  --color-rule:         #cfb98a;
+
+  /* Brand */
+  --color-fairway:      #1d4329;
+  --color-fairway-dim:  #0f2a18;
+  --color-fairway-lift: #2e6b42;
+  --color-brass:        #d4a72c;
+  --color-brass-deep:   #a37b0e;
+
+  /* Teams */
+  --color-red:          #c8392b;
+  --color-red-soft:     #f4d4cf;
+  --color-blue:         #1e5d8e;
+  --color-blue-soft:    #d3e2ef;
+
+  /* Status */
+  --color-win:          #2e6b42;
+  --color-push:         #b79530;
+  --color-loss:         #a82d20;
+
+  /* Typography */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-sans:    'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Shadows — soft layered, paper-like */
+  --shadow-card:
+    0 1px 0 rgba(15, 42, 24, 0.04),
+    0 4px 12px rgba(11, 26, 20, 0.06),
+    0 18px 36px -22px rgba(11, 26, 20, 0.18);
+  --shadow-lift:
+    0 2px 0 rgba(15, 42, 24, 0.05),
+    0 14px 32px -18px rgba(11, 26, 20, 0.35);
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --motion-fast: 120ms;
+  --motion-mid:  220ms;
+  --motion-slow: 420ms;
+}
+
+/* -----------------------------------------------------------------------------
+ * Base
+ * ---------------------------------------------------------------------------*/
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  html, body, #root {
+    min-height: 100%;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  body {
+    /* Paper grain — soft, almost-not-there fibre texture */
+    background-image:
+      radial-gradient(rgba(11, 26, 20, 0.045) 1px, transparent 1px),
+      radial-gradient(rgba(212, 167, 44, 0.04) 1px, transparent 1px),
+      linear-gradient(180deg, var(--color-paper) 0%, var(--color-paper-deep) 100%);
+    background-size: 3px 3px, 7px 7px, 100% 100%;
+    background-position: 0 0, 1px 1px, 0 0;
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--color-ink);
+  }
+
+  /* Tabular money figures everywhere */
+  .num, code, pre, kbd {
+    font-family: var(--font-mono);
+    font-feature-settings: 'tnum' 1, 'cv03' 1, 'cv04' 1;
+  }
+
+  ::selection {
+    background: var(--color-brass);
+    color: var(--color-ink);
+  }
+
+  /* Reduce motion respectfully */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* -----------------------------------------------------------------------------
+ * Utilities tuned for this app
+ * ---------------------------------------------------------------------------*/
+
+@utility hairline {
+  border-color: var(--color-rule);
+}
+
+@utility paper-card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+@utility ink-rule {
+  position: relative;
+}
+@utility ink-rule-after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-rule) 12%, var(--color-rule) 88%, transparent);
+}
