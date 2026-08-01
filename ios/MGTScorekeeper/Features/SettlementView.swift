@@ -112,25 +112,11 @@ private struct SettlementResultCard: View {
                     .foregroundStyle(resultColor)
             }
 
-            if let winningTeam {
+            if winningTeam != nil {
                 Divider()
-                ForEach(Array(paymentPairings(winningTeam: winningTeam).enumerated()), id: \.offset) { _, pairing in
-                    HStack(spacing: 7) {
-                        Text(pairing.payer.name)
-                            .font(.headline)
-                            .foregroundStyle(teamColor(pairing.payer.team))
-                        Text("pays")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(MGTTheme.muted)
-                        Text(pairing.recipient.name)
-                            .font(.headline)
-                            .foregroundStyle(teamColor(pairing.recipient.team))
-                        Spacer()
-                        Text("$\(abs(match.teamBalance))")
-                            .font(.headline.monospacedDigit())
-                            .foregroundStyle(MGTTheme.ink)
-                    }
-                }
+                Text(ScoringEngine.settlementText(for: match))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(MGTTheme.muted)
             } else {
                 Text(ScoringEngine.settlementText(for: match))
                     .font(.subheadline.weight(.medium))
@@ -154,11 +140,6 @@ private struct SettlementResultCard: View {
         return teamColor(winningTeam)
     }
 
-    private func paymentPairings(winningTeam: Team) -> [(payer: Player, recipient: Player)] {
-        let winners = match.players.filter { $0.team == winningTeam }
-        let losers = match.players.filter { $0.team != winningTeam }
-        return Array(zip(losers, winners))
-    }
 }
 
 private struct SettlementSection<Content: View>: View {
@@ -337,8 +318,8 @@ private struct PlayerValueReport: View {
     let analytics: SettlementAnalytics
 
     var body: some View {
-        if let mvp = analytics.mostValuable {
-            Text(mvpSummary(mvp))
+        if !analytics.playerValues.isEmpty {
+            Text(summary)
                 .font(.subheadline)
                 .foregroundStyle(MGTTheme.muted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -347,21 +328,21 @@ private struct PlayerValueReport: View {
                 ForEach(analytics.playerValues) { player in
                     HStack(spacing: 9) {
                         Text(player.name)
-                            .font(.subheadline.weight(player.id == mvp.id ? .bold : .medium))
+                            .font(.subheadline.weight(player.id == analytics.mostValuable?.id ? .bold : .medium))
                             .foregroundStyle(MGTTheme.ink)
                             .lineLimit(1)
                             .frame(width: 112, alignment: .leading)
 
-                        ProgressView(value: Double(player.value), total: Double(max(maxValue, 1)))
+                        ProgressView(value: Double(player.partnerMargin), total: Double(max(maxValue, 1)))
                             .tint(teamColor(player.team))
 
-                        Text(player.value > 0 ? "+\(player.value)" : "0")
+                        Text(player.partnerMargin > 0 ? "+\(player.partnerMargin)" : "0")
                             .font(.subheadline.weight(.semibold).monospacedDigit())
                             .foregroundStyle(MGTTheme.ink)
                             .frame(width: 30, alignment: .trailing)
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(player.name), partner value \(player.value), counting score on \(player.countingHoles) holes")
+                    .accessibilityLabel("\(player.name), partner value \(player.partnerMargin), counting score on \(player.countingHoles) holes")
                 }
             }
 
@@ -377,13 +358,20 @@ private struct PlayerValueReport: View {
     }
 
     private var maxValue: Int {
-        analytics.playerValues.map(\.value).max() ?? 0
+        analytics.playerValues.map(\.partnerMargin).max() ?? 0
+    }
+
+    private var summary: String {
+        guard let mvp = analytics.mostValuable else {
+            return "No player separated from their partner on the saved holes."
+        }
+        return mvpSummary(mvp)
     }
 
     private func mvpSummary(_ player: PlayerValue) -> String {
         let holes = player.biggestGapHoles.map(String.init).joined(separator: " & ")
         let gapSummary = holes.isEmpty ? "with no separation from their partner" : "with the biggest partner gaps on \(holes)"
-        return "\(player.name) carried the side — counting score on \(player.countingHoles) holes, \(gapSummary)."
+        return "\(player.name) carried the side — at the team low on \(player.countingHoles) holes, \(gapSummary)."
     }
 }
 
@@ -402,7 +390,7 @@ private struct JunkReport: View {
                     Spacer()
                     Text(summary(for: player))
                         .font(.caption)
-                        .foregroundStyle(events(for: player).isEmpty ? MGTTheme.muted.opacity(0.75) : MGTTheme.muted)
+                        .foregroundStyle(MGTTheme.muted)
                         .multilineTextAlignment(.trailing)
                 }
                 .padding(.vertical, 8)
@@ -420,14 +408,21 @@ private struct JunkReport: View {
 
     private func summary(for player: Player) -> String {
         let playerEvents = events(for: player)
-        guard !playerEvents.isEmpty else { return "—" }
-
-        return JunkType.allCases.compactMap { type in
+        var summaries: [String] = JunkType.allCases.compactMap { type -> String? in
             let count = playerEvents.filter { $0.type == type }.count
             guard count > 0 else { return nil }
             let label = type == .greeniePenalty ? "greenie penalty" : type.rawValue.lowercased()
             return "\(count) \(label)\(count == 1 ? "" : "s")"
-        }.joined(separator: " • ")
+        }
+
+        let threePuttCount = match.records.reduce(0) { total, record in
+            total + record.playerResults.filter { $0.playerId == player.id && $0.flags.threePutts }.count
+        }
+        if threePuttCount > 0 {
+            summaries.append("\(threePuttCount) 3-putt\(threePuttCount == 1 ? "" : "s")")
+        }
+
+        return summaries.isEmpty ? "—" : summaries.joined(separator: " • ")
     }
 }
 
@@ -530,8 +525,7 @@ private func balanceLabel(_ amount: Int) -> String {
 }
 
 private func teamDeltaLabel(_ amount: Int) -> String {
-    if amount == 0 { return "$0" }
-    return amount > 0 ? "Red +$\(amount)" : "Blue +$\(abs(amount))"
+    balanceLabel(amount)
 }
 
 private func signedMoney(_ amount: Int) -> String {
@@ -540,6 +534,5 @@ private func signedMoney(_ amount: Int) -> String {
 }
 
 private func moneyLabel(_ amount: Int) -> String {
-    if amount == 0 { return "$0" }
-    return amount > 0 ? "+$\(amount)" : "-$\(abs(amount))"
+    signedMoney(amount)
 }

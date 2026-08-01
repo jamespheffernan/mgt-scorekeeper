@@ -207,12 +207,32 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertEqual(analytics.biggestSwings.map(\.delta), [-6, 6, 3])
 
         let values = Dictionary(uniqueKeysWithValues: analytics.playerValues.map { ($0.name, $0) })
-        XCTAssertEqual(values["Red One"]?.value, 2)
+        XCTAssertEqual(values["Red One"]?.partnerMargin, 2)
         XCTAssertEqual(values["Red One"]?.countingHoles, 2)
         XCTAssertEqual(values["Red One"]?.biggestGapHoles, [1])
-        XCTAssertEqual(values["Red Two"]?.value, 2)
-        XCTAssertEqual(values["Blue One"]?.value, 2)
-        XCTAssertEqual(values["Blue Two"]?.value, 1)
+        XCTAssertEqual(values["Red Two"]?.partnerMargin, 2)
+        XCTAssertEqual(values["Blue One"]?.partnerMargin, 2)
+        XCTAssertEqual(values["Blue Two"]?.partnerMargin, 1)
+    }
+
+    func testSettlementAnalyticsDoNotInventMostValuablePlayerWhenPartnersAlwaysTie() {
+        var match = makeMatch(indexes: [0, 0, 0, 0], bigGame: true)
+        match.records = [
+            record(
+                hole: 1,
+                nets: [4, 4, 4, 4],
+                winner: .push,
+                sideDelta: 0,
+                junkDelta: 0,
+                balanceAfter: 0
+            ),
+        ]
+
+        let analytics = ScoringEngine.settlementAnalytics(for: match)
+
+        XCTAssertNil(analytics.mostValuable)
+        XCTAssertTrue(analytics.playerValues.allSatisfy { $0.partnerMargin == 0 })
+        XCTAssertTrue(analytics.playerValues.allSatisfy { $0.countingHoles == 1 })
     }
 
     @MainActor

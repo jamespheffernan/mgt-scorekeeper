@@ -53,7 +53,7 @@ struct PlayerValue: Identifiable, Equatable {
     let playerId: UUID
     let name: String
     let team: Team
-    let value: Int
+    let partnerMargin: Int
     let countingHoles: Int
     let biggestGapHoles: [Int]
 
@@ -65,7 +65,7 @@ struct SettlementAnalytics: Equatable {
     let biggestSwings: [SettlementSwing]
     let playerValues: [PlayerValue]
 
-    var mostValuable: PlayerValue? { playerValues.first }
+    var mostValuable: PlayerValue? { playerValues.first(where: { $0.partnerMargin > 0 }) }
 }
 
 enum ScoringEngine {
@@ -112,7 +112,7 @@ enum ScoringEngine {
 
         struct MutablePlayerValue {
             let player: Player
-            var value = 0
+            var partnerMargin = 0
             var countingHoles = 0
             var gaps: [(hole: Int, margin: Int)] = []
         }
@@ -137,7 +137,7 @@ enum ScoringEngine {
 
                 let margin = max(0, partner.net - counting.net)
                 guard margin > 0 else { continue }
-                values[counting.playerId]?.value += margin
+                values[counting.playerId]?.partnerMargin += margin
                 values[counting.playerId]?.gaps.append((record.hole, margin))
             }
         }
@@ -149,7 +149,7 @@ enum ScoringEngine {
                     playerId: value.player.id,
                     name: value.player.name,
                     team: value.player.team,
-                    value: value.value,
+                    partnerMargin: value.partnerMargin,
                     countingHoles: value.countingHoles,
                     biggestGapHoles: value.gaps
                         .sorted { lhs, rhs in
@@ -161,7 +161,7 @@ enum ScoringEngine {
                 )
             }
             .sorted { lhs, rhs in
-                if lhs.value != rhs.value { return lhs.value > rhs.value }
+                if lhs.partnerMargin != rhs.partnerMargin { return lhs.partnerMargin > rhs.partnerMargin }
                 if lhs.countingHoles != rhs.countingHoles { return lhs.countingHoles > rhs.countingHoles }
                 return playerOrder[lhs.playerId, default: 0] < playerOrder[rhs.playerId, default: 0]
             }
