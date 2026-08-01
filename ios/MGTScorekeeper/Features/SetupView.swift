@@ -69,6 +69,17 @@ struct SetupView: View {
                         .disabled(!hasValidTeams)
                         .padding(.horizontal, 12)
 
+                        if !store.history.isEmpty {
+                            NavigationLink {
+                                MatchHistoryView(matches: store.history)
+                            } label: {
+                                Label("Past rounds (\(store.history.count))", systemImage: "clock.arrow.circlepath")
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(MGTTheme.brand)
+                        }
+
                         Text("Use exactly two Red players and two Blue players. Handicap strokes are allocated from the low index in the foursome.")
                             .font(.caption)
                             .foregroundStyle(MGTTheme.muted)

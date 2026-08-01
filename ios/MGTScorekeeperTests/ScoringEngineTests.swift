@@ -170,6 +170,84 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertEqual(match.teamBalance, -10)
     }
 
+    func testSettlementAnalyticsDeriveMovementSwingsAndPartnerValueFromSavedRecords() {
+        var match = makeMatch(indexes: [0, 0, 0, 0])
+        match.records = [
+            record(
+                hole: 1,
+                nets: [4, 6, 6, 5],
+                winner: .red,
+                sideDelta: 2,
+                junkDelta: 1,
+                balanceAfter: 3
+            ),
+            record(
+                hole: 2,
+                nets: [3, 2, 3, 3],
+                winner: .blue,
+                sideDelta: -4,
+                junkDelta: -2,
+                balanceAfter: -3
+            ),
+            record(
+                hole: 3,
+                nets: [6, 5, 4, 6],
+                winner: .red,
+                sideDelta: 4,
+                junkDelta: 2,
+                balanceAfter: 3
+            ),
+        ]
+        match.teamBalance = 3
+
+        let analytics = ScoringEngine.settlementAnalytics(for: match)
+
+        XCTAssertEqual(analytics.moneyMovement.map(\.balance), [3, -3, 3])
+        XCTAssertEqual(analytics.biggestSwings.map(\.hole), [2, 3, 1])
+        XCTAssertEqual(analytics.biggestSwings.map(\.delta), [-6, 6, 3])
+
+        let values = Dictionary(uniqueKeysWithValues: analytics.playerValues.map { ($0.name, $0) })
+        XCTAssertEqual(values["Red One"]?.value, 2)
+        XCTAssertEqual(values["Red One"]?.countingHoles, 2)
+        XCTAssertEqual(values["Red One"]?.biggestGapHoles, [1])
+        XCTAssertEqual(values["Red Two"]?.value, 2)
+        XCTAssertEqual(values["Blue One"]?.value, 2)
+        XCTAssertEqual(values["Blue Two"]?.value, 1)
+    }
+
+    @MainActor
+    func testStoreLoadsLegacyActiveMatchAndArchivesItBeforeNewRound() throws {
+        let suiteName = "MGTScorekeeperTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        var completed = makeMatch(indexes: [0, 0, 0, 0])
+        completed.records = (1...Rulebook.holeCount).map {
+            record(
+                hole: $0,
+                nets: [4, 5, 5, 6],
+                winner: .red,
+                sideDelta: 2,
+                junkDelta: 0,
+                balanceAfter: $0 * 2
+            )
+        }
+        completed.teamBalance = 36
+        defaults.set(try JSONEncoder().encode(completed), forKey: ScorekeeperStore.activeMatchKey)
+
+        let store = ScorekeeperStore(defaults: defaults)
+        XCTAssertEqual(store.match?.id, completed.id, "The TestFlight-era active match must still decode")
+
+        store.archiveAndReset()
+
+        XCTAssertNil(store.match)
+        XCTAssertEqual(store.history.map(\.id), [completed.id])
+
+        let relaunchedStore = ScorekeeperStore(defaults: defaults)
+        XCTAssertNil(relaunchedStore.match)
+        XCTAssertEqual(relaunchedStore.history.map(\.id), [completed.id])
+    }
+
     private func makePlayers(indexes: [Double]) -> [Player] {
         [
             Player(id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!, name: "Red One", handicapIndex: indexes[0], team: .red, tee: .blueGreen),
@@ -187,5 +265,49 @@ final class ScoringEngineTests: XCTestCase {
         zip(players, gross).map { player, score in
             HoleEntry(playerId: player.id, gross: score)
         }
+    }
+
+    private func record(
+        hole: Int,
+        nets: [Int],
+        winner: HoleWinner,
+        sideDelta: Int,
+        junkDelta: Int,
+        balanceAfter: Int
+    ) -> HoleRecord {
+        let players = makePlayers(indexes: [0, 0, 0, 0])
+        let results = zip(players, nets).map { player, net in
+            PlayerHoleResult(
+                playerId: player.id,
+                playerName: player.name,
+                team: player.team,
+                gross: net,
+                strokes: 0,
+                net: net,
+                par: 4,
+                pickedUp: false,
+                flags: JunkFlags()
+            )
+        }
+
+        return HoleRecord(
+            hole: hole,
+            base: 2,
+            carryIn: 0,
+            carryOut: 0,
+            doublesInEffect: 0,
+            winner: winner,
+            sidePayout: abs(sideDelta),
+            sideDelta: sideDelta,
+            junkEvents: [],
+            junkDelta: junkDelta,
+            greenieCarryIn: 0,
+            greenieCarryOut: 0,
+            doubleWasCalled: false,
+            ld10Accepted: false,
+            playerResults: results,
+            bigGame: nil,
+            teamBalanceAfter: balanceAfter
+        )
     }
 }

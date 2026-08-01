@@ -26,7 +26,153 @@ enum ScoringError: LocalizedError, Equatable {
     }
 }
 
+struct MoneyMovementPoint: Identifiable, Equatable {
+    let hole: Int
+    let balance: Int
+    let delta: Int
+    let winner: HoleWinner
+
+    var id: Int { hole }
+}
+
+struct SettlementSwing: Identifiable, Equatable {
+    let hole: Int
+    let delta: Int
+    let winner: HoleWinner
+    let sideDelta: Int
+    let junkDelta: Int
+    let carryIn: Int
+    let doubleWasCalled: Bool
+    let countingPlayerName: String?
+    let countingNet: Int?
+
+    var id: Int { hole }
+}
+
+struct PlayerValue: Identifiable, Equatable {
+    let playerId: UUID
+    let name: String
+    let team: Team
+    let value: Int
+    let countingHoles: Int
+    let biggestGapHoles: [Int]
+
+    var id: UUID { playerId }
+}
+
+struct SettlementAnalytics: Equatable {
+    let moneyMovement: [MoneyMovementPoint]
+    let biggestSwings: [SettlementSwing]
+    let playerValues: [PlayerValue]
+
+    var mostValuable: PlayerValue? { playerValues.first }
+}
+
 enum ScoringEngine {
+    static func settlementAnalytics(for match: MatchState) -> SettlementAnalytics {
+        var previousBalance = 0
+        let movement = match.records.map { record in
+            let point = MoneyMovementPoint(
+                hole: record.hole,
+                balance: record.teamBalanceAfter,
+                delta: record.teamBalanceAfter - previousBalance,
+                winner: record.winner
+            )
+            previousBalance = record.teamBalanceAfter
+            return point
+        }
+
+        let swings = zip(match.records, movement)
+            .map { record, point in
+                let countingResult = record.winner.team.flatMap { winningTeam in
+                    record.playerResults
+                        .filter { $0.team == winningTeam }
+                        .min { lhs, rhs in
+                            if lhs.net != rhs.net { return lhs.net < rhs.net }
+                            return lhs.playerName < rhs.playerName
+                        }
+                }
+                return SettlementSwing(
+                    hole: record.hole,
+                    delta: point.delta,
+                    winner: record.winner,
+                    sideDelta: record.sideDelta,
+                    junkDelta: record.junkDelta,
+                    carryIn: record.carryIn,
+                    doubleWasCalled: record.doubleWasCalled,
+                    countingPlayerName: countingResult?.playerName,
+                    countingNet: countingResult?.net
+                )
+            }
+            .filter { $0.delta != 0 }
+            .sorted { lhs, rhs in
+                if abs(lhs.delta) != abs(rhs.delta) { return abs(lhs.delta) > abs(rhs.delta) }
+                return lhs.hole < rhs.hole
+            }
+
+        struct MutablePlayerValue {
+            let player: Player
+            var value = 0
+            var countingHoles = 0
+            var gaps: [(hole: Int, margin: Int)] = []
+        }
+
+        var values = Dictionary(
+            uniqueKeysWithValues: match.players.map { ($0.id, MutablePlayerValue(player: $0)) }
+        )
+
+        for record in match.records {
+            for team in Team.allCases {
+                let teammates = record.playerResults.filter { $0.team == team }
+                guard teammates.count == 2, let bestNet = teammates.map(\.net).min() else { continue }
+
+                let countingResults = teammates.filter { $0.net == bestNet }
+                for result in countingResults {
+                    values[result.playerId]?.countingHoles += 1
+                }
+
+                guard countingResults.count == 1,
+                      let counting = countingResults.first,
+                      let partner = teammates.first(where: { $0.playerId != counting.playerId }) else { continue }
+
+                let margin = max(0, partner.net - counting.net)
+                guard margin > 0 else { continue }
+                values[counting.playerId]?.value += margin
+                values[counting.playerId]?.gaps.append((record.hole, margin))
+            }
+        }
+
+        let playerOrder = Dictionary(uniqueKeysWithValues: match.players.enumerated().map { ($0.element.id, $0.offset) })
+        let playerValues = values.values
+            .map { value in
+                PlayerValue(
+                    playerId: value.player.id,
+                    name: value.player.name,
+                    team: value.player.team,
+                    value: value.value,
+                    countingHoles: value.countingHoles,
+                    biggestGapHoles: value.gaps
+                        .sorted { lhs, rhs in
+                            if lhs.margin != rhs.margin { return lhs.margin > rhs.margin }
+                            return lhs.hole < rhs.hole
+                        }
+                        .prefix(2)
+                        .map(\.hole)
+                )
+            }
+            .sorted { lhs, rhs in
+                if lhs.value != rhs.value { return lhs.value > rhs.value }
+                if lhs.countingHoles != rhs.countingHoles { return lhs.countingHoles > rhs.countingHoles }
+                return playerOrder[lhs.playerId, default: 0] < playerOrder[rhs.playerId, default: 0]
+            }
+
+        return SettlementAnalytics(
+            moneyMovement: movement,
+            biggestSwings: Array(swings.prefix(3)),
+            playerValues: playerValues
+        )
+    }
+
     static func validatePlayers(_ players: [Player]) throws {
         guard players.count == 4 else { throw ScoringError.fourPlayersRequired }
         guard players.filter({ $0.team == .red }).count == 2,

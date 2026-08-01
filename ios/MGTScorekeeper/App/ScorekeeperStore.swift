@@ -3,16 +3,28 @@ import Foundation
 @MainActor
 final class ScorekeeperStore: ObservableObject {
     @Published var match: MatchState? {
-        didSet { save() }
+        didSet { saveActiveMatch() }
     }
+    @Published private(set) var history: [MatchState]
     @Published var alertMessage: String?
     @Published var feedbackMessage: String?
 
     let course = Course.millbrook
-    private let persistenceKey = "mgt-scorekeeper.active-match"
+    static let activeMatchKey = "mgt-scorekeeper.active-match"
+    static let historyKey = "mgt-scorekeeper.match-history"
+    private let defaults: UserDefaults
 
-    init() {
-        match = Self.loadSavedMatch(key: persistenceKey)
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        match = Self.loadSavedMatch(defaults: defaults, key: Self.activeMatchKey)
+        history = Self.loadHistory(defaults: defaults, key: Self.historyKey)
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-settlement-preview") {
+            match = Self.makeSettlementPreviewMatch(course: course)
+            history = []
+        }
+        #endif
     }
 
     func start(players: [Player], bigGameEnabled: Bool) {
@@ -102,20 +114,41 @@ final class ScorekeeperStore: ObservableObject {
     }
 
     func reset() {
+        if match?.isComplete == true {
+            archiveAndReset()
+            return
+        }
         match = nil
-        UserDefaults.standard.removeObject(forKey: persistenceKey)
     }
 
-    func save() {
+    func archiveAndReset() {
+        guard let current = match else { return }
+        if !current.records.isEmpty {
+            history.removeAll { $0.id == current.id }
+            history.insert(current, at: 0)
+            saveHistory()
+        }
+        match = nil
+    }
+
+    private func saveActiveMatch() {
         guard let match else {
-            UserDefaults.standard.removeObject(forKey: persistenceKey)
+            defaults.removeObject(forKey: Self.activeMatchKey)
             return
         }
         do {
             let data = try JSONEncoder().encode(match)
-            UserDefaults.standard.set(data, forKey: persistenceKey)
+            defaults.set(data, forKey: Self.activeMatchKey)
         } catch {
             alertMessage = "Could not save match: \(error.localizedDescription)"
+        }
+    }
+
+    private func saveHistory() {
+        do {
+            defaults.set(try JSONEncoder().encode(history), forKey: Self.historyKey)
+        } catch {
+            alertMessage = "Could not save match history: \(error.localizedDescription)"
         }
     }
 
@@ -128,8 +161,55 @@ final class ScorekeeperStore: ObservableObject {
         ]
     }
 
-    private static func loadSavedMatch(key: String) -> MatchState? {
-        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+    private static func loadSavedMatch(defaults: UserDefaults, key: String) -> MatchState? {
+        guard let data = defaults.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(MatchState.self, from: data)
     }
+
+    private static func loadHistory(defaults: UserDefaults, key: String) -> [MatchState] {
+        guard let data = defaults.data(forKey: key) else { return [] }
+        return (try? JSONDecoder().decode([MatchState].self, from: data)) ?? []
+    }
+
+    #if DEBUG
+    private static func makeSettlementPreviewMatch(course: Course) -> MatchState {
+        let players = [
+            Player(name: "James Heffernan", handicapIndex: 6, team: .red, tee: .blueGreen),
+            Player(name: "Doug Reilly", handicapIndex: 10, team: .blue, tee: .blueGreen),
+            Player(name: "Pat Mahoney", handicapIndex: 12, team: .red, tee: .greenSilver),
+            Player(name: "Mike Lin", handicapIndex: 15, team: .blue, tee: .greenSilver),
+        ]
+        var preview = MatchState.new(players: players, bigGameEnabled: true, course: course)
+        let scoreOffsets = [
+            [-1, 1, 1, 0],
+            [0, -1, 1, 1],
+            [1, 0, -1, 1],
+            [0, 1, 0, -1],
+            [-1, 0, 1, 0],
+            [1, 1, 0, 0],
+        ]
+
+        for hole in 1...Rulebook.holeCount {
+            let offsets = scoreOffsets[(hole - 1) % scoreOffsets.count]
+            preview.pendingEntries = zip(preview.players, offsets).map { player, offset in
+                let par = course.hole(hole).teeBox(for: player.tee).par
+                var flags = JunkFlags()
+                if (hole == 4 || hole == 13), player.team == .red {
+                    flags.hadBunkerShot = true
+                }
+                if Rulebook.parThreeGreenieHoles.contains(hole), player.name == "Doug Reilly" {
+                    flags.onGreenFromTee = true
+                }
+                return HoleEntry(playerId: player.id, gross: max(2, par + offset), flags: flags)
+            }
+            if hole == 12 {
+                preview.doubles += 1
+                preview.doubleUsedThisHole = true
+            }
+            _ = try? ScoringEngine.scoreCurrentHole(match: &preview, course: course)
+        }
+
+        return preview
+    }
+    #endif
 }
