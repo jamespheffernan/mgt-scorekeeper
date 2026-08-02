@@ -274,6 +274,49 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertEqual(blueMovement.matchDelta, -12)
     }
 
+    func testSidePayoutBreakdownExposesRecordedWinAndPushArithmetic() {
+        var win = record(
+            hole: 8,
+            nets: [3, 5, 4, 6],
+            winner: .red,
+            sideDelta: 7,
+            junkDelta: 0,
+            balanceAfter: 7
+        )
+        win.base = 2
+        win.carryIn = 3
+        win.sidePayout = 7
+
+        XCTAssertEqual(
+            win.sidePayoutBreakdown,
+            SidePayoutBreakdown(
+                outcome: .win,
+                carryIn: 3,
+                base: 2,
+                winBonus: 2,
+                payout: 7,
+                carryOut: 0
+            )
+        )
+
+        var push = win
+        push.winner = .push
+        push.sidePayout = 0
+        push.carryOut = 5
+
+        XCTAssertEqual(
+            push.sidePayoutBreakdown,
+            SidePayoutBreakdown(
+                outcome: .push,
+                carryIn: 3,
+                base: 2,
+                winBonus: 0,
+                payout: 0,
+                carryOut: 5
+            )
+        )
+    }
+
     @MainActor
     func testStoreLoadsLegacyActiveMatchAndArchivesItBeforeNewRound() throws {
         let suiteName = "MGTScorekeeperTests.\(UUID().uuidString)"

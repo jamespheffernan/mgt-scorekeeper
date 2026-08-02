@@ -100,8 +100,8 @@ private struct LedgerHoleCard: View {
 
             HStack(spacing: 6) {
                 MiniLedgerPill(title: "Base", value: "$\(record.base)")
-                MiniLedgerPill(title: "Side", value: signedMoney(record.sideDelta))
-                MiniLedgerPill(title: "Junk", value: signedMoney(record.junkDelta))
+                MiniLedgerPill(title: "Side", value: ledgerAmount(record.sideDelta))
+                MiniLedgerPill(title: "Junk", value: ledgerAmount(record.junkDelta))
                 MiniLedgerPill(title: "Carry", value: "$\(record.carryOut)")
             }
 
@@ -218,16 +218,12 @@ private struct LedgerHoleCard: View {
         return amount > 0 ? "Red +$\(amount)" : "Blue +$\(abs(amount))"
     }
 
-    private func signedMoney(_ amount: Int) -> String {
-        if amount == 0 { return "$0" }
-        return amount > 0 ? "+$\(amount)" : "-$\(abs(amount))"
-    }
-
     private var sideCalculation: String {
-        if record.winner == .push {
-            return "Side push: $\(record.carryIn) carry + $\(record.base) base = $\(record.carryOut) carried"
+        let breakdown = record.sidePayoutBreakdown
+        if breakdown.outcome == .push {
+            return "Side push: $\(breakdown.carryIn) carry + $\(breakdown.base) base = $\(breakdown.carryOut) carried"
         }
-        return "Side win: $\(record.carryIn) carry + $\(record.base) base + $\(record.base) win bonus = $\(record.sidePayout)"
+        return "Side win: $\(breakdown.carryIn) carry + $\(breakdown.base) base + $\(breakdown.winBonus) win bonus = $\(breakdown.payout)"
     }
 
     private var runningCalculation: String {

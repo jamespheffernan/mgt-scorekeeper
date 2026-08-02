@@ -117,6 +117,20 @@ struct BigGameRow: Identifiable, Codable, Equatable {
     var id: Int { hole }
 }
 
+struct SidePayoutBreakdown: Equatable {
+    enum Outcome: Equatable {
+        case win
+        case push
+    }
+
+    let outcome: Outcome
+    let carryIn: Int
+    let base: Int
+    let winBonus: Int
+    let payout: Int
+    let carryOut: Int
+}
+
 struct HoleRecord: Identifiable, Codable, Equatable {
     var hole: Int
     var base: Int
@@ -140,6 +154,17 @@ struct HoleRecord: Identifiable, Codable, Equatable {
 
     var matchDelta: Int {
         sideDelta + junkDelta
+    }
+
+    var sidePayoutBreakdown: SidePayoutBreakdown {
+        SidePayoutBreakdown(
+            outcome: winner == .push ? .push : .win,
+            carryIn: carryIn,
+            base: base,
+            winBonus: winner == .push ? 0 : base,
+            payout: sidePayout,
+            carryOut: carryOut
+        )
     }
 }
 
