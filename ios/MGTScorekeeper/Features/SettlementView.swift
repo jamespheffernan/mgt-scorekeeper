@@ -312,11 +312,11 @@ private struct ChartLegendDouble: View {
 private struct DoubleMarkerBadge: View {
     var body: some View {
         Text("2×")
-            .font(.system(size: 9, weight: .bold, design: .rounded))
+            .font(.system(size: 7, weight: .bold, design: .rounded))
             .foregroundStyle(.white)
-            .frame(width: 22, height: 16)
-            .background(MGTTheme.ink, in: Capsule())
-            .overlay(Capsule().stroke(.white, lineWidth: 1))
+            .frame(width: 14, height: 14)
+            .background(MGTTheme.ink, in: Circle())
+            .overlay(Circle().stroke(.white, lineWidth: 1))
     }
 }
 
