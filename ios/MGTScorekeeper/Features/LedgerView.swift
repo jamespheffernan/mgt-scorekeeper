@@ -138,31 +138,59 @@ private struct LedgerHoleCard: View {
             if isExpanded {
                 Divider()
 
-                VStack(spacing: 7) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("PLAYER CALCULATIONS")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(MGTTheme.muted)
+
                     ForEach(record.playerResults) { result in
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(result.team == .red ? MGTTheme.red : MGTTheme.blue)
-                                .frame(width: 8, height: 8)
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(result.team == .red ? MGTTheme.red : MGTTheme.blue)
+                                    .frame(width: 8, height: 8)
 
-                            Text(result.playerName)
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(MGTTheme.ink)
-                                .lineLimit(1)
+                                Text(result.playerName)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(MGTTheme.ink)
+                                    .lineLimit(1)
 
-                            Spacer(minLength: 8)
+                                Spacer(minLength: 8)
 
-                            Text("\(result.gross)")
-                                .font(.headline.weight(.bold).monospacedDigit())
-                                .foregroundStyle(MGTTheme.ink)
+                                Text("Gross \(result.gross)")
+                                    .font(.subheadline.weight(.bold).monospacedDigit())
+                                    .foregroundStyle(MGTTheme.ink)
+                            }
 
-                            Text(scoreDetail(result))
+                            Text(scoreCalculation(result))
                                 .font(.caption.monospacedDigit())
                                 .foregroundStyle(MGTTheme.muted)
+
+                            if let junk = junkCalculation(for: result) {
+                                Text(junk)
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(junkColor(for: result))
+                            }
                         }
                         .accessibilityElement(children: .combine)
                     }
                 }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("HOLE CALCULATION")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(MGTTheme.muted)
+
+                    Text(sideCalculation)
+                    Text("Side \(ledgerAmount(record.sideDelta)) + Junk \(ledgerAmount(record.junkDelta)) = Hole \(ledgerAmount(record.matchDelta))")
+                    Text(runningCalculation)
+                }
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(MGTTheme.ink)
+                .padding(9)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(MGTTheme.page, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                .accessibilityElement(children: .combine)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
@@ -195,12 +223,46 @@ private struct LedgerHoleCard: View {
         return amount > 0 ? "+$\(amount)" : "-$\(abs(amount))"
     }
 
-    private func scoreDetail(_ result: PlayerHoleResult) -> String {
-        var details = result.pickedUp ? ["Pickup", "Net \(result.net)"] : ["Net \(result.net)"]
-        if result.strokes > 0 {
-            details.append("\(result.strokes) stroke\(result.strokes == 1 ? "" : "s")")
+    private var sideCalculation: String {
+        if record.winner == .push {
+            return "Side push: $\(record.carryIn) carry + $\(record.base) base = $\(record.carryOut) carried"
         }
-        return details.joined(separator: " • ")
+        return "Side win: $\(record.carryIn) carry + $\(record.base) base + $\(record.base) win bonus = $\(record.sidePayout)"
+    }
+
+    private var runningCalculation: String {
+        let before = record.teamBalanceAfter - record.matchDelta
+        let operation = record.matchDelta < 0 ? "−" : "+"
+        return "Running: \(ledgerAmount(before)) \(operation) $\(abs(record.matchDelta)) = \(ledgerAmount(record.teamBalanceAfter))"
+    }
+
+    private func scoreCalculation(_ result: PlayerHoleResult) -> String {
+        let calculation: String
+        if result.strokes == 0 {
+            calculation = "Gross \(result.gross) = Net \(result.net)"
+        } else {
+            calculation = "Gross \(result.gross) − \(result.strokes) stroke\(result.strokes == 1 ? "" : "s") = Net \(result.net)"
+        }
+        return result.pickedUp ? "Pickup • \(calculation)" : calculation
+    }
+
+    private func junkCalculation(for result: PlayerHoleResult) -> String? {
+        let events = record.junkEvents.filter { $0.playerId == result.playerId }
+        guard !events.isEmpty else { return nil }
+        return events.map {
+            "\($0.type.rawValue) junk \(ledgerAmount($0.deltaForPlayersTeam))"
+        }.joined(separator: " • ")
+    }
+
+    private func junkColor(for result: PlayerHoleResult) -> Color {
+        record.junkEvents.contains {
+            $0.playerId == result.playerId && $0.deltaForPlayersTeam < 0
+        } ? MGTTheme.red : MGTTheme.success
+    }
+
+    private func ledgerAmount(_ amount: Int) -> String {
+        if amount == 0 { return "$0" }
+        return amount > 0 ? "+$\(amount)" : "−$\(abs(amount))"
     }
 }
 
