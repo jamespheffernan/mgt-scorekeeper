@@ -140,20 +140,18 @@ private struct ScoreHeader: View {
     var body: some View {
         MGTCard(spacing: 8, horizontalPadding: 12, verticalPadding: 10) {
             HStack(alignment: .center, spacing: 10) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Hole \(match.currentHole)")
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(MGTTheme.ink)
-                    Text("Base $\(base) • Carry $\(match.carry) • \(balanceLabel(match.teamBalance))")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(MGTTheme.muted)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.78)
-                }
+                Text("Hole \(match.currentHole)")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(MGTTheme.ink)
 
                 Spacer(minLength: 8)
 
-                BigGameBadge(value: match.bigGameTotal.map { "BG \($0)" } ?? "Side")
+                Text(balanceLabel(match.teamBalance))
+                    .font(.title3.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(balanceColor)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .accessibilityLabel("Match score, \(balanceLabel(match.teamBalance))")
 
                 HStack(spacing: 6) {
                     if !match.records.isEmpty {
@@ -170,6 +168,17 @@ private struct ScoreHeader: View {
                     }
                     .accessibilityLabel("Reset round")
                 }
+            }
+
+            HStack(spacing: 8) {
+                Text("Base $\(base) • Carry $\(match.carry)")
+                    .font(.caption.weight(.medium).monospacedDigit())
+                    .foregroundStyle(MGTTheme.muted)
+                    .lineLimit(1)
+
+                Spacer(minLength: 8)
+
+                BigGameBadge(value: match.bigGameTotal.map { "BG \($0)" } ?? "Side")
             }
 
             if match.records.last != nil || !doubleTeams.isEmpty || match.currentHole == 17 {
@@ -216,6 +225,11 @@ private struct ScoreHeader: View {
     private func balanceLabel(_ amount: Int) -> String {
         if amount == 0 { return "$0" }
         return amount > 0 ? "Red +$\(amount)" : "Blue +$\(abs(amount))"
+    }
+
+    private var balanceColor: Color {
+        if match.teamBalance == 0 { return MGTTheme.brand }
+        return match.teamBalance > 0 ? MGTTheme.red : MGTTheme.blue
     }
 }
 

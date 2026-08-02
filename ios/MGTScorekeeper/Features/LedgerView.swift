@@ -56,7 +56,7 @@ private struct LedgerHoleCard: View {
 
                 Text(resultLabel)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(winnerColor)
+                    .foregroundStyle(movementColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.78)
 
@@ -109,20 +109,15 @@ private struct LedgerHoleCard: View {
     }
 
     private var resultLabel: String {
-        switch record.winner {
-        case .red, .blue:
-            "\(record.winner.rawValue) \(signedMoney(abs(record.sidePayout)))"
-        case .push:
-            "Push"
-        }
+        if record.matchDelta == 0 { return "No change" }
+        return record.matchDelta > 0
+            ? "Red +$\(record.matchDelta)"
+            : "Blue +$\(abs(record.matchDelta))"
     }
 
-    private var winnerColor: Color {
-        switch record.winner {
-        case .red: MGTTheme.red
-        case .blue: MGTTheme.blue
-        case .push: MGTTheme.muted
-        }
+    private var movementColor: Color {
+        if record.matchDelta == 0 { return MGTTheme.muted }
+        return record.matchDelta > 0 ? MGTTheme.red : MGTTheme.blue
     }
 
     private var totalColor: Color {

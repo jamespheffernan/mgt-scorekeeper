@@ -235,6 +235,28 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertTrue(analytics.playerValues.allSatisfy { $0.countingHoles == 1 })
     }
 
+    func testHoleMatchMovementIncludesSideAndJunk() {
+        let redMovement = record(
+            hole: 14,
+            nets: [3, 5, 4, 6],
+            winner: .red,
+            sideDelta: 8,
+            junkDelta: 4,
+            balanceAfter: 27
+        )
+        let blueMovement = record(
+            hole: 15,
+            nets: [5, 3, 6, 4],
+            winner: .blue,
+            sideDelta: -8,
+            junkDelta: -4,
+            balanceAfter: 15
+        )
+
+        XCTAssertEqual(redMovement.matchDelta, 12)
+        XCTAssertEqual(blueMovement.matchDelta, -12)
+    }
+
     @MainActor
     func testStoreLoadsLegacyActiveMatchAndArchivesItBeforeNewRound() throws {
         let suiteName = "MGTScorekeeperTests.\(UUID().uuidString)"

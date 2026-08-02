@@ -137,6 +137,10 @@ struct HoleRecord: Identifiable, Codable, Equatable {
     var teamBalanceAfter: Int
 
     var id: Int { hole }
+
+    var matchDelta: Int {
+        sideDelta + junkDelta
+    }
 }
 
 struct MatchState: Codable, Equatable {
