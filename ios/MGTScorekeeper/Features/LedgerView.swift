@@ -152,7 +152,7 @@ private struct LedgerHoleCard: View {
 
                             Spacer(minLength: 8)
 
-                            Text(result.pickedUp ? "Pickup" : "\(result.gross)")
+                            Text("\(result.gross)")
                                 .font(.headline.weight(.bold).monospacedDigit())
                                 .foregroundStyle(MGTTheme.ink)
 
@@ -196,8 +196,11 @@ private struct LedgerHoleCard: View {
     }
 
     private func scoreDetail(_ result: PlayerHoleResult) -> String {
-        if result.strokes == 0 { return "Net \(result.net)" }
-        return "Net \(result.net) • \(result.strokes) stroke\(result.strokes == 1 ? "" : "s")"
+        var details = result.pickedUp ? ["Pickup", "Net \(result.net)"] : ["Net \(result.net)"]
+        if result.strokes > 0 {
+            details.append("\(result.strokes) stroke\(result.strokes == 1 ? "" : "s")")
+        }
+        return details.joined(separator: " • ")
     }
 }
 
