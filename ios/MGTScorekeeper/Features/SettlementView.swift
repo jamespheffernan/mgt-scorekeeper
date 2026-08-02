@@ -210,6 +210,22 @@ private struct MoneyMovementChart: View {
                     )
                     .symbolSize(32)
                     .foregroundStyle(winnerColor(point.winner))
+
+                    if point.doubleWasCalled {
+                        PointMark(
+                            x: .value("Double hole", point.hole),
+                            y: .value("Balance at double", point.balance)
+                        )
+                        .symbol {
+                            Text("2×")
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 16)
+                                .background(MGTTheme.ink, in: Capsule())
+                                .overlay(Capsule().stroke(.white, lineWidth: 1))
+                        }
+                        .accessibilityLabel("Double called on hole \(point.hole)")
+                    }
                 }
             }
             .chartYScale(domain: yDomain)
@@ -236,11 +252,15 @@ private struct MoneyMovementChart: View {
             }
             .frame(height: 190)
             .accessibilityLabel("Money movement by hole")
+            .accessibilityValue(doubleAccessibilityValue)
 
             HStack(spacing: 14) {
                 ChartLegendDot(color: MGTTheme.red, label: "Red won")
                 ChartLegendDot(color: MGTTheme.blue, label: "Blue won")
                 ChartLegendDot(color: MGTTheme.line, label: "Push")
+                if points.contains(where: \.doubleWasCalled) {
+                    ChartLegendDouble()
+                }
             }
         }
     }
@@ -257,6 +277,12 @@ private struct MoneyMovementChart: View {
         guard let finalHole = points.last?.hole else { return [] }
         return Array(Set([1, min(9, finalHole), finalHole])).sorted()
     }
+
+    private var doubleAccessibilityValue: String {
+        let holes = points.filter(\.doubleWasCalled).map { "\($0.hole)" }
+        guard !holes.isEmpty else { return "No doubles called" }
+        return "Doubles called on holes \(holes.joined(separator: ", "))"
+    }
 }
 
 private struct ChartLegendDot: View {
@@ -268,6 +294,22 @@ private struct ChartLegendDot: View {
             Text(label)
         } icon: {
             Circle().fill(color).frame(width: 7, height: 7)
+        }
+        .font(.caption2.weight(.medium))
+        .foregroundStyle(MGTTheme.muted)
+    }
+}
+
+private struct ChartLegendDouble: View {
+    var body: some View {
+        Label {
+            Text("Double")
+        } icon: {
+            Text("2×")
+                .font(.system(size: 8, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(width: 19, height: 13)
+                .background(MGTTheme.ink, in: Capsule())
         }
         .font(.caption2.weight(.medium))
         .foregroundStyle(MGTTheme.muted)

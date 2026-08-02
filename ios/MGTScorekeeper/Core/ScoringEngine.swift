@@ -31,6 +31,7 @@ struct MoneyMovementPoint: Identifiable, Equatable {
     let balance: Int
     let delta: Int
     let winner: HoleWinner
+    let doubleWasCalled: Bool
 
     var id: Int { hole }
 }
@@ -121,7 +122,8 @@ enum ScoringEngine {
                 hole: record.hole,
                 balance: record.teamBalanceAfter,
                 delta: record.teamBalanceAfter - previousBalance,
-                winner: record.winner
+                winner: record.winner,
+                doubleWasCalled: record.doubleWasCalled
             )
             previousBalance = record.teamBalanceAfter
             return point
