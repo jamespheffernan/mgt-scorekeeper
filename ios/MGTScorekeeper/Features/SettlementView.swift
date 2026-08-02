@@ -216,13 +216,10 @@ private struct MoneyMovementChart: View {
                             x: .value("Double hole", point.hole),
                             y: .value("Balance at double", point.balance)
                         )
-                        .symbol {
-                            Text("2×")
-                                .font(.system(size: 9, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                                .frame(width: 22, height: 16)
-                                .background(MGTTheme.ink, in: Capsule())
-                                .overlay(Capsule().stroke(.white, lineWidth: 1))
+                        .foregroundStyle(.clear)
+                        .symbolSize(1)
+                        .annotation(position: .top, spacing: 3) {
+                            DoubleMarkerBadge()
                         }
                         .accessibilityLabel("Double called on hole \(point.hole)")
                     }
@@ -305,14 +302,21 @@ private struct ChartLegendDouble: View {
         Label {
             Text("Double")
         } icon: {
-            Text("2×")
-                .font(.system(size: 8, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(width: 19, height: 13)
-                .background(MGTTheme.ink, in: Capsule())
+            DoubleMarkerBadge()
         }
         .font(.caption2.weight(.medium))
         .foregroundStyle(MGTTheme.muted)
+    }
+}
+
+private struct DoubleMarkerBadge: View {
+    var body: some View {
+        Text("2×")
+            .font(.system(size: 9, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .frame(width: 22, height: 16)
+            .background(MGTTheme.ink, in: Capsule())
+            .overlay(Capsule().stroke(.white, lineWidth: 1))
     }
 }
 

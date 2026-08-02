@@ -215,13 +215,14 @@ final class ScoringEngineTests: XCTestCase {
                 balanceAfter: 3
             ),
         ]
+        match.records[0].doubleWasCalled = true
         match.records[1].doubleWasCalled = true
         match.teamBalance = 3
 
         let analytics = ScoringEngine.settlementAnalytics(for: match)
 
         XCTAssertEqual(analytics.moneyMovement.map(\.balance), [3, -3, 3])
-        XCTAssertEqual(analytics.moneyMovement.map(\.doubleWasCalled), [false, true, false])
+        XCTAssertEqual(analytics.moneyMovement.map(\.doubleWasCalled), [true, true, false])
         XCTAssertEqual(analytics.biggestSwings.map(\.hole), [2, 3, 1])
         XCTAssertEqual(analytics.biggestSwings.map(\.delta), [-6, 6, 3])
 
