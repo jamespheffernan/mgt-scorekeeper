@@ -256,6 +256,11 @@ private struct PlayerScoreEntryView: View {
                             .foregroundStyle(MGTTheme.ink)
                             .lineLimit(1)
                             .minimumScaleFactor(0.78)
+                            .layoutPriority(1)
+                        if strokes > 0 {
+                            HandicapStrokeDots(count: strokes)
+                                .offset(y: -5)
+                        }
                         TeamBadge(team: player.team)
                     }
 
@@ -337,6 +342,26 @@ private struct PlayerScoreEntryView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+private struct HandicapStrokeDots: View {
+    let count: Int
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(0..<count, id: \.self) { _ in
+                Circle()
+                    .fill(MGTTheme.brand)
+                    .frame(width: 8, height: 8)
+                    .overlay {
+                        Circle().stroke(.white, lineWidth: 1)
+                    }
+            }
+        }
+        .fixedSize()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(count) handicap stroke\(count == 1 ? "" : "s") on this hole")
     }
 }
 
