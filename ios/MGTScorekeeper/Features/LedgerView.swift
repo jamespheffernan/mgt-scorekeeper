@@ -157,7 +157,7 @@ private struct LedgerHoleCard: View {
 
                                 Spacer(minLength: 8)
 
-                                Text("Gross \(result.gross)")
+                                Text(scoreHeadline(result))
                                     .font(.subheadline.weight(.bold).monospacedDigit())
                                     .foregroundStyle(MGTTheme.ink)
                             }
@@ -233,13 +233,24 @@ private struct LedgerHoleCard: View {
     }
 
     private func scoreCalculation(_ result: PlayerHoleResult) -> String {
-        let calculation: String
-        if result.strokes == 0 {
-            calculation = "Gross \(result.gross) = Net \(result.net)"
-        } else {
-            calculation = "Gross \(result.gross) − \(result.strokes) stroke\(result.strokes == 1 ? "" : "s") = Net \(result.net)"
+        let breakdown = result.netScoreBreakdown
+        switch breakdown.method {
+        case .pickup(let par, let allowance):
+            return "Par \(par) + \(allowance) pickup allowance = Net \(breakdown.net)"
+        case .played(let gross, let strokes, let rawNet):
+            if strokes == 0 {
+                return "Gross \(gross) = Net \(breakdown.net)"
+            }
+            let subtraction = "Gross \(gross) − \(strokes) stroke\(strokes == 1 ? "" : "s")"
+            if rawNet != breakdown.net {
+                return "\(subtraction) = \(rawNet) → Net minimum \(breakdown.net)"
+            }
+            return "\(subtraction) = Net \(breakdown.net)"
         }
-        return result.pickedUp ? "Pickup • \(calculation)" : calculation
+    }
+
+    private func scoreHeadline(_ result: PlayerHoleResult) -> String {
+        result.pickedUp ? "Pickup • Net \(result.net)" : "Gross \(result.gross)"
     }
 
     private func junkCalculation(for result: PlayerHoleResult) -> String? {

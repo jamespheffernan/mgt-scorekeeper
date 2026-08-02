@@ -56,6 +56,16 @@ struct HoleEntry: Identifiable, Codable, Equatable {
     }
 }
 
+struct NetScoreBreakdown: Equatable {
+    enum Method: Equatable {
+        case played(gross: Int, strokes: Int, rawNet: Int)
+        case pickup(par: Int, allowance: Int)
+    }
+
+    let method: Method
+    let net: Int
+}
+
 struct PlayerHoleResult: Identifiable, Codable, Equatable {
     var playerId: UUID
     var playerName: String
@@ -68,6 +78,19 @@ struct PlayerHoleResult: Identifiable, Codable, Equatable {
     var flags: JunkFlags
 
     var id: UUID { playerId }
+
+    var netScoreBreakdown: NetScoreBreakdown {
+        if pickedUp {
+            return NetScoreBreakdown(
+                method: .pickup(par: par, allowance: net - par),
+                net: net
+            )
+        }
+        return NetScoreBreakdown(
+            method: .played(gross: gross, strokes: strokes, rawNet: gross - strokes),
+            net: net
+        )
+    }
 }
 
 enum HoleWinner: String, Codable, Equatable {

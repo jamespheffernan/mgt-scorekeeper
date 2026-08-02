@@ -317,6 +317,41 @@ final class ScoringEngineTests: XCTestCase {
         )
     }
 
+    func testNetScoreBreakdownExposesMinimumAndPickupArithmetic() {
+        let player = makePlayers(indexes: [0, 0, 0, 0])[0]
+        let minimumNet = PlayerHoleResult(
+            playerId: player.id,
+            playerName: player.name,
+            team: player.team,
+            gross: 1,
+            strokes: 1,
+            net: 1,
+            par: 4,
+            pickedUp: false,
+            flags: JunkFlags()
+        )
+        let pickup = PlayerHoleResult(
+            playerId: player.id,
+            playerName: player.name,
+            team: player.team,
+            gross: 8,
+            strokes: 1,
+            net: 7,
+            par: 5,
+            pickedUp: true,
+            flags: JunkFlags()
+        )
+
+        XCTAssertEqual(
+            minimumNet.netScoreBreakdown,
+            NetScoreBreakdown(method: .played(gross: 1, strokes: 1, rawNet: 0), net: 1)
+        )
+        XCTAssertEqual(
+            pickup.netScoreBreakdown,
+            NetScoreBreakdown(method: .pickup(par: 5, allowance: 2), net: 7)
+        )
+    }
+
     @MainActor
     func testStoreLoadsLegacyActiveMatchAndArchivesItBeforeNewRound() throws {
         let suiteName = "MGTScorekeeperTests.\(UUID().uuidString)"
