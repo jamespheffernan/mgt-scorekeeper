@@ -16,15 +16,24 @@ final class ScorekeeperStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        match = Self.loadSavedMatch(defaults: defaults, key: Self.activeMatchKey)
-        history = Self.loadHistory(defaults: defaults, key: Self.historyKey)
+        let savedMatch = Self.loadSavedMatch(defaults: defaults, key: Self.activeMatchKey)
+        let savedHistory = Self.loadHistory(defaults: defaults, key: Self.historyKey)
+        match = savedMatch.map { ScoringEngine.repairHoleSixPar(in: $0, course: .millbrook) }
+        history = savedHistory.map { ScoringEngine.repairHoleSixPar(in: $0, course: .millbrook) }
+        var shouldPersistRepairs = match != savedMatch || history != savedHistory
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-settlement-preview") {
             match = Self.makeSettlementPreviewMatch(course: course)
             history = []
+            shouldPersistRepairs = false
         }
         #endif
+
+        if shouldPersistRepairs {
+            saveActiveMatch()
+            saveHistory()
+        }
     }
 
     func start(players: [Player], bigGameEnabled: Bool) {

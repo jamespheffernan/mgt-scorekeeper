@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LedgerView: View {
     @EnvironmentObject private var store: ScorekeeperStore
+    @State private var expandedHoles: Set<Int> = []
 
     var body: some View {
         MGTScreen {
@@ -25,7 +26,11 @@ struct LedgerView: View {
                         .padding(.horizontal, 12)
 
                         ForEach(match.records.reversed()) { record in
-                            LedgerHoleCard(record: record)
+                            LedgerHoleCard(
+                                record: record,
+                                isExpanded: expandedHoles.contains(record.hole),
+                                onToggle: { toggle(record.hole) }
+                            )
                                 .padding(.horizontal, 12)
                         }
                     }
@@ -42,32 +47,56 @@ struct LedgerView: View {
         if amount == 0 { return "$0" }
         return amount > 0 ? "Red +$\(amount)" : "Blue +$\(abs(amount))"
     }
+
+    private func toggle(_ hole: Int) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if expandedHoles.contains(hole) {
+                expandedHoles.remove(hole)
+            } else {
+                expandedHoles.insert(hole)
+            }
+        }
+    }
 }
 
 private struct LedgerHoleCard: View {
     let record: HoleRecord
+    let isExpanded: Bool
+    let onToggle: () -> Void
 
     var body: some View {
         MGTCard(spacing: 8, horizontalPadding: 12, verticalPadding: 10) {
-            HStack(spacing: 8) {
-                Text("H\(record.hole)")
-                    .font(.headline.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(MGTTheme.ink)
+            Button(action: onToggle) {
+                HStack(spacing: 8) {
+                    Text("H\(record.hole)")
+                        .font(.headline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(MGTTheme.ink)
 
-                Text(resultLabel)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(movementColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.78)
+                    Text(resultLabel)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(movementColor)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
 
-                Spacer(minLength: 8)
+                    Spacer(minLength: 8)
 
-                Text(balanceLabel(record.teamBalanceAfter))
-                    .font(.subheadline.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(totalColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.76)
+                    Text(balanceLabel(record.teamBalanceAfter))
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(totalColor)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.76)
+
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(MGTTheme.muted)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Hole \(record.hole), \(resultLabel)")
+            .accessibilityValue(isExpanded ? "Scores expanded" : "Scores collapsed")
+            .accessibilityHint("Shows every player's score on this hole")
 
             HStack(spacing: 6) {
                 MiniLedgerPill(title: "Base", value: "$\(record.base)")
@@ -105,6 +134,37 @@ private struct LedgerHoleCard: View {
                 }
                 .padding(.top, 2)
             }
+
+            if isExpanded {
+                Divider()
+
+                VStack(spacing: 7) {
+                    ForEach(record.playerResults) { result in
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(result.team == .red ? MGTTheme.red : MGTTheme.blue)
+                                .frame(width: 8, height: 8)
+
+                            Text(result.playerName)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(MGTTheme.ink)
+                                .lineLimit(1)
+
+                            Spacer(minLength: 8)
+
+                            Text(result.pickedUp ? "Pickup" : "\(result.gross)")
+                                .font(.headline.weight(.bold).monospacedDigit())
+                                .foregroundStyle(MGTTheme.ink)
+
+                            Text(scoreDetail(result))
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(MGTTheme.muted)
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
     }
 
@@ -133,6 +193,11 @@ private struct LedgerHoleCard: View {
     private func signedMoney(_ amount: Int) -> String {
         if amount == 0 { return "$0" }
         return amount > 0 ? "+$\(amount)" : "-$\(abs(amount))"
+    }
+
+    private func scoreDetail(_ result: PlayerHoleResult) -> String {
+        if result.strokes == 0 { return "Net \(result.net)" }
+        return "Net \(result.net) • \(result.strokes) stroke\(result.strokes == 1 ? "" : "s")"
     }
 }
 

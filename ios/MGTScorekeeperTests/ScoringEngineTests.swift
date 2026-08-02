@@ -107,6 +107,23 @@ final class ScoringEngineTests: XCTestCase {
         XCTAssertEqual(secondBirdies.count, 1)
     }
 
+    func testHoleSixIsParFiveAndGrossFourEarnsBirdieJunk() throws {
+        var match = makeMatch(indexes: [0, 0, 0, 0])
+        match.currentHole = 6
+        match.pendingEntries = entries(match.players, gross: [4, 5, 5, 5])
+
+        let record = try ScoringEngine.scoreCurrentHole(match: &match, course: course)
+        let birdie = try XCTUnwrap(
+            record.junkEvents.first {
+                $0.playerId == match.players[0].id && $0.type == .birdie
+            }
+        )
+
+        XCTAssertTrue(record.playerResults.allSatisfy { $0.par == 5 })
+        XCTAssertEqual(birdie.value, record.base)
+        XCTAssertEqual(record.junkDelta, record.base)
+    }
+
     func testGreenieCarriesAndThenPaysAccumulatedPool() throws {
         var match = makeMatch(indexes: [0, 0, 0, 0])
         match.currentHole = 2
@@ -288,6 +305,50 @@ final class ScoringEngineTests: XCTestCase {
         let relaunchedStore = ScorekeeperStore(defaults: defaults)
         XCTAssertNil(relaunchedStore.match)
         XCTAssertEqual(relaunchedStore.history.map(\.id), [completed.id])
+    }
+
+    @MainActor
+    func testStoreRepairsSavedHoleSixBirdieExactlyOnce() throws {
+        let suiteName = "MGTScorekeeperTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        var saved = makeMatch(indexes: [0, 0, 0, 0])
+        saved.currentHole = 7
+        saved.records = [
+            record(
+                hole: 6,
+                nets: [4, 5, 5, 5],
+                winner: .red,
+                sideDelta: 2,
+                junkDelta: 0,
+                balanceAfter: 2
+            ),
+            record(
+                hole: 7,
+                nets: [4, 5, 5, 5],
+                winner: .red,
+                sideDelta: 2,
+                junkDelta: 0,
+                balanceAfter: 4
+            ),
+        ]
+        saved.teamBalance = 4
+        defaults.set(try JSONEncoder().encode(saved), forKey: ScorekeeperStore.activeMatchKey)
+
+        let repaired = try XCTUnwrap(ScorekeeperStore(defaults: defaults).match)
+        let repairedHole = try XCTUnwrap(repaired.records.first)
+        XCTAssertEqual(repairedHole.playerResults.map(\.par), [5, 5, 5, 5])
+        XCTAssertEqual(repairedHole.junkEvents.filter { $0.type == .birdie }.count, 1)
+        XCTAssertEqual(repairedHole.junkDelta, 2)
+        XCTAssertEqual(repairedHole.teamBalanceAfter, 4)
+        XCTAssertEqual(repaired.records[1].teamBalanceAfter, 6)
+        XCTAssertEqual(repaired.teamBalance, 6)
+
+        let relaunched = try XCTUnwrap(ScorekeeperStore(defaults: defaults).match)
+        XCTAssertEqual(relaunched.records[0].junkEvents.filter { $0.type == .birdie }.count, 1)
+        XCTAssertEqual(relaunched.records[1].teamBalanceAfter, 6)
+        XCTAssertEqual(relaunched.teamBalance, 6)
     }
 
     private func makePlayers(indexes: [Double]) -> [Player] {

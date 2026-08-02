@@ -90,8 +90,8 @@ extension Course {
             ]),
             CourseHole(number: 6, teeBoxes: [
                 .whiteBlue: TeeBox(distance: 441, par: 5, strokeIndex: 11),
-                .blueGreen: TeeBox(distance: 389, par: 4, strokeIndex: 11),
-                .greenSilver: TeeBox(distance: 325, par: 4, strokeIndex: 11),
+                .blueGreen: TeeBox(distance: 389, par: 5, strokeIndex: 11),
+                .greenSilver: TeeBox(distance: 325, par: 5, strokeIndex: 11),
                 .redGold: TeeBox(distance: 389, par: 5, strokeIndex: 7),
             ]),
             CourseHole(number: 7, teeBoxes: [
@@ -169,4 +169,3 @@ extension Course {
         ]
     )
 }
-

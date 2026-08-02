@@ -69,6 +69,51 @@ struct SettlementAnalytics: Equatable {
 }
 
 enum ScoringEngine {
+    static func repairHoleSixPar(in match: MatchState, course: Course) -> MatchState {
+        var repaired = match
+        var runningBalanceAdjustment = 0
+
+        for recordIndex in repaired.records.indices {
+            repaired.records[recordIndex].teamBalanceAfter += runningBalanceAdjustment
+            guard repaired.records[recordIndex].hole == 6 else { continue }
+
+            let oldJunkDelta = repaired.records[recordIndex].junkDelta
+            for resultIndex in repaired.records[recordIndex].playerResults.indices {
+                let result = repaired.records[recordIndex].playerResults[resultIndex]
+                guard let player = repaired.players.first(where: { $0.id == result.playerId }) else { continue }
+
+                let correctedPar = course.hole(6).teeBox(for: player.tee).par
+                repaired.records[recordIndex].playerResults[resultIndex].par = correctedPar
+
+                let alreadyHasBirdie = repaired.records[recordIndex].junkEvents.contains {
+                    $0.playerId == result.playerId && $0.type == .birdie
+                }
+                guard !result.pickedUp, result.gross < correctedPar, !alreadyHasBirdie else { continue }
+
+                repaired.records[recordIndex].junkEvents.append(
+                    junkEvent(
+                        score: repaired.records[recordIndex].playerResults[resultIndex],
+                        hole: 6,
+                        type: .birdie,
+                        value: repaired.records[recordIndex].base,
+                        delta: repaired.records[recordIndex].base
+                    )
+                )
+            }
+
+            let correctedJunkDelta = repaired.records[recordIndex].junkEvents.reduce(0) { partial, event in
+                partial + deltaForRed(team: event.team, amount: event.deltaForPlayersTeam)
+            }
+            let adjustment = correctedJunkDelta - oldJunkDelta
+            repaired.records[recordIndex].junkDelta = correctedJunkDelta
+            repaired.records[recordIndex].teamBalanceAfter += adjustment
+            runningBalanceAdjustment += adjustment
+        }
+
+        repaired.teamBalance += runningBalanceAdjustment
+        return repaired
+    }
+
     static func settlementAnalytics(for match: MatchState) -> SettlementAnalytics {
         var previousBalance = 0
         let movement = match.records.map { record in
