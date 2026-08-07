@@ -9,4 +9,3 @@ enum Rulebook {
     static let pickupNetOverPar = 2
     static let parThreeGreenieHoles: Set<Int> = [2, 7, 9, 11, 16, 18]
 }
-

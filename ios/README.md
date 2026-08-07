@@ -24,4 +24,3 @@ Build and test:
 ```bash
 xcodebuild test -project MGTScorekeeper.xcodeproj -scheme MGTScorekeeper -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
-
