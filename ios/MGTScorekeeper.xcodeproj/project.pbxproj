@@ -1,0 +1,478 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		10E0B5785556691E2F1891D2 /* ScorekeeperStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFEB7B1DBF27959BBF412CCB /* ScorekeeperStore.swift */; };
+		219962EBB37F766724B2D4CE /* RoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E9CD40657A89E34803370D /* RoundView.swift */; };
+		37D9DA18989DB9E5D9CB0303 /* LedgerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD263322971F9CA82476B6B0 /* LedgerView.swift */; };
+		66EA1EAB6E959C685217A802 /* ScorekeeperRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888323C0D532DD59645180B3 /* ScorekeeperRootView.swift */; };
+		7318A76CEFD29DAC80430944 /* ScoringEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DECEBA676C44C54D3667AE9 /* ScoringEngine.swift */; };
+		8D3CCAD40447B01F06A0483D /* SettlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ABD9AEA2A76DBA807CC34C6 /* SettlementView.swift */; };
+		93E8F7DA2D3C9942D011F65C /* Rulebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FD9310111EC31FA90B7F50 /* Rulebook.swift */; };
+		9BBE3D70E7B802534D799E77 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2890BFC27C9CD8FDD578FB4C /* SetupView.swift */; };
+		BCC315825A135C90E868535B /* MGTScorekeeperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7E9369C476C4CE5CA7352E8 /* MGTScorekeeperApp.swift */; };
+		D1808811901AEB771EEE9F32 /* Course.swift in Sources */ = {isa = PBXBuildFile; fileRef = E76884C98824B86FEE943EB5 /* Course.swift */; };
+		D585E6BFC3949E356B4547E2 /* SharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CCAD76F6A5ACE21CC4D54E /* SharedViews.swift */; };
+		DEBE6EEDA4C621E4F34ACD32 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8FBF3708CCA61DAFAFB370 /* Models.swift */; };
+		EAE0C4EA8D5C6251B81A5846 /* ScoringEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D932DE7ECB5D75E4A9E944 /* ScoringEngineTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EB4BB6E4B4FC03E1E068A5C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 75D71F8E19DBC1D5588A4CD0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAFF6326EAA8E2089DFDA998;
+			remoteInfo = MGTScorekeeper;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		027A1A786CB0D9D7257F128E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		18CBB6230846EE72B99496C6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1D4CCD6808BF3A3924E2ED3B /* MGTScorekeeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MGTScorekeeper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2890BFC27C9CD8FDD578FB4C /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		40D932DE7ECB5D75E4A9E944 /* ScoringEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringEngineTests.swift; sourceTree = "<group>"; };
+		4ABD9AEA2A76DBA807CC34C6 /* SettlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettlementView.swift; sourceTree = "<group>"; };
+		58CCAD76F6A5ACE21CC4D54E /* SharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedViews.swift; sourceTree = "<group>"; };
+		66FD9310111EC31FA90B7F50 /* Rulebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rulebook.swift; sourceTree = "<group>"; };
+		8584AF867151022092FC620B /* MGTScorekeeperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MGTScorekeeperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		888323C0D532DD59645180B3 /* ScorekeeperRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScorekeeperRootView.swift; sourceTree = "<group>"; };
+		8DECEBA676C44C54D3667AE9 /* ScoringEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringEngine.swift; sourceTree = "<group>"; };
+		C7E9369C476C4CE5CA7352E8 /* MGTScorekeeperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MGTScorekeeperApp.swift; sourceTree = "<group>"; };
+		DC8FBF3708CCA61DAFAFB370 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		DD263322971F9CA82476B6B0 /* LedgerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerView.swift; sourceTree = "<group>"; };
+		DFEB7B1DBF27959BBF412CCB /* ScorekeeperStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScorekeeperStore.swift; sourceTree = "<group>"; };
+		E76884C98824B86FEE943EB5 /* Course.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Course.swift; sourceTree = "<group>"; };
+		F3E9CD40657A89E34803370D /* RoundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0768C57FDF13357037018754 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				C7E9369C476C4CE5CA7352E8 /* MGTScorekeeperApp.swift */,
+				DFEB7B1DBF27959BBF412CCB /* ScorekeeperStore.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		563FA6314DA5D0D541BE4F22 /* MGTScorekeeper */ = {
+			isa = PBXGroup;
+			children = (
+				0768C57FDF13357037018754 /* App */,
+				CBF0899B7A59A5EB49162F30 /* Core */,
+				AF145E7B19742C3E0C512894 /* Features */,
+				9FF88A0F3A4B0FD42C7AAE9C /* Supporting */,
+			);
+			path = MGTScorekeeper;
+			sourceTree = "<group>";
+		};
+		714340D4AA5AC1B97000CE3E = {
+			isa = PBXGroup;
+			children = (
+				563FA6314DA5D0D541BE4F22 /* MGTScorekeeper */,
+				879E0DFEF045F1FE88D0D166 /* MGTScorekeeperTests */,
+				71552E79E85BAEB38E891ADB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		71552E79E85BAEB38E891ADB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1D4CCD6808BF3A3924E2ED3B /* MGTScorekeeper.app */,
+				8584AF867151022092FC620B /* MGTScorekeeperTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		879E0DFEF045F1FE88D0D166 /* MGTScorekeeperTests */ = {
+			isa = PBXGroup;
+			children = (
+				027A1A786CB0D9D7257F128E /* Info.plist */,
+				40D932DE7ECB5D75E4A9E944 /* ScoringEngineTests.swift */,
+			);
+			path = MGTScorekeeperTests;
+			sourceTree = "<group>";
+		};
+		9FF88A0F3A4B0FD42C7AAE9C /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				18CBB6230846EE72B99496C6 /* Info.plist */,
+			);
+			path = Supporting;
+			sourceTree = "<group>";
+		};
+		AF145E7B19742C3E0C512894 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				DD263322971F9CA82476B6B0 /* LedgerView.swift */,
+				F3E9CD40657A89E34803370D /* RoundView.swift */,
+				888323C0D532DD59645180B3 /* ScorekeeperRootView.swift */,
+				4ABD9AEA2A76DBA807CC34C6 /* SettlementView.swift */,
+				2890BFC27C9CD8FDD578FB4C /* SetupView.swift */,
+				58CCAD76F6A5ACE21CC4D54E /* SharedViews.swift */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		CBF0899B7A59A5EB49162F30 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				E76884C98824B86FEE943EB5 /* Course.swift */,
+				DC8FBF3708CCA61DAFAFB370 /* Models.swift */,
+				66FD9310111EC31FA90B7F50 /* Rulebook.swift */,
+				8DECEBA676C44C54D3667AE9 /* ScoringEngine.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BC3846169D7456CC711EF7B4 /* MGTScorekeeperTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9B8CDD989AB36E2EEE34C01 /* Build configuration list for PBXNativeTarget "MGTScorekeeperTests" */;
+			buildPhases = (
+				07F70BA9F34D3A5DD589FED3 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				11B5581AF118A1A32F9E2BD4 /* PBXTargetDependency */,
+			);
+			name = MGTScorekeeperTests;
+			packageProductDependencies = (
+			);
+			productName = MGTScorekeeperTests;
+			productReference = 8584AF867151022092FC620B /* MGTScorekeeperTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DAFF6326EAA8E2089DFDA998 /* MGTScorekeeper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7EA84B3750ECB88AE6ABE7D /* Build configuration list for PBXNativeTarget "MGTScorekeeper" */;
+			buildPhases = (
+				BC27D923E3083AA9FD23E32B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MGTScorekeeper;
+			packageProductDependencies = (
+			);
+			productName = MGTScorekeeper;
+			productReference = 1D4CCD6808BF3A3924E2ED3B /* MGTScorekeeper.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		75D71F8E19DBC1D5588A4CD0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					DAFF6326EAA8E2089DFDA998 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 6C686B7BEF6974CC7EB3704B /* Build configuration list for PBXProject "MGTScorekeeper" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 714340D4AA5AC1B97000CE3E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 71552E79E85BAEB38E891ADB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DAFF6326EAA8E2089DFDA998 /* MGTScorekeeper */,
+				BC3846169D7456CC711EF7B4 /* MGTScorekeeperTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		07F70BA9F34D3A5DD589FED3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAE0C4EA8D5C6251B81A5846 /* ScoringEngineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC27D923E3083AA9FD23E32B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D1808811901AEB771EEE9F32 /* Course.swift in Sources */,
+				37D9DA18989DB9E5D9CB0303 /* LedgerView.swift in Sources */,
+				BCC315825A135C90E868535B /* MGTScorekeeperApp.swift in Sources */,
+				DEBE6EEDA4C621E4F34ACD32 /* Models.swift in Sources */,
+				219962EBB37F766724B2D4CE /* RoundView.swift in Sources */,
+				93E8F7DA2D3C9942D011F65C /* Rulebook.swift in Sources */,
+				66EA1EAB6E959C685217A802 /* ScorekeeperRootView.swift in Sources */,
+				10E0B5785556691E2F1891D2 /* ScorekeeperStore.swift in Sources */,
+				7318A76CEFD29DAC80430944 /* ScoringEngine.swift in Sources */,
+				8D3CCAD40447B01F06A0483D /* SettlementView.swift in Sources */,
+				9BBE3D70E7B802534D799E77 /* SetupView.swift in Sources */,
+				D585E6BFC3949E356B4547E2 /* SharedViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		11B5581AF118A1A32F9E2BD4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAFF6326EAA8E2089DFDA998 /* MGTScorekeeper */;
+			targetProxy = EB4BB6E4B4FC03E1E068A5C4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3C1DF9E523296786F5241468 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SA42CTY6NM;
+				INFOPLIST_FILE = MGTScorekeeper/Supporting/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jamesheffernan.MGTScorekeeper;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B09B4CEAD7F116A76CA76ABB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = MGTScorekeeperTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jamesheffernan.MGTScorekeeperTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MGTScorekeeper.app/MGTScorekeeper";
+			};
+			name = Release;
+		};
+		B24D654325BBF746C86F3CBF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		B675557A5F2682429EC9F33F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = SA42CTY6NM;
+				INFOPLIST_FILE = MGTScorekeeper/Supporting/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jamesheffernan.MGTScorekeeper;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DD058562817B58C07BCD0065 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		F70DA32EBF7260915A8C2D35 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = MGTScorekeeperTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jamesheffernan.MGTScorekeeperTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MGTScorekeeper.app/MGTScorekeeper";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6C686B7BEF6974CC7EB3704B /* Build configuration list for PBXProject "MGTScorekeeper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B24D654325BBF746C86F3CBF /* Debug */,
+				DD058562817B58C07BCD0065 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D7EA84B3750ECB88AE6ABE7D /* Build configuration list for PBXNativeTarget "MGTScorekeeper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B675557A5F2682429EC9F33F /* Debug */,
+				3C1DF9E523296786F5241468 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E9B8CDD989AB36E2EEE34C01 /* Build configuration list for PBXNativeTarget "MGTScorekeeperTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F70DA32EBF7260915A8C2D35 /* Debug */,
+				B09B4CEAD7F116A76CA76ABB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 75D71F8E19DBC1D5588A4CD0 /* Project object */;
+}

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390,initial-scale=1" />
+<title>Direction G — Timeline + F's bottom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#236651;--green-2:#1A4D3D;--green-3:#143728;--green-soft:#E5EEEA;
+    --paper:#FFFFFF;--paper-2:#FAFAF7;--ink:#1B1B1B;--ink-mid:#454545;--mid:#6B6B6B;--muted:#9A9A95;
+    --hair:#E5E2DA;--hair-soft:#EFEDE6;
+    --oxblood:#C8312D;--navy:#1E54B0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:"Roboto",system-ui,sans-serif;color:var(--ink);background:#0c0c0e;font-feature-settings:"tnum"}
+  body{display:flex;justify-content:center;min-height:100vh}
+  .phone{width:390px;min-height:844px;background:var(--paper);position:relative;overflow:hidden}
+
+  .status-fill{position:absolute;top:0;left:0;right:0;height:54px;background:var(--green);z-index:0}
+  .status{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:14px 22px 0;font-weight:500;font-size:13px;color:#fff}
+  .status .dots{display:flex;gap:4px}
+  .status .dots span{width:14px;height:6px;background:#fff;border-radius:2px}
+
+  .header{position:relative;z-index:2;background:var(--green);color:#fff;padding:14px 22px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+  .crest{width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .crest img,.crest svg{width:100%;height:100%;object-fit:contain;display:block}
+  .wordmark{min-width:0;line-height:1}
+  .wordmark .name{font-family:"Cormorant Garamond";font-style:italic;font-weight:500;font-size:24px;color:#fff;letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .header-right{display:flex;gap:8px;align-items:center;flex-shrink:0}
+  .header-tool{width:34px;height:34px;border:1px solid rgba(255,255,255,.35);border-radius:6px;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer}
+  .header-tool svg{width:14px;height:14px;stroke-width:1.6}
+
+  /* HOLE TIMELINE — pips colored by which team won each hole; BG pinned on the right */
+  .timeline{display:flex;align-items:center;padding:11px 14px 11px 16px;background:var(--paper-2);border-bottom:1px solid var(--hair)}
+  .pips{display:flex;align-items:center;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+  .pips::-webkit-scrollbar{display:none}
+  .pip{flex:0 0 auto;width:18px;height:18px;border-radius:50%;border:1px solid var(--hair);background:transparent;color:var(--muted);font-family:"Roboto";font-size:9px;font-weight:700;display:grid;place-items:center;cursor:pointer;margin-right:4px;transition:transform .15s}
+  .pip:hover{transform:scale(1.1)}
+  .pip.won-red{background:var(--oxblood);border-color:var(--oxblood);color:#fff}
+  .pip.won-blue{background:var(--navy);border-color:var(--navy);color:#fff}
+  .pip.push{background:var(--hair);border-color:var(--hair);color:var(--mid)}
+  .pip.current{width:26px;height:26px;border-color:var(--green);color:var(--green);background:#fff;font-size:11px;font-weight:700;box-shadow:0 0 0 3px var(--paper-2),0 0 0 4px var(--green);margin:0 6px 0 4px}
+  .pip.settle{background:#fff;color:var(--green);border-color:var(--green);font-family:"Cormorant Garamond";font-style:italic;font-size:14px;font-weight:600;margin-left:6px;width:26px;height:26px;flex:0 0 auto}
+  .pip.settle::before{content:"$"}
+  .tl-bg{flex-shrink:0;padding-left:12px;margin-left:8px;border-left:1px solid var(--hair);display:inline-flex;flex-direction:column;gap:1px;line-height:1}
+  .tl-bg .l{font-family:"Roboto";font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);font-weight:600}
+  .tl-bg .v{font-family:"Cormorant Garamond";font-weight:700;font-size:18px;color:var(--green);line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums lining-nums}
+
+  .hero{padding:16px 22px 14px;background:var(--paper)}
+  .hero-row1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .breadcrumb{font-family:"Roboto";font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);font-weight:500}
+  .breadcrumb b{color:var(--green);font-weight:700}
+  .date{font-family:"Cormorant Garamond";font-style:italic;font-size:14px;color:var(--mid)}
+
+  .hero-standing{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+  .standing{flex:1;min-width:0}
+  .standing .l{font-family:"Roboto";font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);font-weight:500;margin-bottom:2px}
+  .standing .amt{font-family:"Cormorant Garamond";font-weight:500;font-size:64px;line-height:.95;color:var(--ink);letter-spacing:-.025em;font-variant-numeric:tabular-nums lining-nums}
+  .standing .amt.red{color:var(--oxblood)}
+  .standing .amt.blue{color:var(--navy)}
+  .standing .note{font-family:"Cormorant Garamond";font-style:italic;font-size:17px;color:var(--ink-mid);margin-top:6px;line-height:1.3}
+  .standing .note .red{color:var(--oxblood);font-style:normal;font-weight:700;letter-spacing:.04em}
+  .standing .note .blue{color:var(--navy);font-style:normal;font-weight:700;letter-spacing:.04em}
+  .standing .note .em{font-style:italic;color:var(--green)}
+
+  .hole-block{text-align:right}
+  .hole-block .h{font-family:"Cormorant Garamond";font-weight:500;font-size:46px;line-height:.95;color:var(--green);letter-spacing:-.025em;font-variant-numeric:tabular-nums lining-nums}
+  .hole-block .k{font-family:"Roboto";font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);font-weight:500;margin-top:2px}
+  .hole-block .meta{font-family:"Roboto";font-size:11px;color:var(--ink-mid);margin-top:4px;font-weight:500}
+
+  .hero .double-btn{margin-top:14px;width:100%;justify-content:center}
+  .double-btn{background:var(--navy);color:#fff;border:none;font-family:"Roboto";font-weight:600;font-size:13px;letter-spacing:.16em;text-transform:uppercase;padding:13px 20px;cursor:pointer;border-radius:4px;line-height:1;display:inline-flex;align-items:baseline;gap:10px;box-shadow:0 1px 0 rgba(0,0,0,.18),0 6px 16px -6px rgba(30,84,176,.45)}
+  .double-btn.red{background:var(--oxblood);box-shadow:0 1px 0 rgba(0,0,0,.18),0 6px 16px -6px rgba(200,49,45,.45)}
+  .double-btn:hover{filter:brightness(1.08)}
+  .double-btn .amt{font-family:"Cormorant Garamond";font-style:italic;font-weight:700;font-size:24px;letter-spacing:0;text-transform:none;line-height:1;margin-left:-1px}
+
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);background:var(--paper)}
+  .facts .cell{padding:10px 4px 11px;text-align:center;border-right:1px solid var(--hair-soft)}
+  .facts .cell:last-child{border-right:none}
+  .facts .k{font-family:"Roboto";font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);font-weight:500;margin-bottom:3px}
+  .facts .v{font-family:"Cormorant Garamond";font-weight:500;font-size:20px;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums lining-nums}
+  .facts .v.green{color:var(--green)}
+
+  .roster{padding:0 0 110px}
+  .prow{padding:10px 22px 8px;border-top:1px solid var(--hair-soft)}
+  .prow:first-child{border-top:1px solid var(--hair)}
+  .prow-head{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center}
+  .name-block{min-width:0}
+  .name{font-family:"Cormorant Garamond";font-weight:600;font-size:21px;color:var(--ink);line-height:1.05;display:flex;align-items:baseline;gap:10px}
+  .name .tag{font-family:"Roboto";font-size:9px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;padding:2px 6px 3px;border-radius:2px;color:#fff;line-height:1;flex-shrink:0;position:relative;top:-2px}
+  .name .tag.red{background:var(--oxblood)}
+  .name .tag.blue{background:var(--navy)}
+  .sub{font-family:"Roboto";font-size:11.5px;color:var(--mid);margin-top:3px}
+  .sub b{color:var(--ink-mid);font-weight:600}
+
+  .stepper{display:inline-flex;align-items:stretch;border:1px solid var(--hair);height:38px;border-radius:4px;overflow:hidden;background:#fff}
+  .stepper button{flex:0 0 30px;background:transparent;border:none;color:var(--ink-mid);font-family:"Cormorant Garamond";font-size:20px;font-weight:500;cursor:pointer;display:grid;place-items:center}
+  .stepper button:first-child{border-right:1px solid var(--hair)}
+  .stepper button:last-child{border-left:1px solid var(--hair)}
+  .stepper .val{flex:0 0 32px;display:grid;place-items:center;font-family:"Cormorant Garamond";font-weight:500;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
+
+  .net{text-align:right;min-width:42px}
+  .net .v{font-family:"Cormorant Garamond";font-weight:500;font-size:34px;line-height:1;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums}
+  .net .v.under{color:var(--green)}
+  .net .v.over{color:var(--oxblood)}
+  .net .l{font-family:"Roboto";font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);margin-top:1px;font-weight:500}
+
+  .junk{margin-top:7px;display:flex;gap:14px;flex-wrap:wrap}
+  .j{background:transparent;border:none;color:var(--mid);font-family:"Roboto";font-size:12px;font-weight:500;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:6px;letter-spacing:.02em}
+  .j::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;border:1px solid var(--hair);background:transparent}
+  .j.on{color:var(--green);font-weight:600}
+  .j.on::before{background:var(--green);border-color:var(--green)}
+  .j.warn.on{color:var(--oxblood)}
+  .j.warn.on::before{background:var(--oxblood);border-color:var(--oxblood)}
+
+  /* sticky footer — just Submit, no tab bar */
+  .footer{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--hair);padding:12px 22px 28px;z-index:6;box-shadow:0 -8px 24px -14px rgba(0,0,0,.16)}
+  .submit{background:var(--green);color:#fff;border:none;padding:15px 20px;font-family:"Roboto";font-weight:600;font-size:13px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;border-radius:4px;width:100%;box-shadow:0 1px 0 var(--green-3),0 6px 16px -6px rgba(35,102,81,.5)}
+  .submit:hover{background:var(--green-2)}
+  .submit svg{width:13px;height:13px;stroke-width:1.8}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-fill"></div>
+  <div class="status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+
+  <div class="header">
+    <div class="crest"><svg width="40" height="40" viewBox="0 0 186 173" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#ffffff" d="M33 6h2v1h-2zM33 7h3v2h-3zM33 9h4v2h-4zM33 11h5v1h-5zM137 11h1v1h-1zM33 12h5v1h-5zM136 12h2v1h-2zM33 13h6v1h-6zM135 13h3v1h-3zM33 14h6v1h-6zM134 14h4v1h-4zM33 15h7v1h-7zM132 15h5v1h-5zM33 16h7v1h-7zM131 16h6v1h-6zM33 17h8v1h-8zM130 17h7v1h-7zM33 18h9v1h-9zM129 18h7v1h-7zM33 19h9v1h-9zM52 19h2v1h-2zM127 19h9v1h-9zM33 20h10v1h-10zM51 20h3v1h-3zM116 20h2v1h-2zM126 20h10v1h-10zM32 21h12v1h-12zM50 21h4v1h-4zM116 21h2v1h-2zM125 21h10v1h-10zM32 22h22v1h-22zM115 22h5v1h-5zM123 22h12v1h-12zM32 23h22v1h-22zM115 23h19v1h-19zM32 24h6v1h-6zM39 24h15v1h-15zM96 24h1v1h-1zM114 24h20v1h-20zM32 25h6v1h-6zM39 25h15v1h-15zM95 25h2v1h-2zM114 25h20v1h-20zM31 26h8v1h-8zM40 26h14v1h-14zM94 26h4v1h-4zM113 26h20v1h-20zM31 27h8v1h-8zM40 27h14v1h-14zM94 27h4v1h-4zM112 27h15v1h-15zM128 27h5v1h-5zM30 28h9v1h-9zM41 28h13v1h-13zM93 28h6v1h-6zM112 28h14v1h-14zM128 28h5v1h-5zM29 29h10v1h-10zM41 29h13v1h-13zM93 29h6v1h-6zM111 29h15v1h-15zM127 29h6v1h-6zM27 30h12v1h-12zM41 30h13v1h-13zM92 30h8v1h-8zM110 30h15v1h-15zM127 30h6v1h-6zM21 31h18v1h-18zM41 31h7v1h-7zM49 31h5v1h-5zM91 31h9v1h-9zM109 31h6v1h-6zM116 31h8v1h-8zM126 31h7v1h-7zM21 32h19v1h-19zM42 32h6v1h-6zM49 32h5v1h-5zM91 32h10v1h-10zM109 32h6v1h-6zM116 32h8v1h-8zM126 32h8v1h-8zM22 33h18v1h-18zM42 33h5v1h-5zM49 33h5v1h-5zM90 33h14v1h-14zM106 33h17v1h-17zM125 33h11v1h-11zM22 34h18v1h-18zM42 34h5v1h-5zM49 34h5v1h-5zM90 34h24v1h-24zM115 34h7v1h-7zM124 34h13v1h-13zM23 35h17v1h-17zM42 35h4v1h-4zM48 35h6v1h-6zM89 35h25v1h-25zM115 35h7v1h-7zM124 35h13v1h-13zM23 36h18v1h-18zM43 36h3v1h-3zM48 36h6v1h-6zM89 36h25v1h-25zM115 36h6v1h-6zM123 36h13v1h-13zM24 37h17v1h-17zM43 37h2v1h-2zM47 37h7v1h-7zM64 37h1v1h-1zM88 37h26v1h-26zM115 37h5v1h-5zM123 37h12v1h-12zM24 38h17v1h-17zM47 38h8v1h-8zM62 38h4v1h-4zM87 38h7v1h-7zM95 38h19v1h-19zM115 38h5v1h-5zM122 38h7v1h-7zM130 38h4v1h-4zM25 39h5v1h-5zM31 39h11v1h-11zM46 39h10v1h-10zM60 39h6v1h-6zM87 39h7v1h-7zM95 39h19v1h-19zM115 39h4v1h-4zM121 39h6v1h-6zM129 39h4v1h-4zM25 40h6v1h-6zM33 40h9v1h-9zM45 40h21v1h-21zM86 40h8v1h-8zM95 40h19v1h-19zM115 40h3v1h-3zM121 40h4v1h-4zM128 40h5v1h-5zM26 41h6v1h-6zM34 41h8v1h-8zM45 41h20v1h-20zM86 41h8v1h-8zM95 41h19v1h-19zM115 41h3v1h-3zM120 41h3v1h-3zM127 41h5v1h-5zM26 42h7v1h-7zM35 42h7v1h-7zM45 42h20v1h-20zM85 42h8v1h-8zM95 42h19v1h-19zM115 42h2v1h-2zM125 42h6v1h-6zM26 43h8v1h-8zM37 43h6v1h-6zM45 43h20v1h-20zM85 43h8v1h-8zM95 43h19v1h-19zM115 43h1v1h-1zM122 43h8v1h-8zM27 44h8v1h-8zM38 44h5v1h-5zM45 44h20v1h-20zM84 44h9v1h-9zM95 44h19v1h-19zM120 44h10v1h-10zM27 45h9v1h-9zM39 45h4v1h-4zM45 45h20v1h-20zM84 45h9v1h-9zM95 45h19v1h-19zM118 45h11v1h-11zM8 46h2v1h-2zM27 46h10v1h-10zM41 46h2v1h-2zM45 46h20v1h-20zM83 46h10v1h-10zM95 46h19v1h-19zM117 46h12v1h-12zM8 47h3v1h-3zM28 47h11v1h-11zM45 47h21v1h-21zM83 47h10v1h-10zM95 47h18v1h-18zM116 47h13v1h-13zM8 48h5v1h-5zM28 48h13v1h-13zM46 48h14v1h-14zM61 48h5v1h-5zM82 48h11v1h-11zM95 48h18v1h-18zM115 48h14v1h-14zM9 49h5v1h-5zM28 49h14v1h-14zM46 49h14v1h-14zM61 49h5v1h-5zM82 49h11v1h-11zM95 49h17v1h-17zM114 49h15v1h-15zM9 50h6v1h-6zM28 50h15v1h-15zM46 50h13v1h-13zM61 50h5v1h-5zM81 50h12v1h-12zM95 50h16v1h-16zM114 50h15v1h-15zM9 51h7v1h-7zM28 51h15v1h-15zM47 51h12v1h-12zM60 51h6v1h-6zM81 51h12v1h-12zM96 51h15v1h-15zM113 51h17v1h-17zM10 52h8v1h-8zM28 52h16v1h-16zM47 52h12v1h-12zM60 52h6v1h-6zM80 52h13v1h-13zM96 52h14v1h-14zM112 52h19v1h-19zM10 53h10v1h-10zM28 53h17v1h-17zM47 53h11v1h-11zM60 53h6v1h-6zM80 53h13v1h-13zM96 53h13v1h-13zM112 53h20v1h-20zM10 54h12v1h-12zM28 54h17v1h-17zM48 54h10v1h-10zM60 54h6v1h-6zM79 54h14v1h-14zM96 54h13v1h-13zM111 54h30v1h-30zM10 55h15v1h-15zM26 55h19v1h-19zM48 55h10v1h-10zM59 55h8v1h-8zM79 55h15v1h-15zM96 55h12v1h-12zM111 55h30v1h-30zM10 56h36v1h-36zM48 56h9v1h-9zM59 56h8v1h-8zM78 56h16v1h-16zM96 56h11v1h-11zM110 56h30v1h-30zM11 57h35v1h-35zM48 57h9v1h-9zM59 57h8v1h-8zM78 57h16v1h-16zM96 57h11v1h-11zM109 57h31v1h-31zM11 58h35v1h-35zM48 58h8v1h-8zM58 58h9v1h-9zM78 58h16v1h-16zM97 58h9v1h-9zM109 58h30v1h-30zM11 59h36v1h-36zM49 59h7v1h-7zM58 59h10v1h-10zM77 59h17v1h-17zM97 59h8v1h-8zM108 59h30v1h-30zM11 60h36v1h-36zM49 60h6v1h-6zM58 60h10v1h-10zM77 60h18v1h-18zM97 60h8v1h-8zM107 60h30v1h-30zM12 61h5v1h-5zM18 61h29v1h-29zM49 61h6v1h-6zM57 61h12v1h-12zM76 61h19v1h-19zM97 61h7v1h-7zM106 61h31v1h-31zM12 62h6v1h-6zM19 62h28v1h-28zM49 62h5v1h-5zM57 62h12v1h-12zM75 62h20v1h-20zM97 62h6v1h-6zM106 62h30v1h-30zM12 63h6v1h-6zM20 63h27v1h-27zM50 63h4v1h-4zM56 63h14v1h-14zM75 63h20v1h-20zM97 63h6v1h-6zM105 63h20v1h-20zM127 63h8v1h-8zM13 64h6v1h-6zM21 64h26v1h-26zM50 64h4v1h-4zM56 64h16v1h-16zM74 64h21v1h-21zM98 64h4v1h-4zM104 64h19v1h-19zM125 64h9v1h-9zM13 65h7v1h-7zM22 65h26v1h-26zM50 65h3v1h-3zM56 65h40v1h-40zM98 65h3v1h-3zM104 65h16v1h-16zM124 65h9v1h-9zM14 66h7v1h-7zM23 66h25v1h-25zM50 66h3v1h-3zM55 66h41v1h-41zM98 66h2v1h-2zM103 66h14v1h-14zM123 66h9v1h-9zM14 67h8v1h-8zM25 67h23v1h-23zM51 67h1v1h-1zM55 67h41v1h-41zM98 67h2v1h-2zM102 67h12v1h-12zM121 67h11v1h-11zM14 68h9v1h-9zM26 68h23v1h-23zM55 68h41v1h-41zM102 68h8v1h-8zM118 68h13v1h-13zM14 69h10v1h-10zM27 69h22v1h-22zM54 69h42v1h-42zM102 69h2v1h-2zM116 69h14v1h-14zM15 70h10v1h-10zM28 70h21v1h-21zM54 70h42v1h-42zM113 70h16v1h-16zM15 71h11v1h-11zM29 71h20v1h-20zM53 71h43v1h-43zM107 71h21v1h-21zM16 72h11v1h-11zM30 72h20v1h-20zM53 72h43v1h-43zM102 72h25v1h-25zM16 73h12v1h-12zM31 73h19v1h-19zM53 73h43v1h-43zM100 73h26v1h-26zM16 74h13v1h-13zM32 74h18v1h-18zM53 74h42v1h-42zM98 74h27v1h-27zM17 75h13v1h-13zM33 75h17v1h-17zM53 75h41v1h-41zM97 75h28v1h-28zM17 76h14v1h-14zM35 76h15v1h-15zM53 76h41v1h-41zM96 76h28v1h-28zM18 77h14v1h-14zM36 77h15v1h-15zM53 77h40v1h-40zM95 77h27v1h-27zM18 78h15v1h-15zM37 78h14v1h-14zM53 78h39v1h-39zM95 78h27v1h-27zM19 79h16v1h-16zM39 79h12v1h-12zM53 79h39v1h-39zM94 79h27v1h-27zM19 80h17v1h-17zM40 80h11v1h-11zM54 80h37v1h-37zM93 80h27v1h-27zM20 81h17v1h-17zM42 81h10v1h-10zM54 81h36v1h-36zM93 81h26v1h-26zM20 82h19v1h-19zM43 82h9v1h-9zM54 82h36v1h-36zM92 82h26v1h-26zM21 83h19v1h-19zM45 83h7v1h-7zM55 83h34v1h-34zM91 83h26v1h-26zM22 84h20v1h-20zM47 84h6v1h-6zM55 84h33v1h-33zM91 84h25v1h-25zM22 85h21v1h-21zM48 85h5v1h-5zM55 85h33v1h-33zM90 85h25v1h-25zM23 86h22v1h-22zM50 86h3v1h-3zM55 86h32v1h-32zM89 86h25v1h-25zM23 87h23v1h-23zM51 87h2v1h-2zM55 87h31v1h-31zM89 87h24v1h-24zM24 88h24v1h-24zM56 88h29v1h-29zM88 88h24v1h-24zM25 89h24v1h-24zM56 89h29v1h-29zM87 89h24v1h-24zM137 89h3v1h-3zM25 90h26v1h-26zM56 90h28v1h-28zM87 90h24v1h-24zM134 90h6v1h-6zM26 91h26v1h-26zM56 91h27v1h-27zM86 91h25v1h-25zM132 91h8v1h-8zM26 92h27v1h-27zM56 92h27v1h-27zM85 92h27v1h-27zM129 92h11v1h-11zM26 93h28v1h-28zM57 93h25v1h-25zM85 93h29v1h-29zM124 93h16v1h-16zM158 93h3v1h-3zM27 94h27v1h-27zM57 94h24v1h-24zM84 94h56v1h-56zM155 94h6v1h-6zM27 95h28v1h-28zM57 95h24v1h-24zM83 95h57v1h-57zM153 95h7v1h-7zM27 96h28v1h-28zM57 96h23v1h-23zM82 96h51v1h-51zM134 96h6v1h-6zM151 96h9v1h-9zM27 97h29v1h-29zM58 97h21v1h-21zM82 97h50v1h-50zM133 97h7v1h-7zM148 97h12v1h-12zM27 98h29v1h-29zM58 98h21v1h-21zM81 98h49v1h-49zM131 98h11v1h-11zM144 98h16v1h-16zM27 99h29v1h-29zM58 99h20v1h-20zM80 99h48v1h-48zM130 99h30v1h-30zM6 100h3v1h-3zM26 100h31v1h-31zM58 100h19v1h-19zM79 100h48v1h-48zM129 100h31v1h-31zM6 101h7v1h-7zM26 101h31v1h-31zM58 101h19v1h-19zM78 101h48v1h-48zM128 101h32v1h-32zM7 102h9v1h-9zM24 102h33v1h-33zM59 102h17v1h-17zM78 102h46v1h-46zM127 102h24v1h-24zM153 102h8v1h-8zM7 103h50v1h-50zM59 103h16v1h-16zM76 103h47v1h-47zM126 103h24v1h-24zM152 103h11v1h-11zM7 104h50v1h-50zM58 104h16v1h-16zM75 104h47v1h-47zM125 104h24v1h-24zM151 104h17v1h-17zM8 105h113v1h-113zM124 105h24v1h-24zM150 105h26v1h-26zM8 106h112v1h-112zM123 106h24v1h-24zM149 106h31v1h-31zM9 107h109v1h-109zM122 107h24v1h-24zM148 107h32v1h-32zM10 108h108v1h-108zM121 108h24v1h-24zM148 108h30v1h-30zM10 109h107v1h-107zM120 109h24v1h-24zM147 109h11v1h-11zM162 109h14v1h-14zM11 110h105v1h-105zM119 110h24v1h-24zM148 110h2v1h-2zM159 110h15v1h-15zM12 111h102v1h-102zM118 111h23v1h-23zM156 111h15v1h-15zM12 112h11v1h-11zM24 112h90v1h-90zM117 112h19v1h-19zM149 112h20v1h-20zM13 113h12v1h-12zM27 113h86v1h-86zM117 113h13v1h-13zM143 113h24v1h-24zM14 114h13v1h-13zM32 114h79v1h-79zM117 114h5v1h-5zM140 114h25v1h-25zM15 115h13v1h-13zM36 115h74v1h-74zM130 115h7v1h-7zM141 115h22v1h-22zM16 116h15v1h-15zM39 116h69v1h-69zM121 116h17v1h-17zM142 116h20v1h-20zM17 117h17v1h-17zM42 117h59v1h-59zM114 117h26v1h-26zM143 117h18v1h-18zM18 118h19v1h-19zM46 118h46v1h-46zM108 118h33v1h-33zM145 118h15v1h-15zM19 119h21v1h-21zM50 119h35v1h-35zM101 119h42v1h-42zM146 119h14v1h-14zM20 120h26v1h-26zM53 120h25v1h-25zM91 120h2v1h-2zM100 120h45v1h-45zM148 120h12v1h-12zM21 121h32v1h-32zM56 121h39v1h-39zM100 121h47v1h-47zM149 121h10v1h-10zM22 122h75v1h-75zM102 122h47v1h-47zM151 122h8v1h-8zM23 123h75v1h-75zM103 123h57v1h-57zM25 124h75v1h-75zM104 124h56v1h-56zM26 125h75v1h-75zM105 125h55v1h-55zM28 126h74v1h-74zM107 126h54v1h-54zM30 127h74v1h-74zM108 127h35v1h-35zM153 127h8v1h-8zM31 128h34v1h-34zM66 128h39v1h-39zM109 128h30v1h-30zM33 129h32v1h-32zM67 129h39v1h-39zM111 129h26v1h-26zM36 130h30v1h-30zM67 130h41v1h-41zM113 130h24v1h-24zM38 131h28v1h-28zM68 131h42v1h-42zM114 131h23v1h-23zM40 132h27v1h-27zM69 132h42v1h-42zM116 132h21v1h-21zM43 133h25v1h-25zM70 133h43v1h-43zM118 133h19v1h-19zM46 134h22v1h-22zM70 134h44v1h-44zM119 134h19v1h-19zM48 135h21v1h-21zM71 135h46v1h-46zM121 135h18v1h-18zM47 136h22v1h-22zM72 136h46v1h-46zM123 136h17v1h-17zM46 137h24v1h-24zM72 137h48v1h-48zM125 137h16v1h-16zM45 138h7v1h-7zM53 138h17v1h-17zM73 138h49v1h-49zM127 138h16v1h-16zM44 139h7v1h-7zM54 139h17v1h-17zM74 139h51v1h-51zM129 139h15v1h-15zM43 140h7v1h-7zM55 140h17v1h-17zM75 140h52v1h-52zM131 140h14v1h-14zM42 141h7v1h-7zM56 141h16v1h-16zM75 141h54v1h-54zM133 141h14v1h-14zM41 142h7v1h-7zM57 142h16v1h-16zM76 142h57v1h-57zM135 142h14v1h-14zM41 143h6v1h-6zM57 143h17v1h-17zM77 143h73v1h-73zM40 144h6v1h-6zM58 144h16v1h-16zM78 144h73v1h-73zM39 145h6v1h-6zM59 145h16v1h-16zM78 145h19v1h-19zM107 145h43v1h-43zM39 146h5v1h-5zM60 146h16v1h-16zM79 146h16v1h-16zM112 146h32v1h-32zM38 147h6v1h-6zM61 147h16v1h-16zM80 147h14v1h-14zM121 147h14v1h-14zM37 148h6v1h-6zM62 148h16v1h-16zM80 148h13v1h-13zM37 149h5v1h-5zM63 149h16v1h-16zM81 149h12v1h-12zM36 150h6v1h-6zM64 150h16v1h-16zM82 150h11v1h-11zM36 151h5v1h-5zM65 151h16v1h-16zM83 151h10v1h-10zM35 152h5v1h-5zM66 152h15v1h-15zM83 152h10v1h-10zM35 153h5v1h-5zM67 153h16v1h-16zM84 153h10v1h-10zM35 154h4v1h-4zM68 154h16v1h-16zM85 154h9v1h-9zM34 155h5v1h-5zM70 155h15v1h-15zM86 155h9v1h-9zM34 156h5v1h-5zM71 156h24v1h-24zM33 157h5v1h-5zM72 157h24v1h-24zM33 158h5v1h-5zM74 158h23v1h-23zM32 159h6v1h-6zM76 159h21v1h-21zM31 160h6v1h-6zM78 160h20v1h-20zM28 161h9v1h-9zM79 161h20v1h-20zM27 162h9v1h-9zM81 162h19v1h-19zM27 163h8v1h-8zM84 163h16v1h-16zM28 164h6v1h-6zM87 164h14v1h-14zM28 165h4v1h-4zM91 165h11v1h-11zM95 166h7v1h-7z"/></svg></div>
+    <div class="wordmark"><div class="name">The Millbrook Game</div></div>
+    <div class="header-right">
+      <button class="header-tool" title="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></button>
+    </div>
+  </div>
+
+  <div class="timeline" aria-label="Hole timeline">
+    <div class="pips">
+      <button class="pip won-red" title="Hole 1 · Red won">1</button>
+      <button class="pip push" title="Hole 2 · push">2</button>
+      <button class="pip won-blue" title="Hole 3 · Blue won">3</button>
+      <button class="pip won-red" title="Hole 4 · Red won">4</button>
+      <button class="pip push" title="Hole 5 · push">5</button>
+      <button class="pip won-blue" title="Hole 6 · Blue won">6</button>
+      <button class="pip current" title="Hole 7 · active">7</button>
+      <button class="pip">8</button>
+      <button class="pip">9</button>
+      <button class="pip">10</button>
+      <button class="pip">11</button>
+      <button class="pip">12</button>
+      <button class="pip">13</button>
+      <button class="pip">14</button>
+      <button class="pip">15</button>
+      <button class="pip">16</button>
+      <button class="pip">17</button>
+      <button class="pip">18</button>
+      <button class="pip settle" title="Settle"></button>
+    </div>
+    <div class="tl-bg">
+      <span class="l">Big Game</span>
+      <span class="v">41</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-row1">
+      <div class="breadcrumb">Round · <b>Active</b></div>
+      <div class="date">27 May 2026</div>
+    </div>
+    <div class="hero-standing">
+      <div class="standing">
+        <div class="l">Side · Standing</div>
+        <div class="amt red">+$26</div>
+        <div class="note"><span class="red">Red</span> leads. <span class="em">Carry $6</span> on seven.</div>
+      </div>
+      <div class="hole-block">
+        <div class="k">Hole</div>
+        <div class="h">7</div>
+        <div class="meta">Par 4 · SI 3</div>
+        <div class="meta" style="color:var(--mid)">402 y · White</div>
+      </div>
+    </div>
+    <button class="double-btn blue">Blue Doubles to <span class="amt">$8</span></button>
+  </div>
+
+  <div class="facts">
+    <div class="cell"><div class="k">Base</div><div class="v">$4</div></div>
+    <div class="cell"><div class="k">Carry</div><div class="v green">$6</div></div>
+    <div class="cell"><div class="k">Doubles</div><div class="v">—</div></div>
+  </div>
+
+  <div class="roster">
+    <div class="prow"><div class="prow-head">
+      <div class="name-block"><div class="name">James Heffernan <span class="tag red">Red</span></div><div class="sub">White · idx <b>9.4</b> · 1 stroke</div></div>
+      <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+      <div class="net"><div class="v under">3</div><div class="l">Net</div></div>
+    </div><div class="junk"><button class="j on">Sandy</button><button class="j warn">Pickup</button></div></div>
+
+    <div class="prow"><div class="prow-head">
+      <div class="name-block"><div class="name">Pat Mahoney <span class="tag red">Red</span></div><div class="sub">White · idx <b>12.1</b> · 1 stroke</div></div>
+      <div class="stepper"><button>−</button><div class="val">5</div><button>+</button></div>
+      <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+    </div></div>
+
+    <div class="prow"><div class="prow-head">
+      <div class="name-block"><div class="name">Doug Reilly <span class="tag blue">Blue</span></div><div class="sub">Blue · idx <b>6.2</b> · 0 strokes</div></div>
+      <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+      <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+    </div><div class="junk"><button class="j on">Greenie</button></div></div>
+
+    <div class="prow"><div class="prow-head">
+      <div class="name-block"><div class="name">Mike Lin <span class="tag blue">Blue</span></div><div class="sub">Blue · idx <b>14.8</b> · 2 strokes</div></div>
+      <div class="stepper"><button>−</button><div class="val">6</div><button>+</button></div>
+      <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+    </div><div class="junk"><button class="j warn on">3-putt</button></div></div>
+  </div>
+
+  <div class="footer">
+    <button class="submit">Submit Hole 7
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+</body>
+</html>

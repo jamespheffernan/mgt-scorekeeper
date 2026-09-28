@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390,initial-scale=1" />
+<title>Direction D — Restrained Heritage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F0E8;
+    --bg-card:#FBF8F1;
+    --ink:#1A1815;
+    --ink-mid:#3D3A33;
+    --muted:#8A857B;
+    --hair:#D9D3C5;
+    --hair-soft:#E6E0D0;
+    --forest:#1F3D2E;
+    --forest-2:#16302A;
+    --forest-soft:#E4ECE5;
+    --oxblood:#7A2A1E;
+    --navy:#1A3149;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  html,body{font-family:"Hanken Grotesk",system-ui,sans-serif;color:var(--ink);background:#0c0c0e;font-feature-settings:"ss01","cv02","tnum"}
+  body{display:flex;justify-content:center;padding:0;min-height:100vh}
+  .phone{width:390px;min-height:844px;background:var(--bg);position:relative;overflow:hidden;color:var(--ink)}
+
+  /* helpers */
+  .num{font-family:"Source Serif 4",Georgia,serif;font-feature-settings:"tnum","lnum";font-variant-numeric:tabular-nums lining-nums}
+  .label{font-family:"Hanken Grotesk",sans-serif;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500}
+
+  /* status */
+  .status{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-weight:600;font-size:13px}
+  .status .dots{display:flex;gap:4px}
+  .status .dots span{width:14px;height:6px;background:var(--ink);border-radius:2px}
+
+  /* top context strip */
+  .topstrip{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 0;gap:14px}
+  .where{font-size:13px;color:var(--ink-mid);line-height:1.4;letter-spacing:-.005em}
+  .where b{color:var(--ink);font-weight:600}
+  .tools{display:flex;gap:14px;align-items:center}
+  .tool{width:26px;height:26px;display:grid;place-items:center;color:var(--ink-mid);background:transparent;border:none;cursor:pointer}
+  .tool:hover{color:var(--forest)}
+  .tool svg{width:18px;height:18px;stroke-width:1.5}
+
+  /* hero */
+  .hero{padding:28px 24px 30px;position:relative}
+  .hero .l{margin-bottom:14px}
+  .hero .standing{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+  .hero .amt{font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:84px;line-height:.9;letter-spacing:-.035em;color:var(--ink);font-feature-settings:"tnum","lnum";font-variant-numeric:tabular-nums lining-nums}
+  .hero .amt small{font-weight:400;font-size:.55em;color:var(--muted);margin-left:2px;letter-spacing:-.02em}
+  .hero .hole-side{text-align:right;padding-top:6px}
+  .hero .hole-side .h{font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:56px;line-height:.9;letter-spacing:-.035em;color:var(--forest)}
+  .hero .hole-side .hm{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+  .hero .hm b{color:var(--ink-mid);font-weight:600}
+  .hero .tagline{font-family:"Source Serif 4",Georgia,serif;font-size:15.5px;font-weight:400;color:var(--ink-mid);margin-top:14px;line-height:1.4;letter-spacing:-.005em}
+  .hero .tagline .red{color:var(--oxblood);font-weight:600}
+  .hero .tagline .blue{color:var(--navy);font-weight:600}
+  .hero .tagline em{font-style:italic;color:var(--forest)}
+
+  /* breakdown row */
+  .breakdown{display:flex;gap:0;padding:16px 24px;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);justify-content:space-between}
+  .bk{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .bk .l{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .bk .v{font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:22px;color:var(--ink);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums}
+  .bk .v.carry{color:var(--forest)}
+
+  /* action row — minimal */
+  .actions{display:flex;gap:8px;padding:14px 24px 18px;flex-wrap:wrap}
+  .action{font-size:12px;font-weight:500;color:var(--ink-mid);padding:7px 12px;border:1px solid var(--hair);border-radius:6px;background:transparent;cursor:pointer;letter-spacing:-.005em;display:inline-flex;align-items:center;gap:6px}
+  .action:hover{border-color:var(--ink-mid);color:var(--ink)}
+  .action.saved{color:var(--forest);border-color:var(--forest-soft);background:var(--forest-soft)}
+  .action .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
+
+  /* roster */
+  .roster{padding:0 0 12px}
+  .prow{padding:18px 24px 14px;border-top:1px solid var(--hair-soft);position:relative}
+  .prow:first-child{border-top:1px solid var(--hair)}
+  .prow-head{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center}
+  .name-block{min-width:0}
+  .name{font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:20px;color:var(--ink);line-height:1.1;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+  .pill{font-family:"Hanken Grotesk";font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:2px 7px 3px;border-radius:3px;color:#fff;line-height:1;flex-shrink:0;position:relative;top:-1px}
+  .pill.red{background:var(--oxblood)}
+  .pill.blue{background:var(--navy)}
+  .sub{font-size:11.5px;color:var(--muted);margin-top:4px;letter-spacing:-.005em;line-height:1.3}
+  .sub b{color:var(--ink-mid);font-weight:600}
+  .stepper{display:inline-flex;align-items:stretch;border:1px solid var(--hair);border-radius:8px;height:38px;overflow:hidden;background:var(--bg-card)}
+  .stepper button{flex:0 0 32px;background:transparent;border:none;color:var(--ink-mid);font-size:18px;font-weight:500;cursor:pointer;display:grid;place-items:center}
+  .stepper button:hover{color:var(--forest);background:var(--forest-soft)}
+  .stepper button:disabled{color:var(--muted);opacity:.5;cursor:not-allowed}
+  .stepper .val{flex:0 0 30px;display:grid;place-items:center;font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
+  .net{text-align:right;min-width:42px}
+  .net .v{font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:32px;line-height:1;color:var(--ink);letter-spacing:-.025em;font-variant-numeric:tabular-nums lining-nums}
+  .net .v.under{color:var(--forest)}
+  .net .v.over{color:var(--oxblood)}
+  .net .l{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-top:2px}
+
+  /* junk tags — quiet by default, brand color when active */
+  .junk{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+  .jtag{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:-.005em;cursor:pointer;background:transparent;border:none;padding:0;display:inline-flex;align-items:center;gap:5px}
+  .jtag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;border:1px solid var(--hair);background:transparent}
+  .jtag.on{color:var(--forest);font-weight:600}
+  .jtag.on::before{background:var(--forest);border-color:var(--forest)}
+  .jtag.warn.on{color:var(--oxblood)}
+  .jtag.warn.on::before{background:var(--oxblood);border-color:var(--oxblood)}
+
+  /* footer / submit area */
+  .footer{padding:14px 24px 14px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:6px}
+  .biggame{min-width:0}
+  .biggame .l{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:3px}
+  .biggame .v{font-family:"Source Serif 4",Georgia,serif;font-weight:500;font-size:21px;color:var(--ink);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums}
+  .biggame .v small{font-family:"Hanken Grotesk";font-weight:500;font-size:11.5px;color:var(--muted);margin-left:5px;letter-spacing:-.005em}
+  .submit{background:var(--forest);color:#F4F0E8;border:none;padding:14px 24px;border-radius:10px;font-family:"Hanken Grotesk";font-weight:600;font-size:14px;letter-spacing:-.005em;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 1px 0 var(--forest-2),0 4px 14px -8px rgba(31,61,46,.45)}
+  .submit:hover{background:var(--forest-2)}
+  .submit svg{width:14px;height:14px;stroke-width:2}
+
+  /* tabbar */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);padding:10px 16px 28px;background:var(--bg);border-top:1px solid var(--hair)}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px 4px;color:var(--muted);background:transparent;border:none;cursor:pointer;position:relative}
+  .tab svg{width:18px;height:18px;stroke-width:1.5}
+  .tab span{font-size:11px;font-weight:500;letter-spacing:-.005em}
+  .tab.active{color:var(--ink)}
+  .tab.active::after{content:"";position:absolute;bottom:34px;width:4px;height:4px;border-radius:50%;background:var(--forest)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status">
+    <span>9:41</span>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="topstrip">
+    <div class="where"><b>Hole 7</b> &nbsp;·&nbsp; Par 4 &nbsp;·&nbsp; SI 3 &nbsp;·&nbsp; 402 yds &nbsp;·&nbsp; White</div>
+    <div class="tools">
+      <button class="tool" title="Undo last hole">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+      </button>
+      <button class="tool" title="Reset round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="label">Standing</div>
+    <div class="standing">
+      <div class="amt">+$26</div>
+      <div class="hole-side">
+        <div class="h">7</div>
+        <div class="hm"><b>thru 6</b></div>
+      </div>
+    </div>
+    <div class="tagline"><span class="red">Red</span> leads. Base $4, <em>carry $6</em>.</div>
+  </div>
+
+  <div class="breakdown">
+    <div class="bk"><span class="l">Base</span><span class="v">$4</span></div>
+    <div class="bk"><span class="l">Carry</span><span class="v carry">$6</span></div>
+    <div class="bk"><span class="l">Big Game</span><span class="v">41</span></div>
+    <div class="bk"><span class="l">Saved</span><span class="v">H6</span></div>
+  </div>
+
+  <div class="actions">
+    <button class="action saved"><span class="dot"></span>H6 saved</button>
+    <button class="action">Call Red double</button>
+    <button class="action">Call Blue double</button>
+  </div>
+
+  <div class="roster">
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">James Heffernan <span class="pill red">Red</span></div>
+          <div class="sub">White · idx <b>9.4</b> · 1 stroke</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+        <div class="net"><div class="v under">3</div><div class="l">Net</div></div>
+      </div>
+      <div class="junk">
+        <button class="jtag on">Sand</button>
+        <button class="jtag warn">Pickup</button>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">Pat Mahoney <span class="pill red">Red</span></div>
+          <div class="sub">White · idx <b>12.1</b> · 1 stroke</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">5</div><button>+</button></div>
+        <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">Doug Reilly <span class="pill blue">Blue</span></div>
+          <div class="sub">Blue · idx <b>6.2</b> · 0 strokes</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+        <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+      </div>
+      <div class="junk">
+        <button class="jtag on">Greenie</button>
+        <button class="jtag">On green</button>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">Mike Lin <span class="pill blue">Blue</span></div>
+          <div class="sub">Blue · idx <b>14.8</b> · 2 strokes</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">6</div><button>+</button></div>
+        <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+      </div>
+      <div class="junk">
+        <button class="jtag warn on">3-putt</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="biggame">
+      <div class="l">Big Game · 2-best net</div>
+      <div class="v">41<small>thru 6</small></div>
+    </div>
+    <button class="submit">Submit hole
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="tabbar">
+    <button class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+      <span>Card</span>
+    </button>
+    <button class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Ledger</span>
+    </button>
+    <button class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 11h6"/></svg>
+      <span>Settle</span>
+    </button>
+  </div>
+</div>
+</body>
+</html>

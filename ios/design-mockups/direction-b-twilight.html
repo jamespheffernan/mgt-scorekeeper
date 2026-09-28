@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390,initial-scale=1" />
+<title>Direction B — Twilight Broadcast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07090d;
+    --bg-2:#0d1118;
+    --surface:#13171f;
+    --surface-2:#191e28;
+    --line:rgba(255,255,255,.08);
+    --line-strong:rgba(255,255,255,.16);
+    --ink:#f3f5f7;
+    --ink-soft:#9aa1ad;
+    --ink-dim:#5a6271;
+    --phos:#19E26E;
+    --phos-glow:rgba(25,226,110,.32);
+    --crimson:#FF3E5A;
+    --crimson-glow:rgba(255,62,90,.35);
+    --cyan:#41C8FF;
+    --cyan-glow:rgba(65,200,255,.30);
+    --amber:#FFB020;
+    --amber-glow:rgba(255,176,32,.30);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:"Geist",system-ui,sans-serif;color:var(--ink);background:#000}
+  body{display:flex;justify-content:center;padding:0;min-height:100vh}
+  .phone{
+    width:390px;min-height:844px;
+    position:relative;overflow:hidden;
+    background:
+      radial-gradient(140% 70% at 50% -10%, rgba(25,226,110,.10) 0%, transparent 55%),
+      radial-gradient(120% 60% at -10% 110%, rgba(65,200,255,.08) 0%, transparent 55%),
+      radial-gradient(120% 60% at 110% 60%, rgba(255,62,90,.06) 0%, transparent 55%),
+      linear-gradient(180deg,#07090d 0%,#0a0d14 100%);
+    color:var(--ink);
+  }
+  /* grain */
+  .phone::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence baseFrequency='.95' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .035 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:screen;
+  }
+
+  .status{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:14px 22px 0;font-family:"Geist";font-weight:600;font-size:13px;color:var(--ink)}
+  .status .dots{display:flex;gap:4px;align-items:center}
+  .status .dots span{width:14px;height:6px;background:var(--ink);border-radius:2px;opacity:.85}
+
+  .topbar{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:18px 22px 10px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-logo{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--phos) 0%,#0e8c4a 100%);box-shadow:0 0 20px var(--phos-glow);display:grid;place-items:center;color:#03110a;font-weight:800;font-size:11px;letter-spacing:.06em}
+  .brand-name{font-family:"Geist Mono";font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink)}
+  .brand-name span{color:var(--ink-dim)}
+  .live-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px 5px 7px;background:rgba(25,226,110,.08);border:1px solid rgba(25,226,110,.32);border-radius:999px;font-family:"Geist Mono";font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--phos)}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--phos);box-shadow:0 0 10px var(--phos);animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+
+  /* HERO SCOREBOARD */
+  .hero{position:relative;z-index:2;margin:6px 18px 14px;padding:22px 22px 18px;border-radius:24px;
+    background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 100%);
+    border:1px solid var(--line);
+    backdrop-filter:blur(20px);
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(80% 50% at 50% 0%,rgba(25,226,110,.12) 0%,transparent 60%);
+  }
+  .hero-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;position:relative;z-index:1}
+  .hero-tag{font-family:"Geist Mono";font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim)}
+  .hero-tag b{color:var(--ink-soft);font-weight:500}
+  .hero-h{font-family:"Geist";font-weight:600;font-size:13px;color:var(--ink-soft);letter-spacing:-.01em}
+  .hero-display{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;position:relative;z-index:1}
+  .hole-blk{text-align:left}
+  .hole-blk .k{font-family:"Geist Mono";font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:2px}
+  .hole-blk .n{font-family:"Geist";font-weight:700;font-size:84px;line-height:.85;letter-spacing:-.05em;color:var(--ink);font-variant-numeric:tabular-nums}
+  .hole-blk .sub{font-family:"Geist Mono";font-size:10px;color:var(--ink-soft);letter-spacing:.08em;margin-top:6px;text-transform:uppercase}
+  .hole-blk .sub b{color:var(--phos);font-weight:600}
+  .score-col{text-align:right}
+  .score-col .lbl{font-family:"Geist Mono";font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:4px}
+  .score-col .amt{font-family:"Geist";font-weight:700;font-size:46px;line-height:.95;letter-spacing:-.04em;color:var(--phos);text-shadow:0 0 24px var(--phos-glow);font-variant-numeric:tabular-nums}
+  .score-col .row2{font-family:"Geist Mono";font-size:10px;color:var(--ink-soft);margin-top:6px;letter-spacing:.06em;text-transform:uppercase}
+  .score-col .row2 b.r{color:var(--crimson);font-weight:600}
+  .score-col .row2 b.b{color:var(--cyan);font-weight:600}
+
+  .meter{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:18px;border-top:1px solid var(--line);position:relative;z-index:1;padding-top:14px}
+  .meter > div{padding:0 4px}
+  .meter > div + div{border-left:1px solid var(--line);padding-left:14px}
+  .meter .k{font-family:"Geist Mono";font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:4px}
+  .meter .v{font-family:"Geist";font-weight:600;font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .meter .v.amber{color:var(--amber);text-shadow:0 0 14px var(--amber-glow)}
+
+  /* action chips */
+  .chiprow{position:relative;z-index:2;display:flex;gap:8px;padding:0 18px 12px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--line-strong);background:rgba(255,255,255,.02);font-family:"Geist Mono";font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .chip svg{width:11px;height:11px}
+  .chip.red{color:var(--crimson);border-color:rgba(255,62,90,.4);background:rgba(255,62,90,.06)}
+  .chip.blue{color:var(--cyan);border-color:rgba(65,200,255,.4);background:rgba(65,200,255,.06)}
+  .chip.saved{color:var(--phos);border-color:rgba(25,226,110,.4);background:rgba(25,226,110,.06)}
+
+  /* player rows */
+  .roster{position:relative;z-index:2;margin:0 18px 14px;display:flex;flex-direction:column;gap:8px}
+  .prow{position:relative;display:grid;grid-template-columns:6px 1fr auto auto;gap:14px;align-items:center;padding:14px 16px 14px 14px;background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(12px);overflow:hidden}
+  .prow::before{content:"";position:absolute;top:0;left:0;bottom:0;width:4px;border-radius:18px 0 0 18px}
+  .prow.red::before{background:linear-gradient(180deg,var(--crimson) 0%,#a8152d 100%);box-shadow:0 0 14px var(--crimson-glow)}
+  .prow.blue::before{background:linear-gradient(180deg,var(--cyan) 0%,#1a78b0 100%);box-shadow:0 0 14px var(--cyan-glow)}
+  .prow .placeholder{width:0}
+  .who .n{font-family:"Geist";font-weight:600;font-size:16px;color:var(--ink);letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .who .n .badge{font-family:"Geist Mono";font-size:9px;letter-spacing:.2em;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.06);color:var(--ink-soft)}
+  .who .s{font-family:"Geist Mono";font-size:10.5px;color:var(--ink-dim);letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
+  .who .s b{color:var(--phos);font-weight:600}
+  .stepper{display:flex;align-items:center;gap:0;background:rgba(0,0,0,.35);border:1px solid var(--line-strong);border-radius:10px;height:38px;overflow:hidden}
+  .stepper button{flex:0 0 30px;height:100%;background:transparent;border:none;color:var(--ink-soft);font-size:18px;font-weight:600;cursor:pointer}
+  .stepper button:hover{color:var(--phos)}
+  .stepper .val{flex:1;text-align:center;font-family:"Geist";font-weight:700;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;min-width:34px}
+  .net{text-align:right;min-width:46px}
+  .net .v{font-family:"Geist";font-weight:700;font-size:30px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+  .net .v.under{color:var(--phos);text-shadow:0 0 16px var(--phos-glow)}
+  .net .l{font-family:"Geist Mono";font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim);margin-top:3px}
+  .junkrow{grid-column:2 / -1;display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .tag{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;font-family:"Geist Mono";font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line-strong);color:var(--ink-soft);background:rgba(255,255,255,.02)}
+  .tag.on{background:rgba(25,226,110,.12);border-color:rgba(25,226,110,.4);color:var(--phos);box-shadow:0 0 12px var(--phos-glow)}
+  .tag.warn{background:rgba(255,62,90,.10);border-color:rgba(255,62,90,.4);color:var(--crimson)}
+  .tag.amber{background:rgba(255,176,32,.10);border-color:rgba(255,176,32,.4);color:var(--amber)}
+
+  /* footer CTA */
+  .footer{position:relative;z-index:2;margin:auto 18px 14px;display:flex;gap:10px;align-items:stretch}
+  .footer .bg-meta{flex:1;padding:14px 16px;background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:16px}
+  .footer .bg-meta .k{font-family:"Geist Mono";font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:4px}
+  .footer .bg-meta .v{font-family:"Geist";font-weight:700;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .footer .bg-meta .v small{font-family:"Geist Mono";font-size:10px;font-weight:500;color:var(--ink-soft);margin-left:4px;letter-spacing:.06em}
+  .submit{display:flex;align-items:center;gap:10px;padding:0 22px;background:linear-gradient(180deg,var(--phos) 0%,#0fad55 100%);color:#03110a;border:none;border-radius:16px;font-family:"Geist";font-weight:700;font-size:14px;letter-spacing:.04em;cursor:pointer;box-shadow:0 8px 24px -8px var(--phos-glow),inset 0 1px 0 rgba(255,255,255,.25)}
+  .submit svg{width:16px;height:16px}
+
+  /* tab bar */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;padding:10px 16px 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;z-index:3;background:linear-gradient(180deg,transparent,#05060a 30%)}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 4px;color:var(--ink-dim);border-radius:12px}
+  .tab svg{width:18px;height:18px}
+  .tab span{font-family:"Geist Mono";font-size:9px;letter-spacing:.22em;text-transform:uppercase}
+  .tab.active{color:var(--phos);background:rgba(25,226,110,.06)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status">
+    <span>9:41</span>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">M</div>
+      <div class="brand-name">MILLBROOK <span>/ NIGHT</span></div>
+    </div>
+    <div class="live-pill"><span class="live-dot"></span>Live · H7</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-top">
+      <span class="hero-tag">Side match · <b>Foursome</b></span>
+      <span class="hero-h">May 27 — Twilight</span>
+    </div>
+    <div class="hero-display">
+      <div class="hole-blk">
+        <div class="k">Hole</div>
+        <div class="n">07</div>
+        <div class="sub">Par 4 · SI <b>3</b> · 402 y</div>
+      </div>
+      <div></div>
+      <div class="score-col">
+        <div class="lbl">Standing</div>
+        <div class="amt">+$26</div>
+        <div class="row2"><b class="r">RED</b> leads <b class="b">BLUE</b></div>
+      </div>
+    </div>
+    <div class="meter">
+      <div><div class="k">Base</div><div class="v">$4</div></div>
+      <div><div class="k">Carry</div><div class="v amber">$6</div></div>
+    </div>
+  </div>
+
+  <div class="chiprow">
+    <span class="chip saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg>H6 saved</span>
+    <span class="chip red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 14l5-5 5 5"/></svg>Red double</span>
+    <span class="chip blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 14l5-5 5 5"/></svg>Blue double</span>
+  </div>
+
+  <div class="roster">
+    <div class="prow red">
+      <div class="placeholder"></div>
+      <div class="who">
+        <div class="n">James H. <span class="badge">RED</span></div>
+        <div class="s">White · idx 9.4 · <b>1 stroke</b></div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+      <div class="net"><div class="v under">3</div><div class="l">Net</div></div>
+      <div class="junkrow">
+        <span class="tag on">Sand</span>
+        <span class="tag">Pickup</span>
+      </div>
+    </div>
+    <div class="prow red">
+      <div class="placeholder"></div>
+      <div class="who">
+        <div class="n">Pat M. <span class="badge">RED</span></div>
+        <div class="s">White · idx 12.1 · <b>1 stroke</b></div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">5</div><button>+</button></div>
+      <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+    </div>
+    <div class="prow blue">
+      <div class="placeholder"></div>
+      <div class="who">
+        <div class="n">Doug R. <span class="badge">BLUE</span></div>
+        <div class="s">Blue · idx 6.2 · 0 strokes</div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+      <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+      <div class="junkrow">
+        <span class="tag amber">Greenie</span>
+      </div>
+    </div>
+    <div class="prow blue">
+      <div class="placeholder"></div>
+      <div class="who">
+        <div class="n">Mike L. <span class="badge">BLUE</span></div>
+        <div class="s">Blue · idx 14.8 · <b>2 strokes</b></div>
+      </div>
+      <div class="stepper"><button>−</button><div class="val">6</div><button>+</button></div>
+      <div class="net"><div class="v">4</div><div class="l">Net</div></div>
+      <div class="junkrow">
+        <span class="tag warn">3-putt</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="bg-meta">
+      <div class="k">Big Game · 2-best net</div>
+      <div class="v">41 <small>thru 6</small></div>
+    </div>
+    <button class="submit">
+      Submit
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      <span>Card</span>
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Ledger</span>
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 11h6"/></svg>
+      <span>Settle</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

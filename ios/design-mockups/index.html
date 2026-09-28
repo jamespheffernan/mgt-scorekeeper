@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Millbrook Game — mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  :root{--green:#236651;--green-3:#143728;--paper:#fff;--paper-2:#faf9f5;--ink:#1b1b1b;--mid:#6b6b6b;--hair:#e5e2da}
+  html,body{background:var(--paper-2);color:var(--ink);font-family:"Roboto",system-ui,sans-serif}
+  body{padding:40px 22px 80px;max-width:760px;margin:0 auto}
+  .head{display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--green);padding-bottom:18px;margin-bottom:8px}
+  .leaf{width:40px;height:40px;flex-shrink:0}
+  h1{font-family:"Cormorant Garamond";font-style:italic;font-weight:600;font-size:32px;color:var(--green);line-height:1}
+  .sub{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);font-weight:500;margin-top:4px}
+  h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);font-weight:700;margin:30px 0 10px}
+  a.card{display:flex;align-items:center;justify-content:space-between;gap:14px;text-decoration:none;background:var(--paper);border:1px solid var(--hair);border-left:3px solid var(--green);border-radius:6px;padding:15px 18px;margin-bottom:9px;transition:transform .08s,box-shadow .12s}
+  a.card:hover{transform:translateX(2px);box-shadow:0 6px 18px -10px rgba(20,55,40,.4)}
+  a.card.feature{border-left-color:#c8312d;background:#fff}
+  .t{font-family:"Cormorant Garamond";font-style:italic;font-weight:600;font-size:21px;color:var(--ink)}
+  .d{font-size:12.5px;color:var(--mid);margin-top:2px}
+  .go{font-family:"Cormorant Garamond";font-style:italic;font-size:18px;color:var(--green);white-space:nowrap}
+  .tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#c8312d;background:#fdeceb;border-radius:3px;padding:3px 7px;margin-left:8px;vertical-align:middle}
+</style>
+</head>
+<body>
+  <div class="head">
+    <svg class="leaf" viewBox="0 0 186 173" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#236651" d="M93 4l8 34 26-22-9 33 34-6-26 23 31 14-34 4 21 27-32-13 7 34-22-26-22 26 7-34-32 13 21-27-34-4 31-14-26-23 34 6-9-33 26 22z"/></svg>
+    <div><h1>The Millbrook Game</h1><div class="sub">iOS mockups · pick a screen</div></div>
+  </div>
+
+  <h2>Decisions in flight</h2>
+  <a class="card feature" href="doubles-wording.html"><span><span class="t">Doubling — raised button, wording</span><span class="tag">Double vs Double to $8</span><div class="d">Locked: Option 1 raised blue button on the DOUBLES stat, bottom bar = Undo + Sign. Choosing the words.</div></span><span class="go">view →</span></a>
+  <a class="card" href="doubles-button.html"><span><span class="t">Doubling — clarity styles</span><div class="d">(prior pass) raised / glow / tap-icon</div></span><span class="go">view →</span></a>
+  <a class="card" href="doubles-incell.html"><span><span class="t">Doubling — earlier in-cell styles</span><div class="d">(prior pass) tinted / pill / solid, wording "2× Blue $8"</div></span><span class="go">view →</span></a>
+  <a class="card" href="footer-options.html"><span><span class="t">Footer button options</span><div class="d">(superseded) doubling in the bottom bar — A banner / B row / C split</div></span><span class="go">view →</span></a>
+  <a class="card" href="hero-options.html"><span><span class="t">Hero options</span><div class="d">A bare · B centered · C two-column — top-of-screen standing + hole</div></span><span class="go">view →</span></a>
+
+  <h2>Main screen (locked)</h2>
+  <a class="card" href="direction-h.html"><span><span class="t">Scoring screen — direction H</span><div class="d">Active hole: timeline, 5/4 net cells, junk flags, embossed leaf</div></span><span class="go">view →</span></a>
+
+  <h2>Setup</h2>
+  <a class="card feature" href="setup-flow.html"><span><span class="t">Setup flow — pick from roster</span><span class="tag">current</span><div class="d">Step 1: pick four from the ~15-20 member pool (index + default tee shown). Step 2: assign Red/Blue, tees pre-filled, Big Game, Tee off.</div></span><span class="go">view →</span></a>
+  <a class="card" href="setup-a.html"><span><span class="t">Setup A — roster form</span><div class="d">(early) per-player rows, names typed in</div></span><span class="go">view →</span></a>
+  <a class="card" href="setup-b.html"><span><span class="t">Setup B — matchup</span><div class="d">(early) Red vs Blue team cards</div></span><span class="go">view →</span></a>
+
+  <h2>Settlement</h2>
+  <a class="card feature" href="settle-recap.html"><span><span class="t">Settlement recap</span><span class="tag">current</span><div class="d">Reckoning + pay-pairings, money-movement graph with biggest swings, partner-value (MVP) analysis, Big Game total to submit.</div></span><span class="go">view →</span></a>
+  <a class="card" href="settle-a.html"><span><span class="t">Settle A — the reckoning</span><div class="d">"Blue owes Red $26" + itemized breakdown</div></span><span class="go">view →</span></a>
+  <a class="card" href="settle-b.html"><span><span class="t">Settle B — scoreboard</span><div class="d">Hole-dot timeline, head-to-head, per-player junk, New round</div></span><span class="go">view →</span></a>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390,initial-scale=1" />
+<title>Direction E — Millbrook Stationery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6E8;
+    --cream-2:#F4ECD8;
+    --card:#FFFCF2;
+    --ink:#1B1714;
+    --ink-mid:#4A4239;
+    --muted:#7E7568;
+    --hair:#C8BFAD;
+    --hair-soft:#DCD3BD;
+    --hunter:#1B4332;
+    --hunter-2:#133024;
+    --hunter-soft:#DDE6DA;
+    --oxblood:#6E1A26;
+    --oxblood-soft:#EBDADC;
+    --navy:#1F3148;
+    --navy-soft:#D9DFE6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:"Libre Caslon Text",Georgia,serif;color:var(--ink);background:#0c0c0e;font-feature-settings:"lnum","tnum","kern";font-variant-numeric:tabular-nums lining-nums}
+  body{display:flex;justify-content:center;min-height:100vh}
+  .phone{width:390px;min-height:844px;background:var(--cream);position:relative;overflow:hidden}
+
+  /* status */
+  .status{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-family:"Libre Caslon Text";font-weight:700;font-size:13px}
+  .status .dots{display:flex;gap:4px}
+  .status .dots span{width:14px;height:6px;background:var(--ink);border-radius:2px}
+
+  /* masthead */
+  .masthead{padding:18px 24px 12px;text-align:center;position:relative}
+  .masthead-rule{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .masthead-rule::before,.masthead-rule::after{content:"";flex:1;height:1px;background:var(--ink)}
+  .masthead-rule .mark{font-family:"Libre Caslon Display",serif;font-size:11px;letter-spacing:.42em;color:var(--ink);font-weight:400;line-height:1}
+  .mast-name{font-family:"Libre Caslon Display",serif;font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink);font-weight:400;line-height:1.2}
+  .mast-name .amp{font-style:italic;font-family:"Libre Caslon Text",serif;letter-spacing:0;font-weight:400;text-transform:none;font-size:1.15em;position:relative;top:1px;margin:0 .12em}
+  .mast-sub{font-family:"Libre Caslon Text",serif;font-style:italic;font-size:11px;color:var(--ink-mid);margin-top:4px;letter-spacing:.04em}
+  .mast-double{height:5px;margin:10px 0 0;position:relative}
+  .mast-double::before,.mast-double::after{content:"";position:absolute;left:0;right:0;height:1px;background:var(--ink)}
+  .mast-double::before{top:0}
+  .mast-double::after{top:4px}
+
+  /* corner tools */
+  .corners{position:absolute;top:60px;left:0;right:0;display:flex;justify-content:space-between;padding:0 24px;pointer-events:none}
+  .corners .corner{font-family:"Libre Caslon Text";font-style:italic;font-size:11px;color:var(--muted);pointer-events:auto;display:inline-flex;align-items:center;gap:6px;cursor:pointer;background:transparent;border:none;letter-spacing:.02em}
+  .corners .corner svg{width:12px;height:12px;stroke-width:1.4}
+
+  /* hole context line */
+  .context{display:flex;justify-content:space-between;align-items:baseline;padding:16px 24px 0;font-family:"Libre Caslon Text";font-size:13px;color:var(--ink-mid)}
+  .context .left{letter-spacing:.02em}
+  .context .left b{font-weight:700;color:var(--ink);letter-spacing:.16em;text-transform:uppercase;font-size:11px;margin-right:6px}
+  .context .right{font-style:italic;font-size:11.5px;color:var(--muted)}
+
+  /* hero block */
+  .hero{padding:14px 24px 22px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:flex-end;position:relative}
+  .hero .hole-num{font-family:"Libre Caslon Display",serif;font-size:128px;line-height:.82;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums;font-weight:400}
+  .hero .hole-meta{font-family:"Libre Caslon Text";font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mid);font-weight:400;margin-top:6px;text-align:center}
+  .hero .stand{text-align:right}
+  .hero .stand .lbl{font-family:"Libre Caslon Display";font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .hero .stand .amt{font-family:"Libre Caslon Display",serif;font-size:54px;line-height:.95;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums;font-weight:400}
+  .hero .stand .amt.lead-red{color:var(--oxblood)}
+  .hero .stand .amt.lead-blue{color:var(--navy)}
+  .hero .stand .note{font-family:"Libre Caslon Text";font-style:italic;font-size:13px;color:var(--ink-mid);margin-top:6px;letter-spacing:.01em}
+  .hero .stand .note .lead{font-style:normal;font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+  .hero .stand .note .lead.red{color:var(--oxblood)}
+  .hero .stand .note .lead.blue{color:var(--navy)}
+
+  /* the ruled ledger strip */
+  .strip{margin:0 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:repeat(4,1fr)}
+  .strip .cell{padding:10px 0 11px;text-align:center;border-right:1px solid var(--hair-soft);position:relative}
+  .strip .cell:last-child{border-right:none}
+  .strip .cell .k{font-family:"Libre Caslon Text";font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;font-weight:400}
+  .strip .cell .v{font-family:"Libre Caslon Display",serif;font-size:20px;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums lining-nums;font-weight:400}
+  .strip .cell .v.hunter{color:var(--hunter)}
+
+  /* action row */
+  .actions{padding:14px 24px 10px;display:flex;gap:0;flex-wrap:wrap;justify-content:center;align-items:center;font-family:"Libre Caslon Text";font-size:12px;letter-spacing:.02em;color:var(--ink-mid)}
+  .actions .a{padding:0 12px;cursor:pointer;background:transparent;border:none;font-family:"Libre Caslon Text";font-size:12px;color:var(--ink-mid);letter-spacing:.02em;font-style:italic}
+  .actions .a:hover{color:var(--ink)}
+  .actions .a.saved{color:var(--hunter);font-style:normal;font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+  .actions .a.red{color:var(--oxblood)}
+  .actions .a.blue{color:var(--navy)}
+  .actions .sep{color:var(--hair);font-size:14px;font-style:normal}
+
+  /* divider with center mark */
+  .ornament{display:flex;align-items:center;gap:10px;padding:0 24px;margin-bottom:0}
+  .ornament::before,.ornament::after{content:"";flex:1;height:1px;background:var(--hair)}
+  .ornament .o{font-family:"Libre Caslon Display";font-size:10px;letter-spacing:.4em;color:var(--muted);text-transform:uppercase}
+
+  /* roster — printed scorecard */
+  .roster{margin:0;padding:0}
+  .prow{padding:14px 24px 10px;border-bottom:1px solid var(--hair-soft);position:relative}
+  .prow:first-child{border-top:1px solid var(--hair-soft);margin-top:8px}
+  .prow-head{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center}
+  .name-block{min-width:0}
+  .name{font-family:"Libre Caslon Display",serif;font-size:21px;color:var(--ink);line-height:1.05;letter-spacing:-.01em;font-weight:400;display:flex;align-items:baseline;gap:9px}
+  .name .team-mark{font-family:"Libre Caslon Text";font-style:italic;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;flex-shrink:0;position:relative;top:-1px}
+  .name .team-mark.red{color:var(--oxblood)}
+  .name .team-mark.blue{color:var(--navy)}
+  .sub{font-family:"Libre Caslon Text";font-size:11.5px;color:var(--muted);margin-top:3px;letter-spacing:.02em;font-style:italic}
+  .sub b{color:var(--ink-mid);font-weight:700;font-style:normal}
+
+  .stepper{display:inline-flex;align-items:stretch;border:1px solid var(--ink);border-radius:0;height:38px;background:var(--card)}
+  .stepper button{flex:0 0 30px;background:transparent;border:none;color:var(--ink);font-family:"Libre Caslon Display";font-size:18px;cursor:pointer;display:grid;place-items:center;border-right:1px solid var(--ink)}
+  .stepper button:last-child{border-right:none;border-left:1px solid var(--ink)}
+  .stepper button:hover{background:var(--hunter-soft);color:var(--hunter)}
+  .stepper .val{flex:0 0 30px;display:grid;place-items:center;font-family:"Libre Caslon Display",serif;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
+
+  .net{text-align:right;min-width:46px}
+  .net .v{font-family:"Libre Caslon Display",serif;font-size:34px;line-height:1;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums}
+  .net .v.under{color:var(--hunter)}
+  .net .v.over{color:var(--oxblood)}
+  .net .l{font-family:"Libre Caslon Text";font-style:italic;font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:.04em}
+
+  /* junk — engraved annotation marks */
+  .junk{margin-top:6px;padding-left:0;font-family:"Libre Caslon Text";font-style:italic;font-size:12px;color:var(--muted);letter-spacing:.02em}
+  .junk .j{cursor:pointer;background:transparent;border:none;font-family:inherit;font-style:inherit;font-size:inherit;color:inherit;padding:0;margin:0;letter-spacing:inherit}
+  .junk .j::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;border:1px solid var(--hair);margin-right:6px;position:relative;top:-2px}
+  .junk .j.on{color:var(--hunter);font-style:normal;font-weight:700}
+  .junk .j.on::before{background:var(--hunter);border-color:var(--hunter)}
+  .junk .j.warn.on{color:var(--oxblood)}
+  .junk .j.warn.on::before{background:var(--oxblood);border-color:var(--oxblood)}
+  .junk .sep{color:var(--hair);font-style:normal;margin:0 6px}
+
+  /* footer */
+  .footer{padding:14px 24px 14px;margin-top:12px;border-top:1px solid var(--ink);position:relative}
+  .footer::before{content:"";position:absolute;top:-4px;left:24px;right:24px;border-top:1px solid var(--ink)}
+  .footer-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .biggame{min-width:0}
+  .biggame .k{font-family:"Libre Caslon Display";font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .biggame .v{font-family:"Libre Caslon Display",serif;font-size:24px;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums lining-nums}
+  .biggame .v small{font-family:"Libre Caslon Text";font-style:italic;font-size:12px;color:var(--muted);margin-left:8px;letter-spacing:.02em}
+  .submit{background:var(--hunter);color:var(--cream);border:1px solid var(--hunter-2);padding:11px 18px;font-family:"Libre Caslon Display";font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:10px;border-radius:0;font-weight:400}
+  .submit:hover{background:var(--hunter-2)}
+  .submit em{font-style:italic;font-family:"Libre Caslon Text";letter-spacing:0;text-transform:none;font-size:13px;color:var(--cream-2)}
+  .submit svg{width:13px;height:13px;stroke-width:1.6}
+
+  /* tab bar — engraved menu */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;padding:10px 24px 28px;display:flex;justify-content:center;gap:0;background:var(--cream);border-top:1px solid var(--ink);font-family:"Libre Caslon Display"}
+  .tabbar::before{content:"";position:absolute;left:24px;right:24px;top:-5px;border-top:1px solid var(--ink)}
+  .tab{font-family:"Libre Caslon Display";font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);padding:8px 18px;background:transparent;border:none;cursor:pointer;position:relative}
+  .tab.active{color:var(--ink)}
+  .tab.active::after{content:"";position:absolute;left:18px;right:18px;bottom:2px;height:1px;background:var(--hunter)}
+  .tab-sep{color:var(--hair);align-self:center;font-family:"Libre Caslon Display";font-size:9px;letter-spacing:.4em}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status">
+    <span>9:41</span>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="masthead">
+    <div class="masthead-rule"><span class="mark">·  ·  ·</span></div>
+    <div class="mast-name">Millbrook <span class="amp">&amp;</span> Country Game</div>
+    <div class="mast-sub">A foursome's reckoning — Twenty-Seventh of May</div>
+    <div class="mast-double"></div>
+  </div>
+
+  <div class="context">
+    <div class="left"><b>The Seventh</b> · Par 4 · SI 3 · 402 yards · White</div>
+    <button class="corner" style="background:transparent;border:none;color:var(--muted);font-family:'Libre Caslon Text';font-style:italic;font-size:11px;cursor:pointer">undo last</button>
+  </div>
+
+  <div class="hero">
+    <div>
+      <div class="hole-num">7</div>
+      <div class="hole-meta">— hole —</div>
+    </div>
+    <div class="stand">
+      <div class="lbl">Side · Standing</div>
+      <div class="amt lead-red">+$26</div>
+      <div class="note"><span class="lead red">Red</span> leads through six</div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="cell"><div class="k">Base</div><div class="v">$4</div></div>
+    <div class="cell"><div class="k">Carry</div><div class="v hunter">$6</div></div>
+    <div class="cell"><div class="k">Big Game</div><div class="v">41</div></div>
+    <div class="cell"><div class="k">Doubles</div><div class="v">—</div></div>
+  </div>
+
+  <div class="actions">
+    <button class="a saved">H6 entered</button>
+    <span class="sep">·</span>
+    <button class="a red">call Red double</button>
+    <span class="sep">·</span>
+    <button class="a blue">call Blue double</button>
+  </div>
+
+  <div class="roster">
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">James Heffernan <span class="team-mark red">Red</span></div>
+          <div class="sub">White tee · idx <b>9.4</b> · one stroke received</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+        <div class="net"><div class="v under">3</div><div class="l">net</div></div>
+      </div>
+      <div class="junk">
+        <button class="j on">sandy</button><span class="sep">·</span>
+        <button class="j warn">picked up</button>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">Pat Mahoney <span class="team-mark red">Red</span></div>
+          <div class="sub">White tee · idx <b>12.1</b> · one stroke received</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">5</div><button>+</button></div>
+        <div class="net"><div class="v">4</div><div class="l">net</div></div>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">Doug Reilly <span class="team-mark blue">Blue</span></div>
+          <div class="sub">Blue tee · idx <b>6.2</b> · no strokes</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">4</div><button>+</button></div>
+        <div class="net"><div class="v">4</div><div class="l">net</div></div>
+      </div>
+      <div class="junk">
+        <button class="j on">greenie</button><span class="sep">·</span>
+        <button class="j">on green</button>
+      </div>
+    </div>
+
+    <div class="prow">
+      <div class="prow-head">
+        <div class="name-block">
+          <div class="name">Mike Lin <span class="team-mark blue">Blue</span></div>
+          <div class="sub">Blue tee · idx <b>14.8</b> · two strokes received</div>
+        </div>
+        <div class="stepper"><button>−</button><div class="val">6</div><button>+</button></div>
+        <div class="net"><div class="v">4</div><div class="l">net</div></div>
+      </div>
+      <div class="junk">
+        <button class="j warn on">three putt</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-row">
+      <div class="biggame">
+        <div class="k">Big Game — two best net</div>
+        <div class="v">41 <small>through six</small></div>
+      </div>
+      <button class="submit">
+        Enter <em>the hole</em>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <button class="tab active">Card</button>
+    <span class="tab-sep">·</span>
+    <button class="tab">Ledger</button>
+    <span class="tab-sep">·</span>
+    <button class="tab">Settle</button>
+  </div>
+</div>
+</body>
+</html>
